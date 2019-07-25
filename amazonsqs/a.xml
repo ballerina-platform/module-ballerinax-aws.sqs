@@ -1,9 +1,0 @@
-<?xml version="1.0"?>
-
-<ReceiveMessageResponse xmlns="http://queue.amazonaws.com/doc/2012-11-05/"><ReceiveMessageResult>
-
-<Message><MessageId>595e1952-5cba-4b43-b906-3f70b50fcd96</MessageId><ReceiptHandle>AQEBniJZvB5zkJTSayjSEona7E0ltr1NP3fMDfeq4F2dQXceEI+KWlMS8lHYJxBW1KnC1iyo7XZL/L3gjZWzzC+xQKKIsGKNSRAgai7yV+5Xv0E6KvcwbStucuNGWdtfIK6P41ItgAWvgVAnzhlC8//OMN0rYF6QYYeXS5Lybk0faVuPFNjeUgnfcz7Yr/z+CuJf0yML6Ou6WQc8+0uSXRrIg+4IGgpAPKLUvMz9n1BhWNpaG/++FsPibVy3QOeCH7pGbeXxScEOxougzXU6Mw2bIU5tRuG7uin7pr0LyLyMId8=</ReceiptHandle><MD5OfBody>51b0a3256d59467f973009b739163aa0</MD5OfBody><Body>Information about the largest city in Any Region.</Body></Message><Message>
-
-<MessageId>cc571116-b1ac-4429-a0e4-a4fade1d685b</MessageId><ReceiptHandle>AQEBNy9fU8MJ0LUTbtaZD6aGS3t3xDC99NzWq7LjJI+7dSUn+BFM5h3TxxLKW1dmcK+P5Ston45hCOow8NDkrfPxVrQfs+YXiT+aBh4IX3ZKRqYjpi5sUJGn/LbJMYDG3yKVbjvJ9KZFfy2KVTvcG9OJa60+ZrnqEO2d/WAu2JYUx1AKqGIF7oW6Zo+HH77gk4fjARdcQHyyKfWO36CYQJa/KfmmGqrB+/ALnUwBBYpEH3O3As+S+9F52AbMTXYzPMjfPgv08u4aPtvgxmjVgk0zCcRXGYeJ4oVKLxytENffLMQ=</ReceiptHandle><MD5OfBody>51b0a3256d59467f973009b739163aa0</MD5OfBody><Body>Information about the largest city in Any Region.</Body></Message>
-
-</ReceiveMessageResult><ResponseMetadata><RequestId>2164e594-1916-5072-bf1f-b0366626bd12</RequestId></ResponseMetadata></ReceiveMessageResponse> 
