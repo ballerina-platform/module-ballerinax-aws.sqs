@@ -63,7 +63,7 @@ public type Client client object {
 #
 # + queueName - Name of the queue to be created 
 # + attributes - Other attribute parameters 
-# + return - URL of the created queue
+# + return - If success, URL of the created queue, else returns error
 public remote function Client.createQueue(string queueName, map<string> attributes) returns string|error{
 
     string amzTarget = "AmazonSQSv20121105.CreateQueue";
@@ -93,9 +93,9 @@ public remote function Client.createQueue(string queueName, map<string> attribut
 # Send a new message to a SQS queue
 #
 # + messageBody - Message body string to be sent 
-# + queueResourcePath - Resource path to the queue from the host address 
+# + queueResourcePath - Resource path to the queue from the host address. e.g.: /610968236798/myQueue.fifo
 # + attributes - Non-mandatory parameters for sending a message 
-# + return - Details of the sent message
+# + return - If success, details of the sent message, else returns error
 public remote function Client.sendMessage(string messageBody, string queueResourcePath, map<string> attributes) returns OutboundMessage|error {
 
     string amzTarget = "AmazonSQSv20121105.SendMessage";
@@ -120,11 +120,11 @@ public remote function Client.sendMessage(string messageBody, string queueResour
 
 }
 
-# Description
+# Receive the message(s) from the queue
 #
-# + queueResourcePath - Resource path to the queue from the host address
+# + queueResourcePath - Resource path to the queue from the host address. e.g.: /610968236798/myQueue.fifo 
 # + attributes - Non-mandatory parameters for receiving a message
-# + return - Details of the received message
+# + return - If success, details of the received message, else returns error
 public remote function Client.receiveMessage(string queueResourcePath, map<string> attributes) returns InboundMessage[]|error {
 
     string amzTarget = "AmazonSQSv20121105.ReceiveMessage";
@@ -147,11 +147,11 @@ public remote function Client.receiveMessage(string queueResourcePath, map<strin
     
 }
 
-# Description
+# Delete the message(s) from the queue for the given receiptHandle
 #
-# + queueResourcePath - queueResourcePath Parameter Description 
-# + receiptHandle - receiptHandle Parameter Description 
-# + return - Return Value Description
+# + queueResourcePath - Resource path to the queue from the host address. e.g.: /610968236798/myQueue.fifo
+# + receiptHandle - Receipt Handle parameter for the message(s) to be deleted
+# + return - Whether the message(s) were successfully deleted or whether an error occurred
 public remote function Client.deleteMessage(string queueResourcePath, string receiptHandle) returns boolean|error {
 
     string amzTarget = "AmazonSQSv20121105.DeleteMessage";
@@ -175,7 +175,7 @@ public remote function Client.deleteMessage(string queueResourcePath, string rec
 
 }
 
-# Description
+# Configuration provided for the client
 #
 # + accessKey - accessKey of Amazon Account 
 # + secretKey - secretKey of Amazon Account
@@ -187,7 +187,3 @@ public type Configuration record {
     string region;
     string accountNumber;
 };
-
-
-
-

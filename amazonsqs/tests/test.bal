@@ -1,4 +1,4 @@
-// Copyright (c) 2018 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+// Copyright (c) 2019 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 //
 // WSO2 Inc. licenses this file to you under the Apache License,
 // Version 2.0 (the "License"); you may not use this file except
@@ -62,7 +62,6 @@ function testSendMessage() {
     OutboundMessage|error response = sqsClient->sendMessage("New Message Text", "/610968236798/demox.fifo", attributes);
     if(response is OutboundMessage) {
         log:printInfo("Response from SQS: \n");
-        io:println(response);
         test:assertTrue(true);
     } else {
         test:assertTrue(false);
@@ -82,7 +81,6 @@ function testReceiveMessage() {
     InboundMessage[]|error response = sqsClient->receiveMessage("/610968236798/demox.fifo", attributes);
     if(response is InboundMessage[]) {
         log:printInfo("Received from SQS: \n");
-        io:println(response);
         test:assertTrue(true);
     } else {
         test:assertTrue(false);

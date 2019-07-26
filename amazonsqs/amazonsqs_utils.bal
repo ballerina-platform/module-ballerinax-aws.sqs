@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2018, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+// Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 //
 // WSO2 Inc. licenses this file to you under the Apache License,
 // Version 2.0 (the "License"); you may not use this file except
@@ -57,32 +57,32 @@ function handleResponse(http:Response|error httpResponse) returns json|error {
     }
 }
 
-function generatePOSTRequest(string accessKeyId, string secretAccessKey, string host, string amz_target, string canonical_uri,
+function generatePOSTRequest(string accessKeyId, string secretAccessKey, string host, string amzTarget, string canonicalUri,
                         string region, string payload) returns http:Request|error {
     time:Time time = check time:toTimeZone(time:currentTime(), "GMT");
-    string amz_date = check time:format(time, ISO8601_BASIC_DATE_FORMAT);
-    string date_stamp = check time:format(time, SHORT_DATE_FORMAT);
-    string content_type = "application/x-www-form-urlencoded";
-    string request_parameters =  payload;
-    string canonical_querystring = "";
-    string canonical_headers = "content-type:" + content_type + "\n" + "host:" + host + "\n" + "x-amz-date:" + amz_date + "\n" + "x-amz-target:" + amz_target + "\n";
-    string signed_headers = "content-type;host;x-amz-date;x-amz-target";
-    string payload_hash = encoding:encodeHex(crypto:hashSha256(request_parameters.toByteArray("UTF-8"))).toLower();
-    string canonical_request = POST + "\n" + canonical_uri + "\n" + canonical_querystring + "\n" + canonical_headers + "\n" + signed_headers + "\n" + payload_hash;
+    string amzDate = check time:format(time, ISO8601_BASIC_DATE_FORMAT);
+    string dateStamp = check time:format(time, SHORT_DATE_FORMAT);
+    string contentType = "application/x-www-form-urlencoded";
+    string requestParameters =  payload;
+    string canonicalQuerystring = "";
+    string canonicalHeaders = "content-type:" + contentType + "\n" + "host:" + host + "\n" + "x-amz-date:" + amzDate + "\n" + "x-amz-target:" + amzTarget + "\n";
+    string signedHeaders = "content-type;host;x-amz-date;x-amz-target";
+    string payloadHash = encoding:encodeHex(crypto:hashSha256(requestParameters.toByteArray("UTF-8"))).toLower();
+    string canonicalRequest = POST + "\n" + canonicalUri + "\n" + canonicalQuerystring + "\n" + canonicalHeaders + "\n" + signedHeaders + "\n" + payloadHash;
     string algorithm = "AWS4-HMAC-SHA256";
-    string credential_scope = date_stamp + "/" + region + "/" + SQS_SERVICE_NAME + "/" + "aws4_request";
-    string string_to_sign = algorithm + "\n" +  amz_date + "\n" +  credential_scope + "\n" +  encoding:encodeHex(crypto:hashSha256(canonical_request.toByteArray("UTF-8"))).toLower();
-    byte[] signing_key = getSignatureKey(secretAccessKey, date_stamp, region, SQS_SERVICE_NAME);
-    string signature = encoding:encodeHex(crypto:hmacSha256(string_to_sign.toByteArray("UTF-8"), signing_key)).toLower();
-    string authorization_header = algorithm + " " + "Credential=" + accessKeyId + "/" + credential_scope + ", " +  "SignedHeaders=" + signed_headers + ", " + "Signature=" + signature;
+    string credentialScope = dateStamp + "/" + region + "/" + SQS_SERVICE_NAME + "/" + "aws4_request";
+    string stringToSign = algorithm + "\n" +  amzDate + "\n" +  credentialScope + "\n" +  encoding:encodeHex(crypto:hashSha256(canonicalRequest.toByteArray("UTF-8"))).toLower();
+    byte[] signingKey = getSignatureKey(secretAccessKey, dateStamp, region, SQS_SERVICE_NAME);
+    string signature = encoding:encodeHex(crypto:hmacSha256(stringToSign.toByteArray("UTF-8"), signingKey)).toLower();
+    string authorizationHeader = algorithm + " " + "Credential=" + accessKeyId + "/" + credentialScope + ", " +  "SignedHeaders=" + signedHeaders + ", " + "Signature=" + signature;
 
     map<string> headers = {};
-    headers["Content-Type"] = content_type;
-    headers["X-Amz-Date"] = amz_date;
-    headers["X-Amz-Target"] = amz_target;
-    headers["Authorization"] = authorization_header;
+    headers["Content-Type"] = contentType;
+    headers["X-Amz-Date"] = amzDate;
+    headers["X-Amz-Target"] = amzTarget;
+    headers["Authorization"] = authorizationHeader;
 
-    string msgBody = request_parameters;
+    string msgBody = requestParameters;
 
     http:Request request = new;
     request.setTextPayload(msgBody);
