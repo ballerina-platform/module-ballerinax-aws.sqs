@@ -176,4 +176,3 @@ function closeRc(io:ReadableCharacterChannel rc) {
         log:printError("Error occurred while closing character stream", err = result);
     }
 }
-
