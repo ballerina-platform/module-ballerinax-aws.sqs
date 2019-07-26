@@ -23,8 +23,7 @@ function jsonToCreatedQueueUrl(json source) returns string {
 }
 
 function jsonToOutboundMessage(json source) returns OutboundMessage {
-    json msgSource = source.SendMessageResponse.SendMessageResult != null ? 
-        source.SendMessageResponse.SendMessageResult : {};
+    json msgSource = source.SendMessageResponse.SendMessageResult != null ? source.SendMessageResponse.SendMessageResult : {};
 
     string MD5OfMessageAttributes = msgSource.MD5OfMessageAttributes != null ? msgSource.MD5OfMessageAttributes.toString() : EMPTY_STRING;
     string MD5OfMessageBody = msgSource.MD5OfMessageBody != null ? msgSource.MD5OfMessageBody.toString() : EMPTY_STRING;
@@ -176,3 +175,4 @@ function closeRc(io:ReadableCharacterChannel rc) {
         log:printError("Error occurred while closing character stream", err = result);
     }
 }
+
