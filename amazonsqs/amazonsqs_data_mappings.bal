@@ -26,10 +26,13 @@ function jsonToOutboundMessage(json source) returns OutboundMessage {
     json msgSource = source.SendMessageResponse.SendMessageResult != null ? 
         source.SendMessageResponse.SendMessageResult : {};
 
-    string MD5OfMessageAttributes = msgSource.MD5OfMessageAttributes != null ? msgSource.MD5OfMessageAttributes.toString() : EMPTY_STRING;
-    string MD5OfMessageBody = msgSource.MD5OfMessageBody != null ? msgSource.MD5OfMessageBody.toString() : EMPTY_STRING;
+    string MD5OfMessageAttributes = msgSource.MD5OfMessageAttributes != null ? 
+        msgSource.MD5OfMessageAttributes.toString() : EMPTY_STRING;
+    string MD5OfMessageBody = msgSource.MD5OfMessageBody != null ? 
+        msgSource.MD5OfMessageBody.toString() : EMPTY_STRING;
     string messageId = msgSource.MessageId != null ? msgSource.MessageId.toString() : EMPTY_STRING;
-    string sequenceNumber = msgSource.SequenceNumber != null ? msgSource.SequenceNumber.toString() : EMPTY_STRING;
+    string sequenceNumber = msgSource.SequenceNumber != null ? 
+        msgSource.SequenceNumber.toString() : EMPTY_STRING;
     OutboundMessage sentMessage = {
         MD5OfMessageAttributes: MD5OfMessageAttributes,
         MD5OfMessageBody: MD5OfMessageBody,
@@ -62,7 +65,8 @@ function jsonToInboundMessage(json message) returns InboundMessage|error {
     map<string> attributes = jsonToInboundMessageAttributes(attribute);
     string body = message.Body != null ? message.Body.toString() : EMPTY_STRING;
     string MD5OfBody = message.MD5OfBody != null ? message.MD5OfBody.toString() : EMPTY_STRING;
-    string MD5OfMessageAttributes = message.MD5OfMessageAttributes != null ? message.MD5OfMessageAttributes.toString() : EMPTY_STRING;
+    string MD5OfMessageAttributes = message.MD5OfMessageAttributes != null ? 
+        message.MD5OfMessageAttributes.toString() : EMPTY_STRING;
     json msgAttribute = message.MessageAttribute != null ? message.MessageAttribute : {};
 
     map<MessageAttributeValue> messageAttributes = check jsonToInboundMessageMessageAttributes(msgAttribute);
@@ -107,7 +111,8 @@ function jsonToInboundMessageMessageAttributes(json msgAttributes) returns map<M
         int l = msgAttributes.length();
         int i = 0;
         while (i < l) {
-            (messageAttributeName, messageAttributeValue) = check jsonToInboundMessageMessageAttribute(msgAttributes[i]);
+            (messageAttributeName, messageAttributeValue) = 
+                check jsonToInboundMessageMessageAttribute(msgAttributes[i]);
             messageAttributes[messageAttributeName] = messageAttributeValue;
             i = i + 1;
         }
@@ -126,16 +131,21 @@ function jsonToInboundMessageMessageAttribute(json msgAttribute) returns (string
     string[] stringListValues;
     (binaryListValues, stringListValues) = check jsonMessageAttributeValueToListValues(msgAttributeValue);
 
-    string binaryValue = msgAttributeValue.BinaryValue != null ? msgAttributeValue.BinaryValue.toString() : EMPTY_STRING;
-    string dataType = msgAttributeValue.DataType != null ? msgAttributeValue.DataType.toString() : EMPTY_STRING;
-    string stringValue = msgAttributeValue.StringValue != null ? msgAttributeValue.StringValue.toString() : "String";
+    string binaryValue = msgAttributeValue.BinaryValue != null ? 
+        msgAttributeValue.BinaryValue.toString() : EMPTY_STRING;
+    string dataType = msgAttributeValue.DataType != null ? 
+        msgAttributeValue.DataType.toString() : EMPTY_STRING;
+    string stringValue = msgAttributeValue.StringValue != null ? 
+        msgAttributeValue.StringValue.toString() : "String";
 
     MessageAttributeValue messageAttributeValue = {
         binaryListValues: binaryListValues,
-        binaryValue: msgAttributeValue.BinaryValue != null ? msgAttributeValue.BinaryValue.toString() : EMPTY_STRING,
+        binaryValue: msgAttributeValue.BinaryValue != null ? 
+            msgAttributeValue.BinaryValue.toString() : EMPTY_STRING,
         dataType: msgAttributeValue.DataType != null ? msgAttributeValue.DataType.toString() : EMPTY_STRING,
         stringListValues: stringListValues,
-        stringValue: msgAttributeValue.StringValue != null ? msgAttributeValue.StringValue.toString() : EMPTY_STRING 
+        stringValue: msgAttributeValue.StringValue != null ? 
+            msgAttributeValue.StringValue.toString() : EMPTY_STRING 
     };
     return (msgAttributeName, messageAttributeValue);
 
@@ -150,7 +160,8 @@ function jsonMessageAttributeValueToListValues(json msgAttributeVal) returns (st
         string[] attribVal = k.split(".");
         if (attribVal.length() > 0 && attribVal[0] == "BinaryListValue" && check attribVal[1].matches("\\d+")) {
             binaryListValues[check int.convert(attribVal[1])] = v.toString();
-        } else if (attribVal.length() > 0 && attribVal[0] == "StringListValue" && check attribVal[1].matches("\\d+")) {
+        } else if (attribVal.length() > 0 && attribVal[0] == 
+            "StringListValue" && check attribVal[1].matches("\\d+")) {
             stringListValues[check int.convert(attribVal[1])] = v.toString();
         }
     }

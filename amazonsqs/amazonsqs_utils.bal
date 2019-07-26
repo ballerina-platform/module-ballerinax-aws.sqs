@@ -56,24 +56,29 @@ function handleResponse(http:Response|error httpResponse) returns json|error {
     }
 }
 
-function generatePOSTRequest(string accessKeyId, string secretAccessKey, string host, string amzTarget, string canonicalUri,
-                        string region, string payload) returns http:Request|error {
+function generatePOSTRequest(string accessKeyId, string secretAccessKey, string host, string amzTarget, 
+    string canonicalUri, string region, string payload) returns http:Request|error {
     time:Time time = check time:toTimeZone(time:currentTime(), "GMT");
     string amzDate = check time:format(time, ISO8601_BASIC_DATE_FORMAT);
     string dateStamp = check time:format(time, SHORT_DATE_FORMAT);
     string contentType = "application/x-www-form-urlencoded";
     string requestParameters =  payload;
     string canonicalQuerystring = "";
-    string canonicalHeaders = "content-type:" + contentType + "\n" + "host:" + host + "\n" + "x-amz-date:" + amzDate + "\n" + "x-amz-target:" + amzTarget + "\n";
+    string canonicalHeaders = "content-type:" + contentType + "\n" + "host:" + host + "\n" 
+        + "x-amz-date:" + amzDate + "\n" + "x-amz-target:" + amzTarget + "\n";
     string signedHeaders = "content-type;host;x-amz-date;x-amz-target";
     string payloadHash = encoding:encodeHex(crypto:hashSha256(requestParameters.toByteArray("UTF-8"))).toLower();
-    string canonicalRequest = POST + "\n" + canonicalUri + "\n" + canonicalQuerystring + "\n" + canonicalHeaders + "\n" + signedHeaders + "\n" + payloadHash;
+    string canonicalRequest = POST + "\n" + canonicalUri + "\n" + canonicalQuerystring + "\n" 
+        + canonicalHeaders + "\n" + signedHeaders + "\n" + payloadHash;
     string algorithm = "AWS4-HMAC-SHA256";
     string credentialScope = dateStamp + "/" + region + "/" + SQS_SERVICE_NAME + "/" + "aws4_request";
-    string stringToSign = algorithm + "\n" +  amzDate + "\n" +  credentialScope + "\n" +  encoding:encodeHex(crypto:hashSha256(canonicalRequest.toByteArray("UTF-8"))).toLower();
+    string stringToSign = algorithm + "\n" +  amzDate + "\n" +  credentialScope + "\n" 
+        +  encoding:encodeHex(crypto:hashSha256(canonicalRequest.toByteArray("UTF-8"))).toLower();
     byte[] signingKey = getSignatureKey(secretAccessKey, dateStamp, region, SQS_SERVICE_NAME);
-    string signature = encoding:encodeHex(crypto:hmacSha256(stringToSign.toByteArray("UTF-8"), signingKey)).toLower();
-    string authorizationHeader = algorithm + " " + "Credential=" + accessKeyId + "/" + credentialScope + ", " +  "SignedHeaders=" + signedHeaders + ", " + "Signature=" + signature;
+    string signature = encoding:encodeHex(crypto:hmacSha256(stringToSign
+        .toByteArray("UTF-8"), signingKey)).toLower();
+    string authorizationHeader = algorithm + " " + "Credential=" + accessKeyId + "/" 
+        + credentialScope + ", " +  "SignedHeaders=" + signedHeaders + ", " + "Signature=" + signature;
 
     map<string> headers = {};
     headers["Content-Type"] = contentType;

@@ -51,9 +51,11 @@ public type Client client object {
 
     public remote function createQueue(string queueName, map<string> attributes) returns string|error;
 
-    public remote function sendMessage(string messageBody, string queueResourcePath, map<string> attributes) returns OutboundMessage|error;
+    public remote function sendMessage(string messageBody, string queueResourcePath, map<string> attributes) 
+        returns OutboundMessage|error;
 
-    public remote function receiveMessage(string queueResourcePath, map<string> attributes) returns InboundMessage[]|error;
+    public remote function receiveMessage(string queueResourcePath, map<string> attributes) 
+        returns InboundMessage[]|error;
 
     public remote function deleteMessage(string queueResourcePath, string receiptHandle) returns boolean|error;
     
@@ -79,7 +81,8 @@ public remote function Client.createQueue(string queueName, map<string> attribut
         attributeNumber = attributeNumber + 1;
     }
 
-    http:Request request = check generatePOSTRequest(self.accessKey, self.secretKey, self.host, amzTarget, endpoint, self.region, payload);
+    http:Request request = check generatePOSTRequest(self.accessKey, self.secretKey, self.host, amzTarget, 
+        endpoint, self.region, payload);
     var httpResponse = self.clientEp->post(endpoint, request);
     json|error response = handleResponse(httpResponse);
     if(response is json){
@@ -96,7 +99,8 @@ public remote function Client.createQueue(string queueName, map<string> attribut
 # + queueResourcePath - Resource path to the queue from the host address. e.g.: /610968236798/myQueue.fifo
 # + attributes - Non-mandatory parameters for sending a message 
 # + return - If success, details of the sent message, else returns error
-public remote function Client.sendMessage(string messageBody, string queueResourcePath, map<string> attributes) returns OutboundMessage|error {
+public remote function Client.sendMessage(string messageBody, string queueResourcePath, map<string> attributes) 
+    returns OutboundMessage|error {
 
     string amzTarget = "AmazonSQSv20121105.SendMessage";
     string payload =  "";
@@ -109,7 +113,8 @@ public remote function Client.sendMessage(string messageBody, string queueResour
         attributeNumber = attributeNumber + 1;
     }
 
-    http:Request request = check generatePOSTRequest(self.accessKey, self.secretKey, self.host, amzTarget, queueResourcePath, self.region, payload);
+    http:Request request = check generatePOSTRequest(self.accessKey, self.secretKey, self.host, amzTarget, 
+        queueResourcePath, self.region, payload);
     var httpResponse = self.clientEp->post(queueResourcePath, request);
     json|error response = handleResponse(httpResponse);
     if(response is json){
@@ -125,7 +130,8 @@ public remote function Client.sendMessage(string messageBody, string queueResour
 # + queueResourcePath - Resource path to the queue from the host address. e.g.: /610968236798/myQueue.fifo 
 # + attributes - Non-mandatory parameters for receiving a message
 # + return - If success, details of the received message, else returns error
-public remote function Client.receiveMessage(string queueResourcePath, map<string> attributes) returns InboundMessage[]|error {
+public remote function Client.receiveMessage(string queueResourcePath, map<string> attributes) 
+    returns InboundMessage[]|error {
 
     string amzTarget = "AmazonSQSv20121105.ReceiveMessage";
     string payload =  "";
@@ -136,7 +142,8 @@ public remote function Client.receiveMessage(string queueResourcePath, map<strin
         attributeNumber = attributeNumber + 1;
     }
 
-    http:Request request = check generatePOSTRequest(self.accessKey, self.secretKey, self.host, amzTarget, queueResourcePath, self.region, payload);
+    http:Request request = check generatePOSTRequest(self.accessKey, self.secretKey, self.host, amzTarget, 
+        queueResourcePath, self.region, payload);
     var httpResponse = self.clientEp->post(queueResourcePath, request);
     json|error response = handleResponse(httpResponse);
     if(response is json){
@@ -160,7 +167,8 @@ public remote function Client.deleteMessage(string queueResourcePath, string rec
     payload = payload + "Action=DeleteMessage";
     payload = payload + "&ReceiptHandle=" + receiptHandleEncoded;
 
-    http:Request request = check generatePOSTRequest(self.accessKey, self.secretKey, self.host, amzTarget, queueResourcePath, self.region, payload);
+    http:Request request = check generatePOSTRequest(self.accessKey, self.secretKey, self.host, 
+        amzTarget, queueResourcePath, self.region, payload);
     var httpResponse = self.clientEp->post(queueResourcePath, request);
     json|error response = handleResponse(httpResponse);
     if (response is json) {
