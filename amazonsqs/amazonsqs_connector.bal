@@ -24,7 +24,6 @@ import ballerina/time;
 import wso2/amazoncommons;
 import ballerina/log;
 
-
 # Object to initialize the connection with Amazon SQS.
 #
 # + accessKey - The Amazon API access key
