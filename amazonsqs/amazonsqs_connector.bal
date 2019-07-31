@@ -153,7 +153,7 @@ public remote function Client.receiveMessage(string queueResourcePath, map<strin
     
 }
 
-# Delete the message(s) from the queue for the given receiptHandle
+# Delete message(s) from the queue for a given receiptHandle
 #
 # + queueResourcePath - Resource path to the queue from the host address. e.g.: /610968236798/myQueue.fifo
 # + receiptHandle - Receipt Handle parameter for the message(s) to be deleted
