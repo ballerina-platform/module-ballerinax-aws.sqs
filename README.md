@@ -28,7 +28,9 @@ First, import the `wso2/amazonsqs` module into the Ballerina project.
 import wso2/amazonec2;
 ```
 
-In order for you to use the Amazon SQS Connector, first you need to create a Amazon SQS Client.
+In order for you to use the Amazon SQS Connector, first you need to create an Amazon SQS Client.
+
+Ballerina provides a [config module](https://ballerina.io/learn/api-docs/ballerina/config.html) to obtain parameters from the configuration file. Specify the configuration object and create the client as follows.
 
 ```ballerina
 amazonsqs:Configuration configuration = {
