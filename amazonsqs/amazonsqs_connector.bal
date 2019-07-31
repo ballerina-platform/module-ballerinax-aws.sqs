@@ -124,7 +124,7 @@ public remote function Client.sendMessage(string messageBody, string queueResour
 
 }
 
-# Receive the message(s) from the queue
+# Receive message(s) from the queue
 #
 # + queueResourcePath - Resource path to the queue from the host address. e.g.: /610968236798/myQueue.fifo 
 # + attributes - Non-mandatory parameters for receiving a message
