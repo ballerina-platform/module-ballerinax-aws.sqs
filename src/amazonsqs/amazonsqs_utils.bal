@@ -13,45 +13,49 @@
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-//
 
 import ballerina/crypto;
 import ballerina/encoding;
 import ballerina/http;
+import ballerina/io;
+import ballerina/log;
 import ballerina/system;
 import ballerina/time;
-import ballerina/log;
+import ballerinax/java;
 
 # Handles the HTTP response.
 #
 # + httpResponse - Http response or error
 # + return - If successful returns `json` response. Else returns error.
-function handleResponse(http:Response|error httpResponse) returns json|error {
+function handleResponse(http:Response|error httpResponse) returns @untainted xml|error {
     if (httpResponse is http:Response) {
-        if (httpResponse.statusCode == http:NO_CONTENT_204){
+        if (httpResponse.statusCode == http:STATUS_NO_CONTENT){
             //If status 204, then no response body. So returns json boolean true.
-            return true;
+            error err = error(AMAZONSQS_ERROR_CODE, detail="No Content was sent with the response." );
+            return err;
         }
         var xmlResponse = httpResponse.getXmlPayload();
         if (xmlResponse is xml) {
-            var jsonResponse = xmlResponse.toJSON({ preserveNamespaces: false });
-            if (httpResponse.statusCode == http:OK_200) {
+            if (httpResponse.statusCode == http:STATUS_OK) {
                 //If status is 200, request is successful. Returns resulting payload.
-                return jsonResponse;
+                return xmlResponse;
             } else {
                 //If status is not 200 or 204, request is unsuccessful. Returns error.
-                string errorMsg = STATUS_CODE + COLON_SYMBOL + jsonResponse["error"].code.toString()
-                    + SEMICOLON_SYMBOL + WHITE_SPACE + MESSAGE + COLON_SYMBOL + WHITE_SPACE
-                    + jsonResponse["error"]["message"].toString();
-                error err = error(AMAZONSQS_ERROR_CODE, { message: errorMsg });
+                xmlns "http://queue.amazonaws.com/doc/2012-11-05/" as ns1;
+                string xmlResponseErrorCode = httpResponse.statusCode.toString();
+                string responseErrorMessage = xmlResponse[ns1:'error][ns1:message].getTextValue();
+                string errorMsg = STATUS_CODE + COLON_SYMBOL + xmlResponseErrorCode + 
+                    SEMICOLON_SYMBOL + WHITE_SPACE + MESSAGE + COLON_SYMBOL + WHITE_SPACE + 
+                    responseErrorMessage;
+                error err = error(AMAZONSQS_ERROR_CODE, detail=errorMsg );
                 return err;
             }
         } else {
-                error err = error(AMAZONSQS_ERROR_CODE, { message: "Response payload is not XML" });
+                error err = error(AMAZONSQS_ERROR_CODE, detail="Response payload is not XML");
                 return err;
         }
     } else {
-        error err = error(AMAZONSQS_ERROR_CODE, { message: "Error occurred while invoking the REST API" });
+        error err = error(AMAZONSQS_ERROR_CODE, detail="Error occurred while invoking the REST API" );
         return err;
     }
 }
@@ -67,16 +71,16 @@ function generatePOSTRequest(string accessKeyId, string secretAccessKey, string 
     string canonicalHeaders = "content-type:" + contentType + "\n" + "host:" + host + "\n" 
         + "x-amz-date:" + amzDate + "\n" + "x-amz-target:" + amzTarget + "\n";
     string signedHeaders = "content-type;host;x-amz-date;x-amz-target";
-    string payloadHash = encoding:encodeHex(crypto:hashSha256(requestParameters.toByteArray("UTF-8"))).toLower();
+    string payloadHash = encoding:encodeHex(crypto:hashSha256(requestParameters.toBytes())).toLowerAscii();
     string canonicalRequest = POST + "\n" + canonicalUri + "\n" + canonicalQuerystring + "\n" 
         + canonicalHeaders + "\n" + signedHeaders + "\n" + payloadHash;
     string algorithm = "AWS4-HMAC-SHA256";
     string credentialScope = dateStamp + "/" + region + "/" + SQS_SERVICE_NAME + "/" + "aws4_request";
     string stringToSign = algorithm + "\n" +  amzDate + "\n" +  credentialScope + "\n" 
-        +  encoding:encodeHex(crypto:hashSha256(canonicalRequest.toByteArray("UTF-8"))).toLower();
+        +  encoding:encodeHex(crypto:hashSha256(canonicalRequest.toBytes())).toLowerAscii();
     byte[] signingKey = getSignatureKey(secretAccessKey, dateStamp, region, SQS_SERVICE_NAME);
     string signature = encoding:encodeHex(crypto:hmacSha256(stringToSign
-        .toByteArray("UTF-8"), signingKey)).toLower();
+        .toBytes(), signingKey)).toLowerAscii();
     string authorizationHeader = algorithm + " " + "Credential=" + accessKeyId + "/" 
         + credentialScope + ", " +  "SignedHeaders=" + signedHeaders + ", " + "Signature=" + signature;
 
@@ -87,10 +91,9 @@ function generatePOSTRequest(string accessKeyId, string secretAccessKey, string 
     headers["Authorization"] = authorizationHeader;
 
     string msgBody = requestParameters;
-
     http:Request request = new;
     request.setTextPayload(msgBody);
-    foreach var (k,v) in headers {
+    foreach var [k,v] in headers.entries() {
         request.setHeader(k, v);
     }
 
@@ -98,14 +101,26 @@ function generatePOSTRequest(string accessKeyId, string secretAccessKey, string 
 }
 
 function sign(byte[] key, string msg) returns byte[] {
-    return crypto:hmacSha256(msg.toByteArray("UTF-8"), key);
+    return crypto:hmacSha256(msg.toBytes(), key);
 }
 
 function getSignatureKey(string secretKey, string datestamp, string region, string serviceName)  returns byte[] {
     string awskey = ("AWS4" + secretKey);
-    byte[] kDate = sign(awskey.toByteArray("UTF-8"), datestamp);
+    byte[] kDate = sign(awskey.toBytes(), datestamp);
     byte[] kRegion = sign(kDate, region);
     byte[] kService = sign(kRegion, serviceName);
     byte[] kSigning = sign(kService, "aws4_request");
     return kSigning;
 }
+
+function splitString(string str, string delimeter, int arrIndex) returns string {
+    handle rec = java:fromString(str);
+    handle del = java:fromString(delimeter);
+    handle arr = split(rec, del);
+    handle arrEle =  java:getArrayElement(arr, arrIndex);
+    return arrEle.toString();
+}
+
+function split(handle receiver, handle delimeter) returns handle = @java:Method {
+    class: "java.lang.String"
+} external;

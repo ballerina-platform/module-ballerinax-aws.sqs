@@ -1,11 +1,11 @@
-# Ballerina Amazon EC2 Connector
+# Ballerina Amazon SQS Connector
 
 Amazon SQS Connector allows you to connect to the Amazon Simple Queue Service (SQS) via REST API from Ballerina.
 
 ## Compatibility
 | Ballerina Language Version | Amazon SQS API version  |
 | -------------------------- | ----------------------  |
-| 0.991.0                    | 2012-11-05              |
+| 1.0.0-alpha                | 2012-11-05              |
 
 The following sections provide you with information on how to use the Ballerina Amazon SQS connector.
 
@@ -25,7 +25,7 @@ git clone https://github.com/wso2-ballerina/module-amazonsqs.git
 First, import the `wso2/amazonsqs` module into the Ballerina project.
 
 ```ballerina
-import wso2/amazonec2;
+import wso2/amazonsqs;
 ```
 
 In order for you to use the Amazon SQS Connector, first you need to create an Amazon SQS Client.
@@ -64,7 +64,7 @@ public function main(string... args) {
     // Create a new SQS FIFO queue named "demo.fifo"
     map<string> attributes = {};
     string|error response = sqsClient->createQueue("newQueue", attributes);
-    if(response is string) {
+    if (response is string) {
         log:printInfo("Created queue URL: " + response);
     } else {
         log:printInfo("Error while creating a queue");

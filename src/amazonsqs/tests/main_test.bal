@@ -21,11 +21,20 @@ import ballerina/log;
 import ballerina/encoding;
 import ballerina/math;
 
+// TODO uncomment after fixing config issue related to tests
+// Configuration configuration = {
+//     accessKey: config:getAsString("ACCESS_KEY_ID"),
+//     secretKey: config:getAsString("SECRET_ACCESS_KEY"),
+//     region: config:getAsString("REGION"),
+//     accountNumber: config:getAsString("ACCOUNT_NUMBER")
+// };
+
+// TODO remove after fixing config issue related to tests
 Configuration configuration = {
-    accessKey: config:getAsString("ACCESS_KEY_ID"),
-    secretKey: config:getAsString("SECRET_ACCESS_KEY"),
-    region: config:getAsString("REGION"),
-    accountNumber: config:getAsString("ACCOUNT_NUMBER")
+    accessKey: "ACCESS_KEY_ID",
+    secretKey: "SECRET_ACCESS_KEY",
+    region: "REGION",
+    accountNumber: "ACCOUNT_NUMBER"
 };
 
 Client sqsClient = new(configuration);
@@ -40,16 +49,24 @@ function testCreateQueue() {
     attributes["VisibilityTimeout"] = "400";
     attributes["FifoQueue"] = "true";
     string|error response = sqsClient->createQueue(genRandQueueName(), attributes);
-    if(response is string && response.hasPrefix("http")) {
-        if(response.hasPrefix("https://sqs.")) {
-            queueResourcePath = response.split("amazonaws.com")[1];
-            log:printInfo("SQS queue was created. Queue URL: " + response);
-            test:assertTrue(true);
+    if (response is string) {
+        if (response.startsWith("https://sqs.")) {
+            string|error queueResourcePathAny = splitString(response, AMAZON_HOST, 1);
+            if (queueResourcePathAny is string) {
+                queueResourcePath = queueResourcePathAny;
+                log:printInfo("SQS queue was created. Queue URL: " + response);
+                test:assertTrue(true);
+            } else {
+                log:printInfo("Queue URL is not Amazon!");
+                test:assertTrue(false);
+            }
         } else {
-            test:assertTrue(false, msg = "Error while creating the queue.");
+            log:printInfo("Error while creating the queue.");
+            test:assertTrue(false);
         }
     } else {
-        test:assertTrue(false, msg = "Error while creating the queue.");
+        log:printInfo("Error while creating the queue.");
+        test:assertTrue(false);
     }
 }
 
@@ -70,15 +87,17 @@ function testSendMessage() {
     string queueUrl = "";
     OutboundMessage|error response = sqsClient->sendMessage("New Message Text", queueResourcePath,
         attributes);
-    if(response is OutboundMessage) {
-        if(response.messageId != "") {
+    if (response is OutboundMessage) {
+        if (response.messageId != "") {
             log:printInfo("Sent message to SQS. MessageID: " + response.messageId);
             test:assertTrue(true);
         } else {
-            test:assertTrue(false, msg = "Error while sending the message to the queue.");
+            log:printInfo("Error while sending the message to the queue.");
+            test:assertTrue(false);
         }
     } else {
-        test:assertTrue(false, msg = "Error while sending the message to the queue.");
+        log:printInfo("Error while sending the message to the queue.");
+        test:assertTrue(false);
     }
 }
 
@@ -92,18 +111,21 @@ function testReceiveMessage() {
     attributes["VisibilityTimeout"] = "600";
     attributes["WaitTimeSeconds"] = "2";
     attributes["AttributeName.1"] = "SenderId";
-    attributes["MessageAttributeName.1"] = "N2";
+    attributes["MessageAttributeName.1"] = "N1";
+    attributes["MessageAttributeName.2"] = "N2";
     InboundMessage[]|error response = sqsClient->receiveMessage(queueResourcePath, attributes);
-    if(response is InboundMessage[]) {
-        if(response[0].receiptHandle != "") {
+    if (response is InboundMessage[]) {
+        if (response[0].receiptHandle != "") {
             receivedReceiptHandler = response[0].receiptHandle;
             log:printInfo("Successfully received the message. Receipt Handle: " + response[0].receiptHandle);
             test:assertTrue(true);
         } else {
-            test:assertTrue(false, msg = "Error occurred while receiving the message.");
+            log:printInfo("Error occurred while receiving the message.");
+            test:assertTrue(false);
         }
     } else {
-        test:assertTrue(false, msg = "Error occurred while receiving the message.");
+        log:printInfo("Error occurred while receiving the message.");
+        test:assertTrue(false);
     }
 }
 
@@ -114,20 +136,22 @@ function testReceiveMessage() {
 function testDeleteMessage() {
     string receiptHandler = receivedReceiptHandler;
     boolean|error response = sqsClient->deleteMessage(queueResourcePath, receiptHandler);
-    if(response is boolean) {
+    if (response is boolean) {
         if (response) {
             log:printInfo("Successfully deleted the message from the queue.");
             test:assertTrue(true);
         } else {
-            test:assertTrue(false, msg = "Error occurred while deleting the message.");
+            log:printInfo("Error occurred while deleting the message.");
+            test:assertTrue(false);
         }
     } else {
-        test:assertTrue(false, msg = "Error occurred while deleting the message.");
+        log:printInfo("Error occurred while deleting the message.");
+        test:assertTrue(false);
     }
 }
 
 function genRandQueueName() returns string {
     float ranNumFloat = math:random()*10000000;
     anydata ranNumInt = math:round(ranNumFloat);
-    return "testQueue" + string.convert(ranNumInt) + ".fifo";
+    return "testQueue" + ranNumInt.toString() + ".fifo";
 }

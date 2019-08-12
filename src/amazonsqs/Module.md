@@ -7,7 +7,7 @@ Amazon SQS Connector allows you to connect to the Amazon SQS service via REST AP
 
 |                    |    Version     |  
 |:------------------:|:--------------:|
-| Ballerina Language |   0.991.0      |
+| Ballerina Language |   1.0.0-alpha  |
 | Amazon SQS API     |   2012-11-05   |
 
 
@@ -68,7 +68,7 @@ attributes["VisibilityTimeout"] = "400";
 attributes["FifoQueue"] = "true";
 
 string|error response = sqsClient->createQueue("demo.fifo", attributes);
-if(response is string) {
+if (response is string) {
     log:printInfo("Created queue URL: " + response);
 }
 ```
@@ -86,9 +86,9 @@ attributes["MessageAttribute.2.Name"] = "Name2";
 attributes["MessageAttribute.2.Value.StringValue"] = "Value2";
 attributes["MessageAttribute.2.Value.DataType"] = "String";
 string queueUrl = "";
-OutboundMessage|error response = sqsClient->sendMessage("Sample text message.", "/123456789012/demo.fifo",
+amazonsqs:OutboundMessage|error response = sqsClient->sendMessage("Sample text message.", "/123456789012/demo.fifo",
     attributes);
-if(response is OutboundMessage) {
+if (response is amazonsqs:OutboundMessage) {
     log:printInfo("Sent message to SQS. MessageID: " + response.messageId);
 }
 ```
@@ -102,8 +102,8 @@ attributes["VisibilityTimeout"] = "600";
 attributes["WaitTimeSeconds"] = "2";
 attributes["AttributeName.1"] = "SenderId";
 attributes["MessageAttributeName.1"] = "Name2";
-InboundMessage[]|error response = sqsClient->receiveMessage("/123456789012/demo.fifo", attributes);
-if(response is InboundMessage[]) {
+amazonsqs:InboundMessage[]|error response = sqsClient->receiveMessage("/123456789012/demo.fifo", attributes);
+if (response is amazonsqs:InboundMessage[]) {
     log:printInfo("Successfully received the message. Message body of the first message: " + response[0].body);
     log:printInfo("\nReceipt Handle: " + response[0].receiptHandle);
 }
@@ -113,7 +113,7 @@ A received message should be deleted with `deleteMessage` method within `Visibil
 
 ```ballerina
 boolean|error response = sqsClient->deleteMessage("/123456789012/demo.fifo", "AQEBnLBA/U5jSFADa0ZxCq2qCwpYE3biqcWOUrjzci0tB6LXG1Jyt4IZm8330mmghWuBeCovsXEiphTSXgkz2zNQFnnD/oSBnvAy8XTfA0hscepBMS2sdA81L/jNmR4mVl3dERQwwT1oJM4S2NwjXMGdjmERn/h8jok39ucnlSMJBfbPMUQ1VSHv7WCUheR/DHpVPhGlk2s5mUfAgmF5/srFsSr2NQmDG61wdNiU9LQgH3QR45c7KRtpepeyGAPKejqpKA0bPj6aw3oXSUOqNXAJmg==");
-if(response is boolean) {
+if (response is boolean) {
     if (response) {
         log:printInfo("Successfully deleted the message from the queue.");
     }
@@ -146,10 +146,10 @@ public function main(string... args) {
     // Create a new SQS FIFO queue named "demo.fifo"
     map<string> attributes = {};
     string|error response1 = sqsClient->createQueue("myQueue", attributes);
-    if(response1 is string) {
+    if (response1 is string) {
         log:printInfo("Created queue URL: " + response1);
         // Keep the queue URL for future operations
-        queueResourcePath = response1.split("amazonaws.com")[1];
+        queueResourcePath = amazonsqs:splitString(response1, "amazonaws.com", 1);
     } else {
         log:printInfo("error while creating a queue");
     }
@@ -165,7 +165,7 @@ public function main(string... args) {
     string queueUrl = "";
     amazonsqs:OutboundMessage|error response2 = sqsClient->sendMessage("Sample text message.", queueResourcePath,
         attributes);
-    if(response2 is amazonsqs:OutboundMessage) {
+    if (response2 is amazonsqs:OutboundMessage) {
         log:printInfo("Sent message to SQS. MessageID: " + response2.messageId);
     }
 
@@ -177,7 +177,7 @@ public function main(string... args) {
     attributes["AttributeName.1"] = "SenderId";
     attributes["MessageAttributeName.1"] = "Name2";
     amazonsqs:InboundMessage[]|error response3 = sqsClient->receiveMessage(queueResourcePath, attributes);
-    if(response3 is amazonsqs:InboundMessage[]) {
+    if (response3 is amazonsqs:InboundMessage[]) {
         log:printInfo("Successfully received the message. Message body: " + response3[0].body);
         log:printInfo("\nReceipt Handle: " + response3[0].receiptHandle);
         // Keep receipt handle for deleting the message from the queue
@@ -186,7 +186,7 @@ public function main(string... args) {
 
     // Delete the received the message from the queue
     boolean|error response4 = sqsClient->deleteMessage(queueResourcePath, receivedReceiptHandler);
-    if(response4 is boolean) {
+    if (response4 is boolean) {
         if (response4) {
             log:printInfo("Successfully deleted the message from the queue.");
         }
@@ -225,10 +225,10 @@ public function main(string... args) {
     attributes["FifoQueue"] = "true";
 
     string|error response1 = sqsClient->createQueue("demo.fifo", attributes);
-    if(response1 is string) {
+    if (response1 is string) {
         log:printInfo("Created queue URL: " + response1);
         // Keep the queue URL for future operations
-        queueResourcePath = response1.split("amazonaws.com")[1];
+        queueResourcePath = amazonsqs:splitString(response1, "amazonaws.com", 1);
     }
 
     // Send a message to the created queue
@@ -244,7 +244,7 @@ public function main(string... args) {
     string queueUrl = "";
     amazonsqs:OutboundMessage|error response2 = sqsClient->sendMessage("Sample text message.", queueResourcePath,
         attributes);
-    if(response2 is amazonsqs:OutboundMessage) {
+    if (response2 is amazonsqs:OutboundMessage) {
         log:printInfo("Sent message to SQS. MessageID: " + response2.messageId);
     }
 
@@ -256,7 +256,7 @@ public function main(string... args) {
     attributes["AttributeName.1"] = "SenderId";
     attributes["MessageAttributeName.1"] = "Name2";
     amazonsqs:InboundMessage[]|error response3 = sqsClient->receiveMessage(queueResourcePath, attributes);
-    if(response3 is amazonsqs:InboundMessage[]) {
+    if (response3 is amazonsqs:InboundMessage[]) {
         log:printInfo("Successfully received the message. Message body: " + response3[0].body);
         log:printInfo("\nReceipt Handle: " + response3[0].receiptHandle);
         // Keep receipt handle for deleting the message from the queue
@@ -265,7 +265,7 @@ public function main(string... args) {
 
     // Delete the received the message from the queue
     boolean|error response4 = sqsClient->deleteMessage(queueResourcePath, receivedReceiptHandler);
-    if(response4 is boolean) {
+    if (response4 is boolean) {
         if (response4) {
             log:printInfo("Successfully deleted the message from the queue.");
         }

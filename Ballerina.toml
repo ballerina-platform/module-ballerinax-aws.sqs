@@ -1,8 +1,6 @@
 [project]
-org-name = "wso2"
-version = "0.1.4"
+org-name= "wso2"
 authors = ["WSO2"]
-keywords = ["amazon", "sqs", "mq"]
+version= "1.0.0"
+keywords = ["amazonsqs", "amazon"]
 repository = "https://github.com/wso2-ballerina/module-amazonsqs"
-license = "Apache-2.0"
-
