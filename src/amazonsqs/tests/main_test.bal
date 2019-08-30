@@ -38,22 +38,23 @@ Configuration configuration = {
 };
 
 Client sqsClient = new(configuration);
-string queueResourcePath = "";
+string fifoQueueResourcePath = "";
+string standardQueueResourcePath = "";
 string receivedReceiptHandler = "";
 
 @test:Config {
     groups: ["group1"]
 }
-function testCreateQueue() {
+function testCreateFIFOQueue() {
     map<string> attributes = {};
     attributes["VisibilityTimeout"] = "400";
     attributes["FifoQueue"] = "true";
-    string|error response = sqsClient->createQueue(genRandQueueName(), attributes);
+    string|error response = sqsClient->createQueue(genRandQueueName(true), attributes);
     if (response is string) {
         if (response.startsWith("https://sqs.")) {
             string|error queueResourcePathAny = splitString(response, AMAZON_HOST, 1);
             if (queueResourcePathAny is string) {
-                queueResourcePath = queueResourcePathAny;
+                fifoQueueResourcePath = queueResourcePathAny;
                 log:printInfo("SQS queue was created. Queue URL: " + response);
                 test:assertTrue(true);
             } else {
@@ -71,7 +72,33 @@ function testCreateQueue() {
 }
 
 @test:Config {
-    dependsOn: ["testCreateQueue"],
+    groups: ["group1"]
+}
+function testCreateStandardQueue() {
+    string|error response = sqsClient->createQueue(genRandQueueName(false), {});
+    if (response is string) {
+        if (response.startsWith("https://sqs.")) {
+            string|error queueResourcePathAny = splitString(response, AMAZON_HOST, 1);
+            if (queueResourcePathAny is string) {
+                standardQueueResourcePath = queueResourcePathAny;
+                log:printInfo("SQS queue was created. Queue URL: " + response);
+                test:assertTrue(true);
+            } else {
+                log:printInfo("Queue URL is not Amazon!");
+                test:assertTrue(false);
+            }
+        } else {
+            log:printInfo("Error while creating the queue.");
+            test:assertTrue(false);
+        }
+    } else {
+        log:printInfo("Error while creating the queue.");
+        test:assertTrue(false);
+    }
+}
+
+@test:Config {
+    dependsOn: ["testCreateFIFOQueue"],
     groups: ["group1"]
 }
 function testSendMessage() {
@@ -85,7 +112,7 @@ function testSendMessage() {
     attributes["MessageAttribute.2.Value.StringValue"] = "V2";
     attributes["MessageAttribute.2.Value.DataType"] = "String";
     string queueUrl = "";
-    OutboundMessage|error response = sqsClient->sendMessage("New Message Text", queueResourcePath,
+    OutboundMessage|error response = sqsClient->sendMessage("New Message Text", fifoQueueResourcePath,
         attributes);
     if (response is OutboundMessage) {
         if (response.messageId != "") {
@@ -113,7 +140,7 @@ function testReceiveMessage() {
     attributes["AttributeName.1"] = "SenderId";
     attributes["MessageAttributeName.1"] = "N1";
     attributes["MessageAttributeName.2"] = "N2";
-    InboundMessage[]|error response = sqsClient->receiveMessage(queueResourcePath, attributes);
+    InboundMessage[]|error response = sqsClient->receiveMessage(fifoQueueResourcePath, attributes);
     if (response is InboundMessage[]) {
         if (response[0].receiptHandle != "") {
             receivedReceiptHandler = response[0].receiptHandle;
@@ -135,7 +162,7 @@ function testReceiveMessage() {
 }
 function testDeleteMessage() {
     string receiptHandler = receivedReceiptHandler;
-    boolean|error response = sqsClient->deleteMessage(queueResourcePath, receiptHandler);
+    boolean|error response = sqsClient->deleteMessage(fifoQueueResourcePath, receiptHandler);
     if (response is boolean) {
         if (response) {
             log:printInfo("Successfully deleted the message from the queue.");
@@ -150,8 +177,78 @@ function testDeleteMessage() {
     }
 }
 
-function genRandQueueName() returns string {
+@test:Config {
+    dependsOn: ["testCreateStandardQueue"],
+    groups: ["group1"]
+}
+function testCRUDOperationsForMultipleMessages() {
+    log:printInfo("Test, testCRUDOperationsForMultipleMessages is started ...");
+    int msgCnt = 0;
+
+    // Send 2 messages to the queue
+    while (msgCnt < 2) {
+        string queueUrl = "";
+        log:printInfo("standardQueueResourcePath " + standardQueueResourcePath);
+        OutboundMessage|error response1 = sqsClient->sendMessage("There is a tree", standardQueueResourcePath, {});
+        if (response1 is OutboundMessage) {
+            log:printInfo("Sent an alert to the queue. MessageID: " + response1.messageId);
+        } else {
+            log:printError("Error occurred while trying to send an alert to the SQS queue!");
+            test:assertTrue(false);
+        }
+        msgCnt = msgCnt + 1;
+    }
+
+    // Receive and delete the 2 messages from the queue
+    map<string> attributes = {};
+    attributes["MaxNumberOfMessages"] = "10";
+    attributes["VisibilityTimeout"] = "2";
+    attributes["WaitTimeSeconds"] = "1";
+    msgCnt = 0;
+    int processesMsgCnt = 0;
+    while(msgCnt < 2) {
+        InboundMessage[]|error response2 = sqsClient->receiveMessage(standardQueueResourcePath, attributes);
+        if (response2 is InboundMessage[]) {
+            if (response2.length() > 0) {
+                int deleteMssageCount = response2.length();
+                foreach var eachResponse in response2 {
+                    receivedReceiptHandler = eachResponse.receiptHandle;
+                    boolean|error deleteResponse = sqsClient->deleteMessage(standardQueueResourcePath, receivedReceiptHandler);
+                    if (deleteResponse is boolean && deleteResponse) {
+                        if (deleteResponse) {
+                            processesMsgCnt = processesMsgCnt + 1;
+                            log:printInfo("Deleted the fire alert \"" + eachResponse.body + "\" from the queue.");
+                        }
+                    } else {
+                        log:printError("Error occurred while deleting a message.");
+                        test:assertTrue(false);
+                    }
+                }
+            } else {
+                log:printInfo("Queue is empty. No messages to be deleted.");
+            }
+        } else {
+            log:printError("Error occurred while receiving a message.");
+            test:assertTrue(false);
+        }
+        msgCnt = msgCnt + 1;
+    }
+    if (processesMsgCnt == 2) {
+        log:printInfo("Successfully deleted all the messages from the queue!");
+        test:assertTrue(true);
+    } else {
+        log:printInfo("Error occurred while processing the messages.");
+        test:assertTrue(false);
+    }
+}
+
+function genRandQueueName(boolean isFifo = false) returns string {
     float ranNumFloat = math:random()*10000000;
     anydata ranNumInt = math:round(ranNumFloat);
-    return "testQueue" + ranNumInt.toString() + ".fifo";
+    string queueName = "testQueue" + ranNumInt.toString();
+    if (isFifo) {
+        return queueName + ".fifo";
+    } else {
+        return queueName;
+    }
 }

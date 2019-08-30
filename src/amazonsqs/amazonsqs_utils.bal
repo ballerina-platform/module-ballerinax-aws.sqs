@@ -27,12 +27,11 @@ import ballerinax/java;
 #
 # + httpResponse - Http response or error
 # + return - If successful returns `json` response. Else returns error.
-function handleResponse(http:Response|error httpResponse) returns @untainted xml|error {
+function handleResponse(http:Response|error httpResponse) returns @untainted xml|ResponseHandleFailed {
     if (httpResponse is http:Response) {
         if (httpResponse.statusCode == http:STATUS_NO_CONTENT){
             //If status 204, then no response body. So returns json boolean true.
-            error err = error(AMAZONSQS_ERROR_CODE, detail="No Content was sent with the response." );
-            return err;
+            return error(RESPONSE_HANDLE_FAILED, message = NO_CONTENT_SET_WITH_RESPONSE_MSG);
         }
         var xmlResponse = httpResponse.getXmlPayload();
         if (xmlResponse is xml) {
@@ -47,57 +46,71 @@ function handleResponse(http:Response|error httpResponse) returns @untainted xml
                 string errorMsg = STATUS_CODE + COLON_SYMBOL + xmlResponseErrorCode + 
                     SEMICOLON_SYMBOL + WHITE_SPACE + MESSAGE + COLON_SYMBOL + WHITE_SPACE + 
                     responseErrorMessage;
-                error err = error(AMAZONSQS_ERROR_CODE, detail=errorMsg );
-                return err;
+                return error(RESPONSE_HANDLE_FAILED, message = errorMsg);
             }
         } else {
-                error err = error(AMAZONSQS_ERROR_CODE, detail="Response payload is not XML");
-                return err;
+                return error(RESPONSE_HANDLE_FAILED, message = RESPONSE_PAYLOAD_IS_NOT_XML_MSG);
         }
     } else {
-        error err = error(AMAZONSQS_ERROR_CODE, detail="Error occurred while invoking the REST API" );
-        return err;
+        return error(RESPONSE_HANDLE_FAILED, message = ERROR_OCCURRED_WHILE_INVOKING_REST_API_MSG, cause = httpResponse);
     }
 }
 
 function generatePOSTRequest(string accessKeyId, string secretAccessKey, string host, string amzTarget, 
-    string canonicalUri, string region, string payload) returns http:Request|error {
-    time:Time time = check time:toTimeZone(time:currentTime(), "GMT");
-    string amzDate = check time:format(time, ISO8601_BASIC_DATE_FORMAT);
-    string dateStamp = check time:format(time, SHORT_DATE_FORMAT);
-    string contentType = "application/x-www-form-urlencoded";
-    string requestParameters =  payload;
-    string canonicalQuerystring = "";
-    string canonicalHeaders = "content-type:" + contentType + "\n" + "host:" + host + "\n" 
-        + "x-amz-date:" + amzDate + "\n" + "x-amz-target:" + amzTarget + "\n";
-    string signedHeaders = "content-type;host;x-amz-date;x-amz-target";
-    string payloadHash = encoding:encodeHex(crypto:hashSha256(requestParameters.toBytes())).toLowerAscii();
-    string canonicalRequest = POST + "\n" + canonicalUri + "\n" + canonicalQuerystring + "\n" 
-        + canonicalHeaders + "\n" + signedHeaders + "\n" + payloadHash;
-    string algorithm = "AWS4-HMAC-SHA256";
-    string credentialScope = dateStamp + "/" + region + "/" + SQS_SERVICE_NAME + "/" + "aws4_request";
-    string stringToSign = algorithm + "\n" +  amzDate + "\n" +  credentialScope + "\n" 
-        +  encoding:encodeHex(crypto:hashSha256(canonicalRequest.toBytes())).toLowerAscii();
-    byte[] signingKey = getSignatureKey(secretAccessKey, dateStamp, region, SQS_SERVICE_NAME);
-    string signature = encoding:encodeHex(crypto:hmacSha256(stringToSign
-        .toBytes(), signingKey)).toLowerAscii();
-    string authorizationHeader = algorithm + " " + "Credential=" + accessKeyId + "/" 
-        + credentialScope + ", " +  "SignedHeaders=" + signedHeaders + ", " + "Signature=" + signature;
+    string canonicalUri, string region, string payload) returns http:Request|GeneratePOSTRequestFailed {
+    
+    time:Time|error time = time:toTimeZone(time:currentTime(), "GMT");
+    string|error amzDate;
+    string|error dateStamp;
+    if (time is time:Time) {
+        amzDate = time:format(time, ISO8601_BASIC_DATE_FORMAT);
+        dateStamp = time:format(time, SHORT_DATE_FORMAT);
+        if (amzDate is string && dateStamp is string) {
+            string contentType = "application/x-www-form-urlencoded";
+            string requestParameters =  payload;
+            string canonicalQuerystring = "";
+            string canonicalHeaders = "content-type:" + contentType + "\n" + "host:" + host + "\n" 
+                + "x-amz-date:" + amzDate + "\n" + "x-amz-target:" + amzTarget + "\n";
+            string signedHeaders = "content-type;host;x-amz-date;x-amz-target";
+            string payloadHash = encoding:encodeHex(crypto:hashSha256(requestParameters.toBytes())).toLowerAscii();
+            string canonicalRequest = POST + "\n" + canonicalUri + "\n" + canonicalQuerystring + "\n" 
+                + canonicalHeaders + "\n" + signedHeaders + "\n" + payloadHash;
+            string algorithm = "AWS4-HMAC-SHA256";
+            string credentialScope = dateStamp + "/" + region + "/" + SQS_SERVICE_NAME + "/" + "aws4_request";
+            string stringToSign = algorithm + "\n" +  amzDate + "\n" +  credentialScope + "\n" 
+                +  encoding:encodeHex(crypto:hashSha256(canonicalRequest.toBytes())).toLowerAscii();
+            byte[] signingKey = getSignatureKey(secretAccessKey, dateStamp, region, SQS_SERVICE_NAME);
+            string signature = encoding:encodeHex(crypto:hmacSha256(stringToSign
+                .toBytes(), signingKey)).toLowerAscii();
+            string authorizationHeader = algorithm + " " + "Credential=" + accessKeyId + "/" 
+                + credentialScope + ", " +  "SignedHeaders=" + signedHeaders + ", " + "Signature=" + signature;
 
-    map<string> headers = {};
-    headers["Content-Type"] = contentType;
-    headers["X-Amz-Date"] = amzDate;
-    headers["X-Amz-Target"] = amzTarget;
-    headers["Authorization"] = authorizationHeader;
+            map<string> headers = {};
+            headers["Content-Type"] = contentType;
+            headers["X-Amz-Date"] = amzDate;
+            headers["X-Amz-Target"] = amzTarget;
+            headers["Authorization"] = authorizationHeader;
 
-    string msgBody = requestParameters;
-    http:Request request = new;
-    request.setTextPayload(msgBody);
-    foreach var [k,v] in headers.entries() {
-        request.setHeader(k, v);
+            string msgBody = requestParameters;
+            http:Request request = new;
+            request.setTextPayload(msgBody);
+            foreach var [k,v] in headers.entries() {
+                request.setHeader(k, v);
+            }
+            return request;
+        } else {
+            if (amzDate is error) {
+                return error(GENERATE_POST_REQUEST_FAILED, message = GENERATE_POST_REQUEST_FAILED_MSG, cause = amzDate);
+            } else if (dateStamp is error) {
+                return error(GENERATE_POST_REQUEST_FAILED, message = GENERATE_POST_REQUEST_FAILED_MSG, cause = dateStamp);
+            } else {
+                return error(GENERATE_POST_REQUEST_FAILED, message = GENERATE_POST_REQUEST_FAILED_MSG);
+            }
+        }
+    } else {
+        return error(GENERATE_POST_REQUEST_FAILED, message = GENERATE_POST_REQUEST_FAILED_MSG, cause = time);
     }
 
-    return request;
 }
 
 function sign(byte[] key, string msg) returns byte[] {
@@ -113,7 +126,7 @@ function getSignatureKey(string secretKey, string datestamp, string region, stri
     return kSigning;
 }
 
-function splitString(string str, string delimeter, int arrIndex) returns string {
+public function splitString(string str, string delimeter, int arrIndex) returns string {
     handle rec = java:fromString(str);
     handle del = java:fromString(delimeter);
     handle arr = split(rec, del);
