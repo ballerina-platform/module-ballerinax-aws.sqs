@@ -31,7 +31,7 @@ function handleResponse(http:Response|error httpResponse) returns @untainted xml
     if (httpResponse is http:Response) {
         if (httpResponse.statusCode == http:STATUS_NO_CONTENT){
             //If status 204, then no response body. So returns json boolean true.
-            return error(RESPONSE_HANDLE_FAILED, message = NO_CONTENT_SET_WITH_RESPONSE_MSG);
+            return error(SERVER_ERROR, message = NO_CONTENT_SET_WITH_RESPONSE_MSG, errorCode = RESPONSE_HANDLE_FAILED);
         }
         var xmlResponse = httpResponse.getXmlPayload();
         if (xmlResponse is xml) {
@@ -46,13 +46,14 @@ function handleResponse(http:Response|error httpResponse) returns @untainted xml
                 string errorMsg = STATUS_CODE + COLON_SYMBOL + xmlResponseErrorCode + 
                     SEMICOLON_SYMBOL + WHITE_SPACE + MESSAGE + COLON_SYMBOL + WHITE_SPACE + 
                     responseErrorMessage;
-                return error(RESPONSE_HANDLE_FAILED, message = errorMsg);
+                return error(SERVER_ERROR, message = errorMsg, errorCode = RESPONSE_HANDLE_FAILED);
             }
         } else {
-                return error(RESPONSE_HANDLE_FAILED, message = RESPONSE_PAYLOAD_IS_NOT_XML_MSG);
+                return error(SERVER_ERROR, message = RESPONSE_PAYLOAD_IS_NOT_XML_MSG, errorCode = RESPONSE_HANDLE_FAILED);
         }
     } else {
-        return error(RESPONSE_HANDLE_FAILED, message = ERROR_OCCURRED_WHILE_INVOKING_REST_API_MSG, cause = httpResponse);
+        return error(CLIENT_ERROR, message = ERROR_OCCURRED_WHILE_INVOKING_REST_API_MSG, 
+            errorCode = RESPONSE_HANDLE_FAILED, cause = httpResponse);
     }
 }
 
@@ -100,15 +101,19 @@ function generatePOSTRequest(string accessKeyId, string secretAccessKey, string 
             return request;
         } else {
             if (amzDate is error) {
-                return error(GENERATE_POST_REQUEST_FAILED, message = GENERATE_POST_REQUEST_FAILED_MSG, cause = amzDate);
+                return error(GENERATE_POST_REQUEST_FAILED, message = GENERATE_POST_REQUEST_FAILED_MSG, 
+                    errorCode = GENERATE_POST_REQUEST_FAILED, cause = amzDate);
             } else if (dateStamp is error) {
-                return error(GENERATE_POST_REQUEST_FAILED, message = GENERATE_POST_REQUEST_FAILED_MSG, cause = dateStamp);
+                return error(GENERATE_POST_REQUEST_FAILED, message = GENERATE_POST_REQUEST_FAILED_MSG, 
+                    errorCode = GENERATE_POST_REQUEST_FAILED, cause = dateStamp);
             } else {
-                return error(GENERATE_POST_REQUEST_FAILED, message = GENERATE_POST_REQUEST_FAILED_MSG);
+                return error(GENERATE_POST_REQUEST_FAILED, message = GENERATE_POST_REQUEST_FAILED_MSG, 
+                    errorCode = GENERATE_POST_REQUEST_FAILED);
             }
         }
     } else {
-        return error(GENERATE_POST_REQUEST_FAILED, message = GENERATE_POST_REQUEST_FAILED_MSG, cause = time);
+        return error(GENERATE_POST_REQUEST_FAILED, message = GENERATE_POST_REQUEST_FAILED_MSG, 
+            errorCode = GENERATE_POST_REQUEST_FAILED, cause = time);
     }
 
 }

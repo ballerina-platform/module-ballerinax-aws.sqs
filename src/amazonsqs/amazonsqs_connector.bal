@@ -52,7 +52,7 @@ public type Client client object {
     # + queueName - Name of the queue to be created 
     # + attributes - Other attribute parameters 
     # + return - If success, URL of the created queue, else returns error
-    public remote function createQueue(string queueName, map<string> attributes) returns @untainted string|CreateQueueFailed{
+    public remote function createQueue(string queueName, map<string> attributes) returns @untainted string|OperationError{
         string amzTarget = "AmazonSQSv20121105.CreateQueue";
         string endpoint = "/";
         string payload =  "";
@@ -65,18 +65,19 @@ public type Client client object {
             payload = payload + "&Attribute." + attributeNumber.toString() + ".Value=" + v;
             attributeNumber = attributeNumber + 1;
         }
-        http:Request|error request = generatePOSTRequest(self.accessKey, self.secretKey, self.host, amzTarget, 
+        http:Request|GeneratePOSTRequestFailed request = generatePOSTRequest(self.accessKey, 
+            self.secretKey, self.host, amzTarget, 
             endpoint, self.region, payload);
         if (request is http:Request) {
             var httpResponse = self.clientEp->post(endpoint, request);
-            xml|error response = handleResponse(httpResponse);
+            xml|ResponseHandleFailed response = handleResponse(httpResponse);
             if (response is xml){
                 return xmlToCreatedQueueUrl(response);
             } else {
-                return error(CREATE_QUEUE_FAILED, message = CREATE_QUEUE_FAILED_MSG, cause = response);
+                return error(OPERATION_ERROR, message = OPERATION_ERROR_MSG, errorCode = OPERATION_ERROR, cause = response);
             }
         } else {
-            return error(CREATE_QUEUE_FAILED, message = CREATE_QUEUE_FAILED_MSG, cause = request);
+            return error(OPERATION_ERROR, message = OPERATION_ERROR_MSG, errorCode = OPERATION_ERROR, cause = request);
         }
     }
 
@@ -87,7 +88,7 @@ public type Client client object {
     # + attributes - Non-mandatory parameters for sending a message 
     # + return - If success, details of the sent message, else returns error
     public remote function sendMessage(string messageBody, string queueResourcePath, map<string> attributes) 
-        returns @untainted OutboundMessage|SendMessageFailed {
+        returns @untainted OutboundMessage|OperationError {
         string|error msgbody = http:encode(messageBody, "UTF-8");
         if (msgbody is string) {
             string amzTarget = "AmazonSQSv20121105.SendMessage";
@@ -99,26 +100,26 @@ public type Client client object {
                 payload = payload + "&" + k + "=" + v;
                 attributeNumber = attributeNumber + 1;
             }
-            http:Request|error request = generatePOSTRequest(self.accessKey, self.secretKey, self.host, amzTarget, 
+            http:Request|GeneratePOSTRequestFailed request = generatePOSTRequest(self.accessKey, self.secretKey, self.host, amzTarget, 
                 queueResourcePath, self.region, payload);
             if (request is http:Request) {
                 var httpResponse = self.clientEp->post(queueResourcePath, request);
-                xml|error response = handleResponse(httpResponse);
+                xml|ResponseHandleFailed response = handleResponse(httpResponse);
                 if (response is xml){
-                    OutboundMessage|error result = xmlToOutboundMessage(response);
+                    OutboundMessage|DataMappingError result = xmlToOutboundMessage(response);
                     if (result is OutboundMessage) {
                         return result;
                     } else {
-                        return error(SEND_MESSAGE_FAILED, message = SEND_MESSAGE_FAILED_MSG, cause = result);
+                        return error(OPERATION_ERROR, message = OPERATION_ERROR_MSG, errorCode = OPERATION_ERROR, cause = result);
                     }
                 } else {
-                    return error(SEND_MESSAGE_FAILED, message = SEND_MESSAGE_FAILED_MSG, cause = response);
+                    return error(OPERATION_ERROR, message = OPERATION_ERROR_MSG, errorCode = OPERATION_ERROR, cause = response);
                 }
             } else {
-                return error(SEND_MESSAGE_FAILED, message = SEND_MESSAGE_FAILED_MSG, cause = request);
+                return error(OPERATION_ERROR, message = OPERATION_ERROR_MSG, errorCode = OPERATION_ERROR, cause = request);
             }
         } else {
-            return error(SEND_MESSAGE_FAILED, message = SEND_MESSAGE_FAILED_MSG, cause = msgbody);
+            return error(OPERATION_ERROR, message = OPERATION_ERROR_MSG, errorCode = OPERATION_ERROR, cause = msgbody);
         }
     }
 
@@ -128,7 +129,7 @@ public type Client client object {
     # + attributes - Non-mandatory parameters for receiving a message
     # + return - If success, details of the received message, else returns error
     public remote function receiveMessage(string queueResourcePath, map<string> attributes) 
-        returns @untainted InboundMessage[]|ReceiveMessageFailed {
+        returns @untainted InboundMessage[]|OperationError {
         string amzTarget = "AmazonSQSv20121105.ReceiveMessage";
         string payload =  "";
         payload = payload + "&Action=ReceiveMessage";
@@ -137,23 +138,23 @@ public type Client client object {
             payload = payload + "&" + k + "=" + v;
             attributeNumber = attributeNumber + 1;
         }
-        http:Request|error request = generatePOSTRequest(self.accessKey, self.secretKey, self.host, amzTarget, 
+        http:Request|GeneratePOSTRequestFailed request = generatePOSTRequest(self.accessKey, self.secretKey, self.host, amzTarget, 
             queueResourcePath, self.region, payload);
         if (request is http:Request) {
             var httpResponse = self.clientEp->post(queueResourcePath, request);
-            xml|error response = handleResponse(httpResponse);
+            xml|ResponseHandleFailed response = handleResponse(httpResponse);
             if (response is xml){
-                InboundMessage[]|error result = xmlToInboundMessages(response);
+                InboundMessage[]|DataMappingError result = xmlToInboundMessages(response);
                 if (result is InboundMessage[]) {
                     return result;
                 } else {
-                    return error(RECEIVE_MESSAGE_FAILED, message = RECEIVE_MESSAGE_FAILED_MSG, cause = result);
+                    return error(OPERATION_ERROR, message = OPERATION_ERROR_MSG, errorCode = OPERATION_ERROR, cause = result);
                 }
             } else {
-                return error(RECEIVE_MESSAGE_FAILED, message = RECEIVE_MESSAGE_FAILED_MSG, cause = response);
+                return error(OPERATION_ERROR, message = OPERATION_ERROR_MSG, errorCode = OPERATION_ERROR, cause = response);
             }
         } else {
-            return error(RECEIVE_MESSAGE_FAILED, message = RECEIVE_MESSAGE_FAILED_MSG, cause = request);
+            return error(OPERATION_ERROR, message = OPERATION_ERROR_MSG, errorCode = OPERATION_ERROR, cause = request);
         }
     }
 
@@ -162,28 +163,28 @@ public type Client client object {
     # + queueResourcePath - Resource path to the queue from the host address. e.g.: /610968236798/myQueue.fifo
     # + receiptHandle - Receipt Handle parameter for the message(s) to be deleted
     # + return - Whether the message(s) were successfully deleted or whether an error occurred
-    public remote function deleteMessage(string queueResourcePath, string receiptHandle) returns @untainted boolean|error {
+    public remote function deleteMessage(string queueResourcePath, string receiptHandle) returns @untainted boolean|OperationError {
         string amzTarget = "AmazonSQSv20121105.DeleteMessage";
         string|error receiptHandleEncoded = http:encode(receiptHandle, "UTF-8");
         if (receiptHandleEncoded is string) {
             string payload =  "";
             payload = payload + "Action=DeleteMessage";
             payload = payload + "&ReceiptHandle=" + receiptHandleEncoded;
-            http:Request|error request = generatePOSTRequest(self.accessKey, self.secretKey, self.host, 
+            http:Request|GeneratePOSTRequestFailed request = generatePOSTRequest(self.accessKey, self.secretKey, self.host, 
                 amzTarget, queueResourcePath, self.region, payload);
             if (request is http:Request) {
                 var httpResponse = self.clientEp->post(queueResourcePath, request);
-                xml|error response = handleResponse(httpResponse);
+                xml|ResponseHandleFailed response = handleResponse(httpResponse);
                 if (response is xml) {
                     return isXmlDeleteResponse(response);
                 } else {
-                    return error(DELETE_MESSAGE_FAILED, message = DELETE_MESSAGE_FAILED_MSG, cause = response);
+                    return error(OPERATION_ERROR, message = OPERATION_ERROR_MSG, errorCode = OPERATION_ERROR, cause = response);
                 }
             } else {
-                return error(DELETE_MESSAGE_FAILED, message = DELETE_MESSAGE_FAILED_MSG, cause = request);
+                return error(OPERATION_ERROR, message = OPERATION_ERROR_MSG, errorCode = OPERATION_ERROR, cause = request);
             }
         } else {
-            return error(DELETE_MESSAGE_FAILED, message = DELETE_MESSAGE_FAILED_MSG, cause = receiptHandleEncoded);
+            return error(OPERATION_ERROR, message = OPERATION_ERROR_MSG, errorCode = OPERATION_ERROR, cause = receiptHandleEncoded);
         }
     }
 };

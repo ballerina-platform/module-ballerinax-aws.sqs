@@ -17,9 +17,11 @@
 # Holds the details of an AmazonSQS error
 #
 # + message - Specific error message for the error
+# + errorCode - Error code for the error
 # + cause - Cause of the error; If this error occurred due to another error (Probably from another module)
 public type ErrorDetail record {
     string message;
+    string errorCode;
     error cause?;
 };
 
@@ -37,37 +39,26 @@ public type GeneratePOSTRequestFailed error<GENERATE_POST_REQUEST_FAILED, ErrorD
 
 // AmazonSQS Connector Error Types
 
-public const CREATE_QUEUE_FAILED = "{wso2/amazonsqs}CreateQueueFailed";
-public type CreateQueueFailed error<CREATE_QUEUE_FAILED, ErrorDetail>;
+public const CLIENT_ERROR = "{wso2/amazonsqs}ClientError";
+public type ClientError error<CLIENT_ERROR, ErrorDetail>;
 
-public const SEND_MESSAGE_FAILED = "{wso2/amazonsqs}SendMessageFailed";
-public type SendMessageFailed error<SEND_MESSAGE_FAILED, ErrorDetail>;
+public const SERVER_ERROR = "{wso2/amazonsqs}ServerError";
+public type ServerError error<SERVER_ERROR, ErrorDetail>;
 
-public const RECEIVE_MESSAGE_FAILED = "{wso2/amazonsqs}ReceiveMessageFailed";
-public type ReceiveMessageFailed error<RECEIVE_MESSAGE_FAILED, ErrorDetail>;
-
-public const DELETE_MESSAGE_FAILED = "{wso2/amazonsqs}DeleteMessageFailed";
-public type DeleteMessageFailed error<DELETE_MESSAGE_FAILED, ErrorDetail>;
+public const OPERATION_ERROR = "{wso2/amazonsqs}OperationError";
+public type OperationError error<OPERATION_ERROR, ErrorDetail>;
 
 // AmazonSQS Data Mappings Error Types
 
+public const DATA_MAPPING_ERROR = "{wso2/amazonsqs}DataMappingError";
+public type DataMappingError error<DATA_MAPPING_ERROR, ErrorDetail>;
+
 public const CONVERT_XML_TO_OUTBOUND_MESSAGE_FAILED = "{wso2/amazonsqs}ConvertXmlToOutboundMessageFailed";
-public type ConvertXmlToOutboundMessageFailed error<CONVERT_XML_TO_OUTBOUND_MESSAGE_FAILED, ErrorDetail>;
-
 public const CONVERT_XML_TO_INBOUND_MESSAGES_FAILED = "{wso2/amazonsqs}ConvertXmlToInboundMessagesFailed";
-public type ConvertXmlToInboundMessagesFailed error<CONVERT_XML_TO_INBOUND_MESSAGES_FAILED, ErrorDetail>;
-
 public const CONVERT_XML_TO_INBOUND_MESSAGE_FAILED = "{wso2/amazonsqs}ConvertXmlToInboundMessageFailed";
-public type ConvertXmlToInboundMessageFailed error<CONVERT_XML_TO_INBOUND_MESSAGE_FAILED, ErrorDetail>;
-
 public const CONVERT_XML_TO_INBOUND_MESSAGE_MESSAGE_ATTRIBUTES_FAILED = "{wso2/amazonsqs}ConvertXmlToInboundMessageMessageAttributesFailed";
-public type ConvertXmlToInboundMessageMessageAttributesFailed error<CONVERT_XML_TO_INBOUND_MESSAGE_MESSAGE_ATTRIBUTES_FAILED, ErrorDetail>;
-
 public const CONVERT_XML_TO_INBOUND_MESSAGE_MESSAGE_ATTRIBUTE_FAILED = "{wso2/amazonsqs}ConvertXmlToInboundMessageMessageAttributeFailed";
-public type ConvertXmlToInboundMessageMessageAttributeFailed error<CONVERT_XML_TO_INBOUND_MESSAGE_MESSAGE_ATTRIBUTE_FAILED, ErrorDetail>;
-
 public const CONVERT_XML_MESSAGE_ATTRIBUTE_VALUE_TO_LIST_VALUES_FAILED = "{wso2/amazonsqs}ConvertXmlMessageAttributeValueToListValuesFailed";
-public type ConvertXmlMessageAttributeValueToListValuesFailed error<CONVERT_XML_MESSAGE_ATTRIBUTE_VALUE_TO_LIST_VALUES_FAILED, ErrorDetail>;
 
 // AmazonSQS Other Error Types
 
@@ -75,11 +66,7 @@ public const FILE_READ_FAILED = "{wso2/amazonsqs}FileReadFailed";
 public type FileReadFailed error<FILE_READ_FAILED, ErrorDetail>;
 
 public const RESPONSE_HANDLE_FAILED = "{wso2/amazonsqs}ResponseHandleFailed";
-public type ResponseHandleFailed error<RESPONSE_HANDLE_FAILED, ErrorDetail>;
-
-// AmazonSQS Client Error Types
-
-public type ClientError CREATE_QUEUE_FAILED|SEND_MESSAGE_FAILED|RECEIVE_MESSAGE_FAILED;
+public type ResponseHandleFailed error<CLIENT_ERROR|SERVER_ERROR, ErrorDetail>;
 
 // Error messages.
 
@@ -98,3 +85,7 @@ const string GENERATE_POST_REQUEST_FAILED_MSG = "Error occurred while generating
 const string NO_CONTENT_SET_WITH_RESPONSE_MSG = "No Content was sent with the response.";
 const string RESPONSE_PAYLOAD_IS_NOT_XML_MSG = "Response payload is not XML.";
 const string ERROR_OCCURRED_WHILE_INVOKING_REST_API_MSG = "Error occurred while invoking the REST API.";
+const string OUTBOUND_MESSAGE_RESPONSE_EMPTY_MSG = "Outbound Message response is empty.";
+const string OPERATION_ERROR_MSG = "Error has occurred during an operation.";
+public const CLIENT_ERROR_MSG = "Error has occurred in client side";
+public const SERVER_ERROR_MSG = "Error has occurred in server side";
