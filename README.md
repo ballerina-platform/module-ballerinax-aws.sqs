@@ -65,7 +65,7 @@ amazonsqs:Client sqsClient = new(configuration);
 
 public function main(string... args) {
 
-    // Create a new SQS FIFO queue named "demo.fifo"
+    // Create a new SQS Standard queue named "newQueue"
     map<string> attributes = {};
     string|error response = sqsClient->createQueue("newQueue", attributes);
     if (response is string) {

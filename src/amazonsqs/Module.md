@@ -13,14 +13,23 @@ Amazon SQS Connector allows you to connect to the Amazon SQS service via REST AP
 
 ## Sample
 
-First, import the `wso2/amazonsqs` module and related other modules into the Ballerina project.
+First, import the `wso2/amazonsqs` module and related other modules into the Ballerina project and create a `main` method.
 
 ```ballerina
 import ballerina/config;
-import ballerina/io;
 import ballerina/log;
 import wso2/amazonsqs;
+
+public function main(string... args) {
+
+}
 ```
+Rest of the code can be written inside the `main` method. The source code can be saved in a file for example, `demo.bal`. The file can be executed with the following command where `ballerina.conf` is the configuration that is described below.
+
+```
+ballerina run demo.bal --b7a.config.file=path/to/ballerina.conf
+```
+
 The Amazon SQS connector can be instantiated using the Access Key ID, Secret Access Key, Region of the Amazon SQS geographic location 
 and the Account Number in the Amazon SQS client configuration.
 
@@ -138,7 +147,9 @@ public function main(string... args) {
         accessKey: "AKIAIOSFODNN7EXAMPLE",
         secretKey: "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY",
         region: "us-east-2",
-        accountNumber: "610973236798"
+        accountNumber: "610973236798",
+        trustStore: "${ballerina.home}/bre/security/ballerinaTruststore.p12",
+        trustStorePassword: "ballerina"
     };
 
     amazonsqs:Client sqsClient = new(configuration);
@@ -214,7 +225,9 @@ public function main(string... args) {
         accessKey: "AKIAIOSFODNN7EXAMPLE",
         secretKey: "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY",
         region: "us-east-2",
-        accountNumber: "610973236798"
+        accountNumber: "610973236798",
+        trustStore: "${ballerina.home}/bre/security/ballerinaTruststore.p12",
+        trustStorePassword: "ballerina"
     };
 
     amazonsqs:Client sqsClient = new(configuration);
