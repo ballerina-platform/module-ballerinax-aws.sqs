@@ -14,14 +14,12 @@
 // specific language governing permissions and limitations
 // under the License.
 
+import ballerina/lang.array;
 import ballerina/crypto;
-import ballerina/encoding;
 import ballerina/http;
-import ballerina/io;
-import ballerina/log;
-import ballerina/system;
 import ballerina/time;
 import ballerinax/java;
+import ballerinax/java.arrays as jarrays;
 
 # Handles the HTTP response.
 #
@@ -73,15 +71,15 @@ function generatePOSTRequest(string accessKeyId, string secretAccessKey, string 
             string canonicalHeaders = "content-type:" + contentType + "\n" + "host:" + host + "\n" 
                 + "x-amz-date:" + amzDate + "\n" + "x-amz-target:" + amzTarget + "\n";
             string signedHeaders = "content-type;host;x-amz-date;x-amz-target";
-            string payloadHash = encoding:encodeHex(crypto:hashSha256(requestParameters.toBytes())).toLowerAscii();
+            string payloadHash = array:toBase16(crypto:hashSha256(requestParameters.toBytes())).toLowerAscii();
             string canonicalRequest = POST + "\n" + canonicalUri + "\n" + canonicalQuerystring + "\n" 
                 + canonicalHeaders + "\n" + signedHeaders + "\n" + payloadHash;
             string algorithm = "AWS4-HMAC-SHA256";
             string credentialScope = dateStamp + "/" + region + "/" + SQS_SERVICE_NAME + "/" + "aws4_request";
             string stringToSign = algorithm + "\n" +  amzDate + "\n" +  credentialScope + "\n" 
-                +  encoding:encodeHex(crypto:hashSha256(canonicalRequest.toBytes())).toLowerAscii();
+                +  array:toBase16(crypto:hashSha256(canonicalRequest.toBytes())).toLowerAscii();
             byte[] signingKey = getSignatureKey(secretAccessKey, dateStamp, region, SQS_SERVICE_NAME);
-            string signature = encoding:encodeHex(crypto:hmacSha256(stringToSign
+            string signature = array:toBase16(crypto:hmacSha256(stringToSign
                 .toBytes(), signingKey)).toLowerAscii();
             string authorizationHeader = algorithm + " " + "Credential=" + accessKeyId + "/" 
                 + credentialScope + ", " +  "SignedHeaders=" + signedHeaders + ", " + "Signature=" + signature;
@@ -135,7 +133,7 @@ public function splitString(string str, string delimeter, int arrIndex) returns 
     handle rec = java:fromString(str);
     handle del = java:fromString(delimeter);
     handle arr = split(rec, del);
-    handle arrEle =  java:getArrayElement(arr, arrIndex);
+    handle arrEle =  jarrays:get(arr, arrIndex);
     return arrEle.toString();
 }
 

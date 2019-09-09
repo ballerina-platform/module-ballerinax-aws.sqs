@@ -16,31 +16,23 @@
 
 import ballerina/config;
 import ballerina/test;
-import ballerina/io;
 import ballerina/log;
-import ballerina/encoding;
 import ballerina/math;
 
-// TODO uncomment after fixing config issue related to tests
-// Configuration configuration = {
-//     accessKey: config:getAsString("ACCESS_KEY_ID"),
-//     secretKey: config:getAsString("SECRET_ACCESS_KEY"),
-//     region: config:getAsString("REGION"),
-//     accountNumber: config:getAsString("ACCOUNT_NUMBER")
-// };
-
-// TODO remove after fixing config issue related to tests
 Configuration configuration = {
-    accessKey: "ACCESS_KEY_ID",
-    secretKey: "SECRET_ACCESS_KEY",
-    region: "REGION",
-    accountNumber: "ACCOUNT_NUMBER"
+    accessKey: config:getAsString("ACCESS_KEY_ID"),
+    secretKey: config:getAsString("SECRET_ACCESS_KEY"),
+    region: config:getAsString("REGION"),
+    accountNumber: config:getAsString("ACCOUNT_NUMBER"),
+    trustStore: config:getAsString("TRUST_STORE"),
+    trustStorePassword: config:getAsString("TRUST_STORE_PASSWORD")
 };
 
-Client sqsClient = new(configuration);
+Client sqs = new(configuration);
 string fifoQueueResourcePath = "";
 string standardQueueResourcePath = "";
 string receivedReceiptHandler = "";
+string standardQueueReceivedReceiptHandler = "";
 
 @test:Config {
     groups: ["group1"]
@@ -49,7 +41,7 @@ function testCreateFIFOQueue() {
     map<string> attributes = {};
     attributes["VisibilityTimeout"] = "400";
     attributes["FifoQueue"] = "true";
-    string|error response = sqsClient->createQueue(genRandQueueName(true), attributes);
+    string|error response = sqs->createQueue(genRandQueueName(true), attributes);
     if (response is string) {
         if (response.startsWith("https://sqs.")) {
             string|error queueResourcePathAny = splitString(response, AMAZON_HOST, 1);
@@ -72,10 +64,10 @@ function testCreateFIFOQueue() {
 }
 
 @test:Config {
-    groups: ["group1"]
+    groups: ["group2"]
 }
 function testCreateStandardQueue() {
-    string|error response = sqsClient->createQueue(genRandQueueName(false), {});
+    string|error response = sqs->createQueue(genRandQueueName(false), {});
     if (response is string) {
         if (response.startsWith("https://sqs.")) {
             string|error queueResourcePathAny = splitString(response, AMAZON_HOST, 1);
@@ -112,7 +104,7 @@ function testSendMessage() {
     attributes["MessageAttribute.2.Value.StringValue"] = "V2";
     attributes["MessageAttribute.2.Value.DataType"] = "String";
     string queueUrl = "";
-    OutboundMessage|error response = sqsClient->sendMessage("New Message Text", fifoQueueResourcePath,
+    OutboundMessage|error response = sqs->sendMessage("New Message Text", fifoQueueResourcePath,
         attributes);
     if (response is OutboundMessage) {
         if (response.messageId != "") {
@@ -140,10 +132,10 @@ function testReceiveMessage() {
     attributes["AttributeName.1"] = "SenderId";
     attributes["MessageAttributeName.1"] = "N1";
     attributes["MessageAttributeName.2"] = "N2";
-    InboundMessage[]|error response = sqsClient->receiveMessage(fifoQueueResourcePath, attributes);
+    InboundMessage[]|error response = sqs->receiveMessage(fifoQueueResourcePath, attributes);
     if (response is InboundMessage[]) {
         if (response[0].receiptHandle != "") {
-            receivedReceiptHandler = response[0].receiptHandle;
+            receivedReceiptHandler = <@untainted>response[0].receiptHandle;
             log:printInfo("Successfully received the message. Receipt Handle: " + response[0].receiptHandle);
             test:assertTrue(true);
         } else {
@@ -162,7 +154,7 @@ function testReceiveMessage() {
 }
 function testDeleteMessage() {
     string receiptHandler = receivedReceiptHandler;
-    boolean|error response = sqsClient->deleteMessage(fifoQueueResourcePath, receiptHandler);
+    boolean|error response = sqs->deleteMessage(fifoQueueResourcePath, receiptHandler);
     if (response is boolean) {
         if (response) {
             log:printInfo("Successfully deleted the message from the queue.");
@@ -179,7 +171,7 @@ function testDeleteMessage() {
 
 @test:Config {
     dependsOn: ["testCreateStandardQueue"],
-    groups: ["group1"]
+    groups: ["group2"]
 }
 function testCRUDOperationsForMultipleMessages() {
     log:printInfo("Test, testCRUDOperationsForMultipleMessages is started ...");
@@ -189,7 +181,7 @@ function testCRUDOperationsForMultipleMessages() {
     while (msgCnt < 2) {
         string queueUrl = "";
         log:printInfo("standardQueueResourcePath " + standardQueueResourcePath);
-        OutboundMessage|error response1 = sqsClient->sendMessage("There is a tree", standardQueueResourcePath, {});
+        OutboundMessage|error response1 = sqs->sendMessage("There is a tree", standardQueueResourcePath, {});
         if (response1 is OutboundMessage) {
             log:printInfo("Sent an alert to the queue. MessageID: " + response1.messageId);
         } else {
@@ -207,13 +199,13 @@ function testCRUDOperationsForMultipleMessages() {
     msgCnt = 0;
     int processesMsgCnt = 0;
     while(msgCnt < 2) {
-        InboundMessage[]|error response2 = sqsClient->receiveMessage(standardQueueResourcePath, attributes);
+        InboundMessage[]|error response2 = sqs->receiveMessage(standardQueueResourcePath, attributes);
         if (response2 is InboundMessage[]) {
             if (response2.length() > 0) {
                 int deleteMssageCount = response2.length();
                 foreach var eachResponse in response2 {
-                    receivedReceiptHandler = eachResponse.receiptHandle;
-                    boolean|error deleteResponse = sqsClient->deleteMessage(standardQueueResourcePath, receivedReceiptHandler);
+                    standardQueueReceivedReceiptHandler = <@untainted>eachResponse.receiptHandle;
+                    boolean|error deleteResponse = sqs->deleteMessage(standardQueueResourcePath, standardQueueReceivedReceiptHandler);
                     if (deleteResponse is boolean && deleteResponse) {
                         if (deleteResponse) {
                             processesMsgCnt = processesMsgCnt + 1;

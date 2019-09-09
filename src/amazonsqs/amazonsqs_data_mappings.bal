@@ -15,8 +15,6 @@
 // under the License.
 
 import ballerina/io;
-import ballerina/lang.'int as ints;
-import ballerina/log;
 
 function xmlToCreatedQueueUrl(xml response) returns string {
     xmlns "http://queue.amazonaws.com/doc/2012-11-05/" as ns1;
@@ -219,7 +217,7 @@ function isXmlDeleteResponse(xml response) returns boolean {
     }
 }
 
-function read(string path) returns @untainted json|FileReadFailed {
+function read(string path) returns @tainted json|FileReadFailed {
     io:ReadableByteChannel|error rbc = io:openReadableFile(path);
     if (rbc is io:ReadableByteChannel) {
         io:ReadableCharacterChannel rch = new(rbc, "UTF8");

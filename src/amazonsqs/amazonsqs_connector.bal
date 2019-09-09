@@ -14,14 +14,8 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import ballerina/crypto;
 import ballerina/encoding;
 import ballerina/http;
-import ballerina/internal;
-import ballerina/io;
-import ballerina/log;
-import ballerina/system;
-import ballerina/time;
 
 # Object to initialize the connection with Amazon SQS.
 #
@@ -37,14 +31,27 @@ public type Client client object {
     string region;
     string acctNum;
     string host;
+    string trustStore;
+    string trustStorePassword;
 
     public function __init(Configuration config) {
         self.accessKey = config.accessKey;
         self.secretKey = config.secretKey;
         self.acctNum = config.accountNumber;
         self.region = config.region;
+        self.trustStore = config.trustStore;
+        self.trustStorePassword = config.trustStorePassword;
         self.host = SQS_SERVICE_NAME + "." + self.region + "." + AMAZON_HOST;
-        self.clientEp = new("https://" + self.host);
+        self.clientEp = new("https://" + self.host, 
+            {
+                secureSocket: {
+                    trustStore: {
+                        path: config.trustStore,
+                        password: config.trustStorePassword
+                    }
+                }
+            }
+        );
     }
 
     # Creates a new queue in SQS
@@ -52,7 +59,7 @@ public type Client client object {
     # + queueName - Name of the queue to be created 
     # + attributes - Other attribute parameters 
     # + return - If success, URL of the created queue, else returns error
-    public remote function createQueue(string queueName, map<string> attributes) returns @untainted string|OperationError{
+    public remote function createQueue(string queueName, map<string> attributes) returns @tainted string|OperationError{
         string amzTarget = "AmazonSQSv20121105.CreateQueue";
         string endpoint = "/";
         string payload =  "";
@@ -88,8 +95,8 @@ public type Client client object {
     # + attributes - Non-mandatory parameters for sending a message 
     # + return - If success, details of the sent message, else returns error
     public remote function sendMessage(string messageBody, string queueResourcePath, map<string> attributes) 
-        returns @untainted OutboundMessage|OperationError {
-        string|error msgbody = http:encode(messageBody, "UTF-8");
+        returns @tainted OutboundMessage|OperationError {
+        string|error msgbody = encoding:encodeUriComponent(messageBody, "UTF-8");
         if (msgbody is string) {
             string amzTarget = "AmazonSQSv20121105.SendMessage";
             string payload =  "";
@@ -129,7 +136,7 @@ public type Client client object {
     # + attributes - Non-mandatory parameters for receiving a message
     # + return - If success, details of the received message, else returns error
     public remote function receiveMessage(string queueResourcePath, map<string> attributes) 
-        returns @untainted InboundMessage[]|OperationError {
+        returns @tainted InboundMessage[]|OperationError {
         string amzTarget = "AmazonSQSv20121105.ReceiveMessage";
         string payload =  "";
         payload = payload + "&Action=ReceiveMessage";
@@ -163,9 +170,9 @@ public type Client client object {
     # + queueResourcePath - Resource path to the queue from the host address. e.g.: /610968236798/myQueue.fifo
     # + receiptHandle - Receipt Handle parameter for the message(s) to be deleted
     # + return - Whether the message(s) were successfully deleted or whether an error occurred
-    public remote function deleteMessage(string queueResourcePath, string receiptHandle) returns @untainted boolean|OperationError {
+    public remote function deleteMessage(string queueResourcePath, string receiptHandle) returns @tainted boolean|OperationError {
         string amzTarget = "AmazonSQSv20121105.DeleteMessage";
-        string|error receiptHandleEncoded = http:encode(receiptHandle, "UTF-8");
+        string|error receiptHandleEncoded = encoding:encodeUriComponent(receiptHandle, "UTF-8");
         if (receiptHandleEncoded is string) {
             string payload =  "";
             payload = payload + "Action=DeleteMessage";
@@ -195,9 +202,13 @@ public type Client client object {
 # + secretKey - secretKey of Amazon Account
 # + region - region of SQS Queue
 # + accountNumber - account number of the SQS queue
+# + trustStore - trust store file path to establish TLS connections
+# + trustStorePassword - trust store password to open the trust store
 public type Configuration record {
     string accessKey;
     string secretKey;
     string region;
     string accountNumber;
+    string trustStore;
+    string trustStorePassword;
 };

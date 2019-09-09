@@ -5,7 +5,7 @@ Amazon SQS Connector allows you to connect to the Amazon Simple Queue Service (S
 ## Compatibility
 | Ballerina Language Version | Amazon SQS API version  |
 | -------------------------- | ----------------------  |
-| 1.0.0-alpha                | 2012-11-05              |
+| 1.0.0                      | 2012-11-05              |
 
 The following sections provide you with information on how to use the Ballerina Amazon SQS connector.
 
@@ -37,7 +37,9 @@ amazonsqs:Configuration configuration = {
     accessKey: config:getAsString("ACCESS_KEY_ID"),
     secretKey: config:getAsString("SECRET_ACCESS_KEY"),
     region: config:getAsString("REGION"),
-    accountNumber: config:getAsString("ACCOUNT_NUMBER")
+    accountNumber: config:getAsString("ACCOUNT_NUMBER"),
+    trustStore: config:getAsString("TRUST_STORE"),
+    trustStorePassword: config:getAsString("TRUST_STORE_PASSWORD")
 };
 
 amazonsqs:Client sqsClient = new(configuration);
@@ -54,7 +56,9 @@ amazonsqs:Configuration configuration = {
     accessKey: "AKIAIOSFODNN7EXAMPLE",
     secretKey: "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY",
     region: "us-east-2",
-    accountNumber: "610973236798"
+    accountNumber: "610973236798",
+    trustStore: "${ballerina.home}/bre/security/ballerinaTruststore.p12",
+    trustStorePassword: "ballerina"
 };
 
 amazonsqs:Client sqsClient = new(configuration);
