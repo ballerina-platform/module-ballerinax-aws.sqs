@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/wso2-ballerina/module-amazonsqs.svg?branch=master)](https://travis-ci.org/wso2-ballerina/module-amazonsqs)
+
 # Ballerina Amazon SQS Connector
 
 Amazon SQS Connector allows you to connect to the Amazon Simple Queue Service (SQS) via REST API from Ballerina.
