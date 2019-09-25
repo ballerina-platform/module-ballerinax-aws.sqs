@@ -16,9 +16,10 @@
 
 import ballerina/io;
 
+xmlns "http://queue.amazonaws.com/doc/2012-11-05/" as ns;
+
 function xmlToCreatedQueueUrl(xml response) returns string {
-    xmlns "http://queue.amazonaws.com/doc/2012-11-05/" as ns1;
-    string|error queueUrl = response[ns1:CreateQueueResult][ns1:QueueUrl].getTextValue();
+    string|error queueUrl = response[ns:CreateQueueResult][ns:QueueUrl].getTextValue();
     if (queueUrl is string) {
         return queueUrl != "" ? queueUrl.toString() : EMPTY_STRING;
     } else {
@@ -26,40 +27,34 @@ function xmlToCreatedQueueUrl(xml response) returns string {
     }
 }
 
-function xmlToOutboundMessage(xml response) returns OutboundMessage|DataMappingError {
-    xmlns "http://queue.amazonaws.com/doc/2012-11-05/" as ns1;
-    xml msgSource = response[ns1:SendMessageResult];
+function xmlToOutboundMessage(xml response) returns OutboundMessage|ErrorDataMapping {
+    xml msgSource = response[ns:SendMessageResult];
     if (!msgSource.isEmpty()) {
-        string MD5OfMessageAttributes = msgSource[ns1:MD5OfMessageAttributes].getTextValue();
-        string MD5OfMessageBody = msgSource[ns1:MD5OfMessageBody].getTextValue();
-        string messageId = msgSource[ns1:MessageId].getTextValue();
-        string sequenceNumber = msgSource[ns1:SequenceNumber].getTextValue();
         OutboundMessage sentMessage = {
-            MD5OfMessageAttributes: MD5OfMessageAttributes,
-            MD5OfMessageBody: MD5OfMessageBody,
-            messageId: messageId,
-            sequenceNumber: sequenceNumber
+            MD5OfMessageAttributes: msgSource[ns:MD5OfMessageAttributes].getTextValue(),
+            MD5OfMessageBody: msgSource[ns:MD5OfMessageBody].getTextValue(),
+            messageId: msgSource[ns:MessageId].getTextValue(),
+            sequenceNumber: msgSource[ns:SequenceNumber].getTextValue()
         };
         return sentMessage;
     } else {
-        return error(DATA_MAPPING_ERROR, errorCode = CONVERT_XML_TO_OUTBOUND_MESSAGE_FAILED, 
+        return error(ERROR_DATA_MAPPING, errorCode = CONVERT_XML_TO_OUTBOUND_MESSAGE_FAILED,
             message = OUTBOUND_MESSAGE_RESPONSE_EMPTY_MSG);
     }
 }
 
-function xmlToInboundMessages(xml response) returns InboundMessage[]|DataMappingError {
-    xmlns "http://queue.amazonaws.com/doc/2012-11-05/" as ns1;
-    xml messages = response[ns1:ReceiveMessageResult][ns1:Message];
+function xmlToInboundMessages(xml response) returns InboundMessage[]|ErrorDataMapping {
+    xml messages = response[ns:ReceiveMessageResult][ns:Message];
     InboundMessage[] receivedMessages = [];
     if (!messages.isSingleton()) {
         int i = 0;
         foreach var b in messages.elements() {
             if (b is xml) {
-                InboundMessage|DataMappingError receivedMsg = xmlToInboundMessage(b.elements());
+                InboundMessage|ErrorDataMapping receivedMsg = xmlToInboundMessage(b.elements());
                 if (receivedMsg is InboundMessage) {
                     receivedMessages[i] = receivedMsg;
                 } else {
-                    return error(DATA_MAPPING_ERROR, 
+                    return error(ERROR_DATA_MAPPING,
                         message = CONVERT_XML_TO_INBOUND_MESSAGES_FAILED_MSG, 
                             errorCode = CONVERT_XML_TO_INBOUND_MESSAGES_FAILED, cause = receivedMsg);
                 }
@@ -68,71 +63,62 @@ function xmlToInboundMessages(xml response) returns InboundMessage[]|DataMapping
         }
         return receivedMessages;
     } else {
-        InboundMessage|DataMappingError receivedMsg = xmlToInboundMessage(messages);
+        InboundMessage|ErrorDataMapping receivedMsg = xmlToInboundMessage(messages);
         if (receivedMsg is InboundMessage) {
             return [receivedMsg]; 
         } else {
-            return error(DATA_MAPPING_ERROR, 
+            return error(ERROR_DATA_MAPPING,
                 message = CONVERT_XML_TO_INBOUND_MESSAGES_FAILED_MSG, 
                     errorCode = CONVERT_XML_TO_INBOUND_MESSAGES_FAILED, cause = receivedMsg);
         }
     }
 }
 
-function xmlToInboundMessage(xml message) returns InboundMessage|DataMappingError {
-    xmlns "http://queue.amazonaws.com/doc/2012-11-05/" as ns1;
-    xml attribute = message[ns1:Attribute];
+function xmlToInboundMessage(xml message) returns InboundMessage|ErrorDataMapping {
+    xml attribute = message[ns:Attribute];
+    xml msgAttribute = message[ns:MessageAttribute];
 
-    map<string> attributes = xmlToInboundMessageAttributes(attribute);
-    string body = message[ns1:Body].getTextValue();
-    string MD5OfBody = message[ns1:MD5OfBody].getTextValue();
-    string MD5OfMessageAttributes = message[ns1:MD5OfMessageAttributes].getTextValue();
-    xml msgAttribute = message[ns1:MessageAttribute];
-
-    map<MessageAttributeValue>|DataMappingError messageAttributes = xmlToInboundMessageMessageAttributes(msgAttribute);
+    map<MessageAttributeValue>|ErrorDataMapping messageAttributes = xmlToInboundMessageMessageAttributes(msgAttribute);
     if (messageAttributes is map<MessageAttributeValue>) {
-        string messageId = message[ns1:MessageId].getTextValue();
-        string receiptHandle = message[ns1:ReceiptHandle].getTextValue();
         InboundMessage receivedMessage = {
-            attributes: attributes,
-            body: body,
-            MD5OfBody: MD5OfBody,
-            MD5OfMessageAttributes: MD5OfMessageAttributes,
+            attributes: xmlToInboundMessageAttributes(attribute),
+            body: message[ns:Body].getTextValue(),
+            MD5OfBody: message[ns:MD5OfBody].getTextValue(),
+            MD5OfMessageAttributes: message[ns:MD5OfMessageAttributes].getTextValue(),
             messageAttributes: messageAttributes,
-            messageId: messageId,
-            receiptHandle: receiptHandle
+            messageId: message[ns:MessageId].getTextValue(),
+            receiptHandle: message[ns:ReceiptHandle].getTextValue()
         };
         return receivedMessage;
     } else {
-        return error(DATA_MAPPING_ERROR, 
+        return error(ERROR_DATA_MAPPING,
             message = CONVERT_XML_TO_INBOUND_MESSAGE_FAILED_MSG, errorCode = CONVERT_XML_TO_INBOUND_MESSAGE_FAILED, 
                 cause = messageAttributes);
     }
 }
 
 function xmlToInboundMessageAttributes(xml attribute) returns map<string> {
-    xmlns "http://queue.amazonaws.com/doc/2012-11-05/" as ns1;
     map<string> attributes = {};
     if (!attribute.isSingleton()) {
         int i = 0;
         foreach var b in attribute.elements() {
             if (b is xml) {
-                string attName = b[ns1:Name].getTextValue();
-                string attValue = b[ns1:Value].getTextValue();
+                string attName = b[ns:Name].getTextValue();
+                string attValue = b[ns:Value].getTextValue();
                 attributes[attName] = attValue;
                 i = i + 1;
             }
         }
     } else {
-        string attName = attribute[ns1:Name].getTextValue();
-        string attValue = attribute[ns1:Value].getTextValue();
+        string attName = attribute[ns:Name].getTextValue();
+        string attValue = attribute[ns:Value].getTextValue();
         attributes[attName] = attValue;
     }
     return attributes;
 }
 
 function xmlToInboundMessageMessageAttributes(xml msgAttributes) 
-    returns map<MessageAttributeValue>|DataMappingError {
+        returns map<MessageAttributeValue>|ErrorDataMapping {
     map<MessageAttributeValue> messageAttributes = {};
     string messageAttributeName = "";
     MessageAttributeValue messageAttributeValue;
@@ -140,12 +126,12 @@ function xmlToInboundMessageMessageAttributes(xml msgAttributes)
         int i = 0;
         foreach var b in msgAttributes.elements() {
             if (b is xml) {
-                [string, MessageAttributeValue]|DataMappingError resXml = 
+                [string, MessageAttributeValue]|ErrorDataMapping resXml =
                     xmlToInboundMessageMessageAttribute(b.elements());
                 if (resXml is [string, MessageAttributeValue]) {
                     [messageAttributeName, messageAttributeValue] = resXml;
                 } else {
-                    return error(DATA_MAPPING_ERROR, 
+                    return error(ERROR_DATA_MAPPING,
                         message = CONVERT_XML_TO_INBOUND_MESSAGE_MESSAGE_ATTRIBUTES_FAILED_MSG, 
                             errorCode = CONVERT_XML_TO_INBOUND_MESSAGE_MESSAGE_ATTRIBUTES_FAILED, cause = resXml);
                 }
@@ -154,11 +140,11 @@ function xmlToInboundMessageMessageAttributes(xml msgAttributes)
             }
         }
     } else {
-        [string, MessageAttributeValue]|DataMappingError resXml = xmlToInboundMessageMessageAttribute(msgAttributes);
+        [string, MessageAttributeValue]|ErrorDataMapping resXml = xmlToInboundMessageMessageAttribute(msgAttributes);
         if (resXml is [string, MessageAttributeValue]) {
             [messageAttributeName, messageAttributeValue] = resXml;
         } else {
-            return error(DATA_MAPPING_ERROR, 
+            return error(ERROR_DATA_MAPPING,
                 message = CONVERT_XML_TO_INBOUND_MESSAGE_MESSAGE_ATTRIBUTES_FAILED_MSG, errorCode = 
                     CONVERT_XML_TO_INBOUND_MESSAGE_MESSAGE_ATTRIBUTES_FAILED, cause = resXml);
         }
@@ -168,35 +154,31 @@ function xmlToInboundMessageMessageAttributes(xml msgAttributes)
 }
 
 function xmlToInboundMessageMessageAttribute(xml msgAttribute) 
-    returns ([string, MessageAttributeValue]|DataMappingError) {
-    xmlns "http://queue.amazonaws.com/doc/2012-11-05/" as ns1;
-    string msgAttributeName = msgAttribute[ns1:Name].getTextValue();
-    xml msgAttributeValue = msgAttribute[ns1:Value];
+        returns ([string, MessageAttributeValue]|ErrorDataMapping) {
+    string msgAttributeName = msgAttribute[ns:Name].getTextValue();
+    xml msgAttributeValue = msgAttribute[ns:Value];
     string[] binaryListValues; 
     string[] stringListValues;
     [string[], string[]]|error strListVals = xmlMessageAttributeValueToListValues(msgAttributeValue);
     if (strListVals is [string[], string[]]) {
         [binaryListValues, stringListValues] = strListVals;
-        string binaryValue = msgAttributeValue[ns1:BinaryValue].getTextValue();
-        string dataType = msgAttributeValue[ns1:DataType].getTextValue();
-        string stringValue = msgAttributeValue[ns1:StringValue].getTextValue();
         MessageAttributeValue messageAttributeValue = {
             binaryListValues: binaryListValues,
-            binaryValue: binaryValue,
-            dataType: dataType,
+            binaryValue: msgAttributeValue[ns:BinaryValue].getTextValue(),
+            dataType: msgAttributeValue[ns:DataType].getTextValue(),
             stringListValues: stringListValues,
-            stringValue: stringValue 
+            stringValue: msgAttributeValue[ns:StringValue].getTextValue()
         };
         return [msgAttributeName, messageAttributeValue];
     } else {
-        return error(DATA_MAPPING_ERROR, 
+        return error(ERROR_DATA_MAPPING,
             message = CONVERT_XML_TO_INBOUND_MESSAGE_MESSAGE_ATTRIBUTE_FAILED_MSG, 
                 errorCode = CONVERT_XML_TO_INBOUND_MESSAGE_MESSAGE_ATTRIBUTE_FAILED, cause = strListVals);
     }
 }
 
 function xmlMessageAttributeValueToListValues(xml msgAttributeVal) 
-    returns ([string[], string[]]|DataMappingError) {
+        returns ([string[], string[]]|ErrorDataMapping) {
     string[] binaryListValues = [];
     string[] stringListValues = [];
 
@@ -218,15 +200,15 @@ function isXmlDeleteResponse(xml response) returns boolean {
 }
 
 function read(string path) returns @tainted json|FileReadFailed {
-    io:ReadableByteChannel|error rbc = io:openReadableFile(path);
-    if (rbc is io:ReadableByteChannel) {
-        io:ReadableCharacterChannel rch = new(rbc, "UTF8");
-        var result = rch.readJson();
+    io:ReadableByteChannel|error readableByteChannel = io:openReadableFile(path);
+    if (readableByteChannel is io:ReadableByteChannel) {
+        io:ReadableCharacterChannel readableChannel = new(readableByteChannel, "UTF8");
+        var result = readableChannel.readJson();
         if (result is error) {
-            FileReadFailed? err = closeRc(rch);
+            FileReadFailed? err = closeReadableChannel(readableChannel);
             return error(FILE_READ_FAILED, message = FILE_READ_FAILED_MSG, errorCode = FILE_READ_FAILED, cause = result);
         } else {
-            FileReadFailed? err = closeRc(rch);
+            FileReadFailed? err = closeReadableChannel(readableChannel);
             if (err is error) {
                 return error(FILE_READ_FAILED, message = FILE_READ_FAILED_MSG, errorCode = FILE_READ_FAILED, cause = err);
             } else {
@@ -234,12 +216,12 @@ function read(string path) returns @tainted json|FileReadFailed {
             }
         }
     } else {
-        return error(FILE_READ_FAILED, message = FILE_READ_FAILED_MSG, errorCode = FILE_READ_FAILED, cause = rbc);
+        return error(FILE_READ_FAILED, message = FILE_READ_FAILED_MSG, errorCode = FILE_READ_FAILED, cause = readableByteChannel);
     }
 }
 
-function closeRc(io:ReadableCharacterChannel rc) returns FileReadFailed? {
-    var result = rc.close();
+function closeReadableChannel(io:ReadableCharacterChannel readableChannel) returns FileReadFailed? {
+    var result = readableChannel.close();
     if (result is error) {
         return error(FILE_READ_FAILED, message = CLOSE_CHARACTER_STREAM_FAILED_MSG, errorCode = FILE_READ_FAILED, cause = result);
     }

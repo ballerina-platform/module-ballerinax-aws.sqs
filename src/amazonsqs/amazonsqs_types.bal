@@ -20,12 +20,12 @@
 # + MD5OfMessageBody - MD5 of message body sent to sendMessage method
 # + messageId - Message ID for the message sent to sendMessage method
 # + sequenceNumber - Sequence number of the sent message
-public type OutboundMessage record {
-    string MD5OfMessageAttributes = "";
-    string MD5OfMessageBody = "";
-    string messageId = "";  
-    string sequenceNumber = "";  
-};
+public type OutboundMessage record {|
+    string MD5OfMessageAttributes;
+    string MD5OfMessageBody;
+    string messageId;
+    string sequenceNumber;
+|};
 
 # Response message for receiveMessage method
 #
@@ -36,15 +36,15 @@ public type OutboundMessage record {
 # + messageAttributes - Message Attribute parameters got from receiveMessage method 
 # + messageId - Message ID for the message got from receiveMessage method
 # + receiptHandle - Receipt Handle of the message got from receiveMessage method
-public type InboundMessage record {
+public type InboundMessage record {|
     map<string> attributes = {};
-    string body = "";
-    string MD5OfBody = "";
-    string MD5OfMessageAttributes = "";
-    map<MessageAttributeValue> messageAttributes = {};
-    string messageId = "";
-    string receiptHandle = "";
-};
+    string body;
+    string MD5OfBody;
+    string MD5OfMessageAttributes;
+    map<MessageAttributeValue> messageAttributes;
+    string messageId;
+    string receiptHandle;
+|};
 
 # Data parameters defined in a MessageAttributeValue parameter
 #
@@ -53,10 +53,10 @@ public type InboundMessage record {
 # + dataType - Supports the following logical data types: String, Number, and Binary. For the Number data type, you must use StringValue.
 # + stringListValues - Array of strings. Reserved for future use.
 # + stringValue - Strings are Unicode with UTF-8 binary encoding.
-public type MessageAttributeValue record {
-    string[] binaryListValues = [];
-    string binaryValue = "";
-    string dataType = "String";
-    string[] stringListValues = [];
-    string stringValue = "";
-};
+public type MessageAttributeValue record {|
+    string[] binaryListValues;
+    string binaryValue;
+    string dataType;
+    string[] stringListValues;
+    string stringValue;
+|};

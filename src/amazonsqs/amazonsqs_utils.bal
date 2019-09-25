@@ -29,7 +29,7 @@ function handleResponse(http:Response|error httpResponse) returns @untainted xml
     if (httpResponse is http:Response) {
         if (httpResponse.statusCode == http:STATUS_NO_CONTENT){
             //If status 204, then no response body. So returns json boolean true.
-            return error(SERVER_ERROR, message = NO_CONTENT_SET_WITH_RESPONSE_MSG, errorCode = RESPONSE_HANDLE_FAILED);
+            return error(ERROR_SERVER, message = NO_CONTENT_SET_WITH_RESPONSE_MSG, errorCode = RESPONSE_HANDLE_FAILED);
         }
         var xmlResponse = httpResponse.getXmlPayload();
         if (xmlResponse is xml) {
@@ -38,19 +38,19 @@ function handleResponse(http:Response|error httpResponse) returns @untainted xml
                 return xmlResponse;
             } else {
                 //If status is not 200 or 204, request is unsuccessful. Returns error.
-                xmlns "http://queue.amazonaws.com/doc/2012-11-05/" as ns1;
+                xmlns "http://queue.amazonaws.com/doc/2012-11-05/" as ns;
                 string xmlResponseErrorCode = httpResponse.statusCode.toString();
-                string responseErrorMessage = xmlResponse[ns1:'error][ns1:message].getTextValue();
+                string responseErrorMessage = xmlResponse[ns:'error][ns:message].getTextValue();
                 string errorMsg = STATUS_CODE + COLON_SYMBOL + xmlResponseErrorCode + 
                     SEMICOLON_SYMBOL + WHITE_SPACE + MESSAGE + COLON_SYMBOL + WHITE_SPACE + 
                     responseErrorMessage;
-                return error(SERVER_ERROR, message = errorMsg, errorCode = RESPONSE_HANDLE_FAILED);
+                return error(ERROR_SERVER, message = errorMsg, errorCode = RESPONSE_HANDLE_FAILED);
             }
         } else {
-                return error(SERVER_ERROR, message = RESPONSE_PAYLOAD_IS_NOT_XML_MSG, errorCode = RESPONSE_HANDLE_FAILED);
+                return error(ERROR_SERVER, message = RESPONSE_PAYLOAD_IS_NOT_XML_MSG, errorCode = RESPONSE_HANDLE_FAILED);
         }
     } else {
-        return error(CLIENT_ERROR, message = ERROR_OCCURRED_WHILE_INVOKING_REST_API_MSG, 
+        return error(ERROR_CLIENT, message = ERROR_OCCURRED_WHILE_INVOKING_REST_API_MSG,
             errorCode = RESPONSE_HANDLE_FAILED, cause = httpResponse);
     }
 }

@@ -2,11 +2,11 @@
 *.class
 *.balx
 
-# Log file
-*.log
+# Log file (Commented to add ballerina-internal.log)
+#*.log 
 
-#conf file
-ballerina.conf
+#conf file (Commented to add ballerina.conf)
+#ballerina.conf
 
 # BlueJ files
 *.ctxt

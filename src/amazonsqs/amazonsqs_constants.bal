@@ -50,3 +50,8 @@ const string NEW_LINE = "\n";
 const string ERROR = "error";
 
 const string EMPTY_STRING = "";
+const string AMAZON_SQS_API_VERSION = "AmazonSQSv20121105";
+const string ACTION_CREATE_QUEUE = "CreateQueue";
+const string ACTION_SEND_MESSAGE = "SendMessage";
+const string ACTION_RECEIVE_MESSAGE = "ReceiveMessage";
+const string ACTION_DELETE_MESSAGE = "DeleteMessage";
