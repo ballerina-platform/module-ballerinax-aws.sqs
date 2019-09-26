@@ -2,8 +2,8 @@
 *.class
 *.balx
 
-# Log file (Commented to add ballerina-internal.log)
-#*.log 
+# Log file
+*.log
 
 #conf file (Commented to add ballerina.conf)
 #ballerina.conf

@@ -50,8 +50,15 @@ const string NEW_LINE = "\n";
 const string ERROR = "error";
 
 const string EMPTY_STRING = "";
+const string SQS_VERSION = "2012-11-05";
 const string AMAZON_SQS_API_VERSION = "AmazonSQSv20121105";
 const string ACTION_CREATE_QUEUE = "CreateQueue";
 const string ACTION_SEND_MESSAGE = "SendMessage";
 const string ACTION_RECEIVE_MESSAGE = "ReceiveMessage";
 const string ACTION_DELETE_MESSAGE = "DeleteMessage";
+
+const string PAYLOAD_PARAM_ACTION = "Action";
+const string PAYLOAD_PARAM_VERSION = "Version";
+const string PAYLOAD_PARAM_QUEUE_NAME = "QueueName";
+const string PAYLOAD_PARAM_MESSAGE_BODY = "MessageBody";
+const string PAYLOAD_PARAM_RECEIPT_HANDLE = "ReceiptHandle";
