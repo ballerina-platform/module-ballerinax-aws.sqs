@@ -17,6 +17,10 @@
 import ballerina/encoding;
 import ballerina/http;
 
+import ballerina/lang.array;
+import ballerina/crypto;
+import ballerina/time;
+
 # Object to initialize the connection with Amazon SQS.
 #
 # + accessKey - The Amazon API access key
@@ -74,8 +78,8 @@ public type Client client object {
             parameters["Attribute." + attributeNumber.toString() + ".Value"] = value;
             attributeNumber = attributeNumber + 1;
         }
-        http:Request|GeneratePOSTRequestFailed request = generatePOSTRequest(self.accessKey, 
-            self.secretKey, self.host, amzTarget, endpoint, self.region, self.buildPayload(parameters));
+        http:Request|GeneratePOSTRequestFailed request = self.generatePOSTRequest(amzTarget,
+            endpoint, self.buildPayload(parameters));
         if (request is http:Request) {
             var httpResponse = self.clientEp->post(endpoint, request);
             xml|ResponseHandleFailed response = handleResponse(httpResponse);
@@ -106,8 +110,8 @@ public type Client client object {
             foreach var [key, value] in attributes.entries() {
                 parameters[key] = value;
             }
-            http:Request|GeneratePOSTRequestFailed request = generatePOSTRequest(self.accessKey, self.secretKey, self.host, amzTarget, 
-                queueResourcePath, self.region, self.buildPayload(parameters));
+            http:Request|GeneratePOSTRequestFailed request = self.generatePOSTRequest(amzTarget,
+                queueResourcePath, self.buildPayload(parameters));
             if (request is http:Request) {
                 var httpResponse = self.clientEp->post(queueResourcePath, request);
                 xml|ResponseHandleFailed response = handleResponse(httpResponse);
@@ -142,8 +146,8 @@ public type Client client object {
         foreach var [key, value] in attributes.entries() {
             parameters[key] = value;
         }
-        http:Request|GeneratePOSTRequestFailed request = generatePOSTRequest(self.accessKey, self.secretKey, self.host, amzTarget, 
-            queueResourcePath, self.region, self.buildPayload(parameters));
+        http:Request|GeneratePOSTRequestFailed request = self.generatePOSTRequest(amzTarget,
+            queueResourcePath, self.buildPayload(parameters));
         if (request is http:Request) {
             var httpResponse = self.clientEp->post(queueResourcePath, request);
             xml|ResponseHandleFailed response = handleResponse(httpResponse);
@@ -175,8 +179,7 @@ public type Client client object {
             map<string> parameters = {};
             parameters[PAYLOAD_PARAM_ACTION] = ACTION_DELETE_MESSAGE;
             parameters[PAYLOAD_PARAM_RECEIPT_HANDLE] = receiptHandleEncoded;
-            http:Request|GeneratePOSTRequestFailed request = generatePOSTRequest(self.accessKey, self.secretKey, self.host, 
-                amzTarget, queueResourcePath, self.region, self.buildPayload(parameters));
+            http:Request|GeneratePOSTRequestFailed request = self.generatePOSTRequest(amzTarget, queueResourcePath, self.buildPayload(parameters));
             if (request is http:Request) {
                 var httpResponse = self.clientEp->post(queueResourcePath, request);
                 xml|ResponseHandleFailed response = handleResponse(httpResponse);
@@ -205,6 +208,80 @@ public type Client client object {
         }
         return payload;
     }
+
+    private function generatePOSTRequest(string amzTarget, string canonicalUri, string payload)
+            returns http:Request|GeneratePOSTRequestFailed {
+        time:Time|error time = time:toTimeZone(time:currentTime(), "GMT");
+        string|error amzDate;
+        string|error dateStamp;
+        if (time is time:Time) {
+            amzDate = time:format(time, ISO8601_BASIC_DATE_FORMAT);
+            dateStamp = time:format(time, SHORT_DATE_FORMAT);
+            if (amzDate is string && dateStamp is string) {
+                string contentType = "application/x-www-form-urlencoded";
+                string requestParameters =  payload;
+                string canonicalQuerystring = "";
+                string canonicalHeaders = "content-type:" + contentType + "\n" + "host:" + self.host + "\n"
+                    + "x-amz-date:" + amzDate + "\n" + "x-amz-target:" + amzTarget + "\n";
+                string signedHeaders = "content-type;host;x-amz-date;x-amz-target";
+                string payloadHash = array:toBase16(crypto:hashSha256(requestParameters.toBytes())).toLowerAscii();
+                string canonicalRequest = POST + "\n" + canonicalUri + "\n" + canonicalQuerystring + "\n"
+                    + canonicalHeaders + "\n" + signedHeaders + "\n" + payloadHash;
+                string algorithm = "AWS4-HMAC-SHA256";
+                string credentialScope = dateStamp + "/" + self.region + "/" + SQS_SERVICE_NAME + "/" + "aws4_request";
+                string stringToSign = algorithm + "\n" +  amzDate + "\n" +  credentialScope + "\n"
+                    +  array:toBase16(crypto:hashSha256(canonicalRequest.toBytes())).toLowerAscii();
+                byte[] signingKey = self.getSignatureKey(self.secretKey, dateStamp, self.region, SQS_SERVICE_NAME);
+                string signature = array:toBase16(crypto:hmacSha256(stringToSign
+                    .toBytes(), signingKey)).toLowerAscii();
+                string authorizationHeader = algorithm + " " + "Credential=" + self.accessKey + "/"
+                    + credentialScope + ", " +  "SignedHeaders=" + signedHeaders + ", " + "Signature=" + signature;
+
+                map<string> headers = {};
+                headers["Content-Type"] = contentType;
+                headers["X-Amz-Date"] = amzDate;
+                headers["X-Amz-Target"] = amzTarget;
+                headers["Authorization"] = authorizationHeader;
+
+                string msgBody = requestParameters;
+                http:Request request = new;
+                request.setTextPayload(msgBody);
+                foreach var [k,v] in headers.entries() {
+                    request.setHeader(k, v);
+                }
+                return request;
+            } else {
+                if (amzDate is error) {
+                    return error(GENERATE_POST_REQUEST_FAILED, message = GENERATE_POST_REQUEST_FAILED_MSG,
+                        errorCode = GENERATE_POST_REQUEST_FAILED, cause = amzDate);
+                } else if (dateStamp is error) {
+                    return error(GENERATE_POST_REQUEST_FAILED, message = GENERATE_POST_REQUEST_FAILED_MSG,
+                        errorCode = GENERATE_POST_REQUEST_FAILED, cause = dateStamp);
+                } else {
+                    return error(GENERATE_POST_REQUEST_FAILED, message = GENERATE_POST_REQUEST_FAILED_MSG,
+                        errorCode = GENERATE_POST_REQUEST_FAILED);
+                }
+            }
+        } else {
+            return error(GENERATE_POST_REQUEST_FAILED, message = GENERATE_POST_REQUEST_FAILED_MSG,
+                errorCode = GENERATE_POST_REQUEST_FAILED, cause = time);
+        }
+
+    }
+
+    private function sign(byte[] key, string msg) returns byte[] {
+        return crypto:hmacSha256(msg.toBytes(), key);
+    }
+
+    private function getSignatureKey(string secretKey, string datestamp, string region, string serviceName)  returns byte[] {
+        string awskey = ("AWS4" + secretKey);
+        byte[] kDate = self.sign(awskey.toBytes(), datestamp);
+        byte[] kRegion = self.sign(kDate, region);
+        byte[] kService = self.sign(kRegion, serviceName);
+        byte[] kSigning = self.sign(kService, "aws4_request");
+        return kSigning;
+    }
+
 };
 
 # Configuration provided for the client

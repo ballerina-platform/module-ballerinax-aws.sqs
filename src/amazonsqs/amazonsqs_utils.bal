@@ -14,10 +14,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import ballerina/lang.array;
-import ballerina/crypto;
 import ballerina/http;
-import ballerina/time;
 import ballerinax/java;
 import ballerinax/java.arrays as jarrays;
 
@@ -53,80 +50,6 @@ function handleResponse(http:Response|error httpResponse) returns @untainted xml
         return error(ERROR_CLIENT, message = ERROR_OCCURRED_WHILE_INVOKING_REST_API_MSG,
             errorCode = RESPONSE_HANDLE_FAILED, cause = httpResponse);
     }
-}
-
-function generatePOSTRequest(string accessKeyId, string secretAccessKey, string host, string amzTarget, 
-    string canonicalUri, string region, string payload) returns http:Request|GeneratePOSTRequestFailed {
-    
-    time:Time|error time = time:toTimeZone(time:currentTime(), "GMT");
-    string|error amzDate;
-    string|error dateStamp;
-    if (time is time:Time) {
-        amzDate = time:format(time, ISO8601_BASIC_DATE_FORMAT);
-        dateStamp = time:format(time, SHORT_DATE_FORMAT);
-        if (amzDate is string && dateStamp is string) {
-            string contentType = "application/x-www-form-urlencoded";
-            string requestParameters =  payload;
-            string canonicalQuerystring = "";
-            string canonicalHeaders = "content-type:" + contentType + "\n" + "host:" + host + "\n" 
-                + "x-amz-date:" + amzDate + "\n" + "x-amz-target:" + amzTarget + "\n";
-            string signedHeaders = "content-type;host;x-amz-date;x-amz-target";
-            string payloadHash = array:toBase16(crypto:hashSha256(requestParameters.toBytes())).toLowerAscii();
-            string canonicalRequest = POST + "\n" + canonicalUri + "\n" + canonicalQuerystring + "\n" 
-                + canonicalHeaders + "\n" + signedHeaders + "\n" + payloadHash;
-            string algorithm = "AWS4-HMAC-SHA256";
-            string credentialScope = dateStamp + "/" + region + "/" + SQS_SERVICE_NAME + "/" + "aws4_request";
-            string stringToSign = algorithm + "\n" +  amzDate + "\n" +  credentialScope + "\n" 
-                +  array:toBase16(crypto:hashSha256(canonicalRequest.toBytes())).toLowerAscii();
-            byte[] signingKey = getSignatureKey(secretAccessKey, dateStamp, region, SQS_SERVICE_NAME);
-            string signature = array:toBase16(crypto:hmacSha256(stringToSign
-                .toBytes(), signingKey)).toLowerAscii();
-            string authorizationHeader = algorithm + " " + "Credential=" + accessKeyId + "/" 
-                + credentialScope + ", " +  "SignedHeaders=" + signedHeaders + ", " + "Signature=" + signature;
-
-            map<string> headers = {};
-            headers["Content-Type"] = contentType;
-            headers["X-Amz-Date"] = amzDate;
-            headers["X-Amz-Target"] = amzTarget;
-            headers["Authorization"] = authorizationHeader;
-
-            string msgBody = requestParameters;
-            http:Request request = new;
-            request.setTextPayload(msgBody);
-            foreach var [k,v] in headers.entries() {
-                request.setHeader(k, v);
-            }
-            return request;
-        } else {
-            if (amzDate is error) {
-                return error(GENERATE_POST_REQUEST_FAILED, message = GENERATE_POST_REQUEST_FAILED_MSG, 
-                    errorCode = GENERATE_POST_REQUEST_FAILED, cause = amzDate);
-            } else if (dateStamp is error) {
-                return error(GENERATE_POST_REQUEST_FAILED, message = GENERATE_POST_REQUEST_FAILED_MSG, 
-                    errorCode = GENERATE_POST_REQUEST_FAILED, cause = dateStamp);
-            } else {
-                return error(GENERATE_POST_REQUEST_FAILED, message = GENERATE_POST_REQUEST_FAILED_MSG, 
-                    errorCode = GENERATE_POST_REQUEST_FAILED);
-            }
-        }
-    } else {
-        return error(GENERATE_POST_REQUEST_FAILED, message = GENERATE_POST_REQUEST_FAILED_MSG, 
-            errorCode = GENERATE_POST_REQUEST_FAILED, cause = time);
-    }
-
-}
-
-function sign(byte[] key, string msg) returns byte[] {
-    return crypto:hmacSha256(msg.toBytes(), key);
-}
-
-function getSignatureKey(string secretKey, string datestamp, string region, string serviceName)  returns byte[] {
-    string awskey = ("AWS4" + secretKey);
-    byte[] kDate = sign(awskey.toBytes(), datestamp);
-    byte[] kRegion = sign(kDate, region);
-    byte[] kService = sign(kRegion, serviceName);
-    byte[] kSigning = sign(kService, "aws4_request");
-    return kSigning;
 }
 
 public function splitString(string str, string delimeter, int arrIndex) returns string {
