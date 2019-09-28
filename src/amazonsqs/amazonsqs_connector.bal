@@ -35,27 +35,19 @@ public type Client client object {
     string region;
     string acctNum;
     string host;
-    string trustStore;
-    string trustStorePassword;
 
     public function __init(Configuration config) {
         self.accessKey = config.accessKey;
         self.secretKey = config.secretKey;
         self.acctNum = config.accountNumber;
         self.region = config.region;
-        self.trustStore = config.trustStore;
-        self.trustStorePassword = config.trustStorePassword;
         self.host = SQS_SERVICE_NAME + "." + self.region + "." + AMAZON_HOST;
-        self.clientEp = new("https://" + self.host, 
-            {
-                secureSocket: {
-                    trustStore: {
-                        path: config.trustStore,
-                        password: config.trustStorePassword
-                    }
-                }
-            }
-        );
+        http:ClientSecureSocket? clientSecureSocket = config?.secureSocketConfig;
+        if (clientSecureSocket is http:ClientSecureSocket) {
+            self.clientEp = new("https://" + self.host, {secureSocket: clientSecureSocket});
+        } else {
+            self.clientEp = new("https://" + self.host, {});
+        }
     }
 
     # Creates a new queue in SQS
@@ -290,13 +282,11 @@ public type Client client object {
 # + secretKey - secretKey of Amazon Account
 # + region - region of SQS Queue
 # + accountNumber - account number of the SQS queue
-# + trustStore - trust store file path to establish TLS connections
-# + trustStorePassword - trust store password to open the trust store
+# + secureSocketConfig - HTTP client configuration
 public type Configuration record {
     string accessKey;
     string secretKey;
     string region;
     string accountNumber;
-    string trustStore;
-    string trustStorePassword;
+    http:ClientSecureSocket secureSocketConfig?;
 };

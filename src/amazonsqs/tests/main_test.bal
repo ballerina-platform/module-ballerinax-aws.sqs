@@ -23,9 +23,7 @@ Configuration configuration = {
     accessKey: config:getAsString("ACCESS_KEY_ID"),
     secretKey: config:getAsString("SECRET_ACCESS_KEY"),
     region: config:getAsString("REGION"),
-    accountNumber: config:getAsString("ACCOUNT_NUMBER"),
-    trustStore: config:getAsString("TRUST_STORE"),
-    trustStorePassword: config:getAsString("TRUST_STORE_PASSWORD")
+    accountNumber: config:getAsString("ACCOUNT_NUMBER")
 };
 
 Client sqs = new(configuration);

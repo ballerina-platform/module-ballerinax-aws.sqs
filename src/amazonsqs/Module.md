@@ -7,7 +7,7 @@ Amazon SQS Connector allows you to connect to the Amazon SQS service via REST AP
 
 |                    |    Version     |  
 |:------------------:|:--------------:|
-| Ballerina Language |   1.0.0        |
+| Ballerina Language |   1.0.1        |
 | Amazon SQS API     |   2012-11-05   |
 
 
@@ -66,9 +66,7 @@ amazonsqs:Configuration configuration = {
     accessKey: config:getAsString("ACCESS_KEY_ID"),
     secretKey: config:getAsString("SECRET_ACCESS_KEY"),
     region: config:getAsString("REGION"),
-    accountNumber: config:getAsString("ACCOUNT_NUMBER"),
-    trustStore: config:getAsString("TRUST_STORE"),
-    trustStorePassword: config:getAsString("TRUST_STORE_PASSWORD")
+    accountNumber: config:getAsString("ACCOUNT_NUMBER")
 };
 
 amazonsqs:Client sqsClient = new(configuration);
@@ -147,9 +145,7 @@ public function main(string... args) {
         accessKey: "AKIAIOSFODNN7EXAMPLE",
         secretKey: "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY",
         region: "us-east-2",
-        accountNumber: "610973236798",
-        trustStore: "${ballerina.home}/bre/security/ballerinaTruststore.p12",
-        trustStorePassword: "ballerina"
+        accountNumber: "610973236798"
     };
 
     amazonsqs:Client sqsClient = new(configuration);
@@ -225,9 +221,7 @@ public function main(string... args) {
         accessKey: "AKIAIOSFODNN7EXAMPLE",
         secretKey: "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY",
         region: "us-east-2",
-        accountNumber: "610973236798",
-        trustStore: "${ballerina.home}/bre/security/ballerinaTruststore.p12",
-        trustStorePassword: "ballerina"
+        accountNumber: "610973236798"
     };
 
     amazonsqs:Client sqsClient = new(configuration);
