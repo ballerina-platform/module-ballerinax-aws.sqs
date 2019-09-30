@@ -215,10 +215,10 @@ public function main(string... args) {
 
     // Add the SQS credentials as the Configuration
     amazonsqs:Configuration configuration = {
-        accessKey: "",
-        secretKey: "",
-        region: "",
-        accountNumber: ""
+        accessKey: "<ACCESS_KEY>",
+        secretKey: "<SECRET_ACCESS>",
+        region: "<REGION>",
+        accountNumber: "<ACCOUNT_NUMBER>"
     };
 
     amazonsqs:Client sqsClient = new(configuration);
