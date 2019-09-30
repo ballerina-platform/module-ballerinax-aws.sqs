@@ -16,13 +16,13 @@
 
 # Response message for sendMessage method
 #
-# + MD5OfMessageAttributes - MD5 of message attributes sent to sendMessage method
-# + MD5OfMessageBody - MD5 of message body sent to sendMessage method
+# + md5OfMessageAttributes - MD5 of message attributes sent to sendMessage method
+# + md5OfMessageBody - MD5 of message body sent to sendMessage method
 # + messageId - Message ID for the message sent to sendMessage method
 # + sequenceNumber - Sequence number of the sent message
 public type OutboundMessage record {|
-    string MD5OfMessageAttributes;
-    string MD5OfMessageBody;
+    string md5OfMessageAttributes;
+    string md5OfMessageBody;
     string messageId;
     string sequenceNumber;
 |};
@@ -31,16 +31,16 @@ public type OutboundMessage record {|
 #
 # + attributes - Parameters got from receiveMessage method 
 # + body - Message body got from receiveMessage method 
-# + MD5OfBody - MD5 of message body got from receiveMessage method
-# + MD5OfMessageAttributes - MD5 of message attributes got from receiveMessage method
+# + md5OfBody - MD5 of message body got from receiveMessage method
+# + md5OfMessageAttributes - MD5 of message attributes got from receiveMessage method
 # + messageAttributes - Message Attribute parameters got from receiveMessage method 
 # + messageId - Message ID for the message got from receiveMessage method
 # + receiptHandle - Receipt Handle of the message got from receiveMessage method
 public type InboundMessage record {|
     map<string> attributes = {};
     string body;
-    string MD5OfBody;
-    string MD5OfMessageAttributes;
+    string md5OfBody;
+    string md5OfMessageAttributes;
     map<MessageAttributeValue> messageAttributes;
     string messageId;
     string receiptHandle;

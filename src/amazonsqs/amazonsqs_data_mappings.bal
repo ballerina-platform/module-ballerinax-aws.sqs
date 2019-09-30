@@ -31,8 +31,8 @@ function xmlToOutboundMessage(xml response) returns OutboundMessage|ErrorDataMap
     xml msgSource = response[ns:SendMessageResult];
     if (!msgSource.isEmpty()) {
         OutboundMessage sentMessage = {
-            MD5OfMessageAttributes: msgSource[ns:MD5OfMessageAttributes].getTextValue(),
-            MD5OfMessageBody: msgSource[ns:MD5OfMessageBody].getTextValue(),
+            md5OfMessageAttributes: msgSource[ns:MD5OfMessageAttributes].getTextValue(),
+            md5OfMessageBody: msgSource[ns:MD5OfMessageBody].getTextValue(),
             messageId: msgSource[ns:MessageId].getTextValue(),
             sequenceNumber: msgSource[ns:SequenceNumber].getTextValue()
         };
@@ -83,8 +83,8 @@ function xmlToInboundMessage(xml message) returns InboundMessage|ErrorDataMappin
         InboundMessage receivedMessage = {
             attributes: xmlToInboundMessageAttributes(attribute),
             body: message[ns:Body].getTextValue(),
-            MD5OfBody: message[ns:MD5OfBody].getTextValue(),
-            MD5OfMessageAttributes: message[ns:MD5OfMessageAttributes].getTextValue(),
+            md5OfBody: message[ns:MD5OfBody].getTextValue(),
+            md5OfMessageAttributes: message[ns:MD5OfMessageAttributes].getTextValue(),
             messageAttributes: messageAttributes,
             messageId: message[ns:MessageId].getTextValue(),
             receiptHandle: message[ns:ReceiptHandle].getTextValue()
