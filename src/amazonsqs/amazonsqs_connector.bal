@@ -14,8 +14,11 @@
 // specific language governing permissions and limitations
 // under the License.
 
+import ballerina/crypto;
 import ballerina/encoding;
 import ballerina/http;
+import ballerina/lang.array;
+import ballerina/time;
 
 # Object to initialize the connection with Amazon SQS.
 #
@@ -31,27 +34,19 @@ public type Client client object {
     string region;
     string acctNum;
     string host;
-    string trustStore;
-    string trustStorePassword;
 
     public function __init(Configuration config) {
         self.accessKey = config.accessKey;
         self.secretKey = config.secretKey;
         self.acctNum = config.accountNumber;
         self.region = config.region;
-        self.trustStore = config.trustStore;
-        self.trustStorePassword = config.trustStorePassword;
         self.host = SQS_SERVICE_NAME + "." + self.region + "." + AMAZON_HOST;
-        self.clientEp = new("https://" + self.host, 
-            {
-                secureSocket: {
-                    trustStore: {
-                        path: config.trustStore,
-                        password: config.trustStorePassword
-                    }
-                }
-            }
-        );
+        http:ClientSecureSocket? clientSecureSocket = config?.secureSocketConfig;
+        if (clientSecureSocket is http:ClientSecureSocket) {
+            self.clientEp = new("https://" + self.host, {secureSocket: clientSecureSocket});
+        } else {
+            self.clientEp = new("https://" + self.host, {});
+        }
     }
 
     # Creates a new queue in SQS
@@ -59,32 +54,33 @@ public type Client client object {
     # + queueName - Name of the queue to be created 
     # + attributes - Other attribute parameters 
     # + return - If success, URL of the created queue, else returns error
-    public remote function createQueue(string queueName, map<string> attributes) returns @tainted string|OperationError{
-        string amzTarget = "AmazonSQSv20121105.CreateQueue";
+    public remote function createQueue(string queueName, map<string> attributes)
+            returns @tainted string|ErrorOperation{
+        string amzTarget = AMAZON_SQS_API_VERSION + "." + ACTION_CREATE_QUEUE;
         string endpoint = "/";
-        string payload =  "";
-        payload = payload + "Action=CreateQueue";
-        payload = payload + "&Version=2012-11-05";
-        payload = payload + "&QueueName=" + queueName;
+        string payload;
+        map<string> parameters = {};
+        parameters[PAYLOAD_PARAM_ACTION] = ACTION_CREATE_QUEUE;
+        parameters[PAYLOAD_PARAM_VERSION] = SQS_VERSION;
+        parameters[PAYLOAD_PARAM_QUEUE_NAME] = queueName;
         int attributeNumber = 1;
-        foreach var [k, v] in attributes.entries() {
-            payload = payload + "&Attribute." + attributeNumber.toString() + ".Name=" + k;
-            payload = payload + "&Attribute." + attributeNumber.toString() + ".Value=" + v;
+        foreach var [key, value] in attributes.entries() {
+            parameters["Attribute." + attributeNumber.toString() + ".Name"] = key;
+            parameters["Attribute." + attributeNumber.toString() + ".Value"] = value;
             attributeNumber = attributeNumber + 1;
         }
-        http:Request|GeneratePOSTRequestFailed request = generatePOSTRequest(self.accessKey, 
-            self.secretKey, self.host, amzTarget, 
-            endpoint, self.region, payload);
+        http:Request|GeneratePOSTRequestFailed request = self.generatePOSTRequest(amzTarget,
+            endpoint, self.buildPayload(parameters));
         if (request is http:Request) {
             var httpResponse = self.clientEp->post(endpoint, request);
             xml|ResponseHandleFailed response = handleResponse(httpResponse);
             if (response is xml){
                 return xmlToCreatedQueueUrl(response);
             } else {
-                return error(OPERATION_ERROR, message = OPERATION_ERROR_MSG, errorCode = OPERATION_ERROR, cause = response);
+                 return error(ERROR_OPERATION, message = OPERATION_ERROR_MSG, errorCode = ERROR_OPERATION, cause = response);
             }
         } else {
-            return error(OPERATION_ERROR, message = OPERATION_ERROR_MSG, errorCode = OPERATION_ERROR, cause = request);
+            return error(ERROR_OPERATION, message = OPERATION_ERROR_MSG, errorCode = ERROR_OPERATION, cause = request);
         }
     }
 
@@ -95,38 +91,36 @@ public type Client client object {
     # + attributes - Non-mandatory parameters for sending a message 
     # + return - If success, details of the sent message, else returns error
     public remote function sendMessage(string messageBody, string queueResourcePath, map<string> attributes) 
-        returns @tainted OutboundMessage|OperationError {
-        string|error msgbody = encoding:encodeUriComponent(messageBody, "UTF-8");
+            returns @tainted OutboundMessage|ErrorOperation {
+        string|error msgbody = encoding:encodeUriComponent(messageBody, UTF_8);
         if (msgbody is string) {
-            string amzTarget = "AmazonSQSv20121105.SendMessage";
-            string payload =  "";
-            payload = payload + "Action=SendMessage";
-            payload = payload + "&MessageBody=" + msgbody;
-            int attributeNumber = 1;
-            foreach var [k, v] in attributes.entries() {
-                payload = payload + "&" + k + "=" + v;
-                attributeNumber = attributeNumber + 1;
+            string amzTarget = AMAZON_SQS_API_VERSION + "." + ACTION_SEND_MESSAGE;
+            map<string> parameters = {};
+            parameters[PAYLOAD_PARAM_ACTION] = ACTION_SEND_MESSAGE;
+            parameters[PAYLOAD_PARAM_MESSAGE_BODY] = msgbody;
+            foreach var [key, value] in attributes.entries() {
+                parameters[key] = value;
             }
-            http:Request|GeneratePOSTRequestFailed request = generatePOSTRequest(self.accessKey, self.secretKey, self.host, amzTarget, 
-                queueResourcePath, self.region, payload);
+            http:Request|GeneratePOSTRequestFailed request = self.generatePOSTRequest(amzTarget,
+                queueResourcePath, self.buildPayload(parameters));
             if (request is http:Request) {
                 var httpResponse = self.clientEp->post(queueResourcePath, request);
                 xml|ResponseHandleFailed response = handleResponse(httpResponse);
                 if (response is xml){
-                    OutboundMessage|DataMappingError result = xmlToOutboundMessage(response);
+                    OutboundMessage|ErrorDataMapping result = xmlToOutboundMessage(response);
                     if (result is OutboundMessage) {
                         return result;
                     } else {
-                        return error(OPERATION_ERROR, message = OPERATION_ERROR_MSG, errorCode = OPERATION_ERROR, cause = result);
+                        return error(ERROR_OPERATION, message = OPERATION_ERROR_MSG, errorCode = ERROR_OPERATION, cause = result);
                     }
                 } else {
-                    return error(OPERATION_ERROR, message = OPERATION_ERROR_MSG, errorCode = OPERATION_ERROR, cause = response);
+                    return error(ERROR_OPERATION, message = OPERATION_ERROR_MSG, errorCode = ERROR_OPERATION, cause = response);
                 }
             } else {
-                return error(OPERATION_ERROR, message = OPERATION_ERROR_MSG, errorCode = OPERATION_ERROR, cause = request);
+                return error(ERROR_OPERATION, message = OPERATION_ERROR_MSG, errorCode = ERROR_OPERATION, cause = request);
             }
         } else {
-            return error(OPERATION_ERROR, message = OPERATION_ERROR_MSG, errorCode = OPERATION_ERROR, cause = msgbody);
+            return error(ERROR_OPERATION, message = OPERATION_ERROR_MSG, errorCode = ERROR_OPERATION, cause = msgbody);
         }
     }
 
@@ -136,32 +130,30 @@ public type Client client object {
     # + attributes - Non-mandatory parameters for receiving a message
     # + return - If success, details of the received message, else returns error
     public remote function receiveMessage(string queueResourcePath, map<string> attributes) 
-        returns @tainted InboundMessage[]|OperationError {
-        string amzTarget = "AmazonSQSv20121105.ReceiveMessage";
-        string payload =  "";
-        payload = payload + "&Action=ReceiveMessage";
-        int attributeNumber = 1;
-        foreach var [k, v] in attributes.entries() {
-            payload = payload + "&" + k + "=" + v;
-            attributeNumber = attributeNumber + 1;
+            returns @tainted InboundMessage[]|ErrorOperation {
+        string amzTarget = AMAZON_SQS_API_VERSION + "." + ACTION_RECEIVE_MESSAGE;
+        map<string> parameters = {};
+        parameters[PAYLOAD_PARAM_ACTION] = ACTION_RECEIVE_MESSAGE;
+        foreach var [key, value] in attributes.entries() {
+            parameters[key] = value;
         }
-        http:Request|GeneratePOSTRequestFailed request = generatePOSTRequest(self.accessKey, self.secretKey, self.host, amzTarget, 
-            queueResourcePath, self.region, payload);
+        http:Request|GeneratePOSTRequestFailed request = self.generatePOSTRequest(amzTarget,
+            queueResourcePath, self.buildPayload(parameters));
         if (request is http:Request) {
             var httpResponse = self.clientEp->post(queueResourcePath, request);
             xml|ResponseHandleFailed response = handleResponse(httpResponse);
             if (response is xml){
-                InboundMessage[]|DataMappingError result = xmlToInboundMessages(response);
+                InboundMessage[]|ErrorDataMapping result = xmlToInboundMessages(response);
                 if (result is InboundMessage[]) {
                     return result;
                 } else {
-                    return error(OPERATION_ERROR, message = OPERATION_ERROR_MSG, errorCode = OPERATION_ERROR, cause = result);
+                    return error(ERROR_OPERATION, message = OPERATION_ERROR_MSG, errorCode = ERROR_OPERATION, cause = result);
                 }
             } else {
-                return error(OPERATION_ERROR, message = OPERATION_ERROR_MSG, errorCode = OPERATION_ERROR, cause = response);
+                return error(ERROR_OPERATION, message = OPERATION_ERROR_MSG, errorCode = ERROR_OPERATION, cause = response);
             }
         } else {
-            return error(OPERATION_ERROR, message = OPERATION_ERROR_MSG, errorCode = OPERATION_ERROR, cause = request);
+            return error(ERROR_OPERATION, message = OPERATION_ERROR_MSG, errorCode = ERROR_OPERATION, cause = request);
         }
     }
 
@@ -170,30 +162,117 @@ public type Client client object {
     # + queueResourcePath - Resource path to the queue from the host address. e.g.: /610968236798/myQueue.fifo
     # + receiptHandle - Receipt Handle parameter for the message(s) to be deleted
     # + return - Whether the message(s) were successfully deleted or whether an error occurred
-    public remote function deleteMessage(string queueResourcePath, string receiptHandle) returns @tainted boolean|OperationError {
-        string amzTarget = "AmazonSQSv20121105.DeleteMessage";
-        string|error receiptHandleEncoded = encoding:encodeUriComponent(receiptHandle, "UTF-8");
+    public remote function deleteMessage(string queueResourcePath, string receiptHandle)
+            returns @tainted boolean|ErrorOperation {
+        string amzTarget = AMAZON_SQS_API_VERSION + "." + ACTION_DELETE_MESSAGE;
+        string|error receiptHandleEncoded = encoding:encodeUriComponent(receiptHandle, UTF_8);
         if (receiptHandleEncoded is string) {
-            string payload =  "";
-            payload = payload + "Action=DeleteMessage";
-            payload = payload + "&ReceiptHandle=" + receiptHandleEncoded;
-            http:Request|GeneratePOSTRequestFailed request = generatePOSTRequest(self.accessKey, self.secretKey, self.host, 
-                amzTarget, queueResourcePath, self.region, payload);
+            map<string> parameters = {};
+            parameters[PAYLOAD_PARAM_ACTION] = ACTION_DELETE_MESSAGE;
+            parameters[PAYLOAD_PARAM_RECEIPT_HANDLE] = receiptHandleEncoded;
+            http:Request|GeneratePOSTRequestFailed request = self.generatePOSTRequest(amzTarget, queueResourcePath, self.buildPayload(parameters));
             if (request is http:Request) {
                 var httpResponse = self.clientEp->post(queueResourcePath, request);
                 xml|ResponseHandleFailed response = handleResponse(httpResponse);
                 if (response is xml) {
                     return isXmlDeleteResponse(response);
                 } else {
-                    return error(OPERATION_ERROR, message = OPERATION_ERROR_MSG, errorCode = OPERATION_ERROR, cause = response);
+                    return error(ERROR_OPERATION, message = OPERATION_ERROR_MSG, errorCode = ERROR_OPERATION, cause = response);
                 }
             } else {
-                return error(OPERATION_ERROR, message = OPERATION_ERROR_MSG, errorCode = OPERATION_ERROR, cause = request);
+                return error(ERROR_OPERATION, message = OPERATION_ERROR_MSG, errorCode = ERROR_OPERATION, cause = request);
             }
         } else {
-            return error(OPERATION_ERROR, message = OPERATION_ERROR_MSG, errorCode = OPERATION_ERROR, cause = receiptHandleEncoded);
+            return error(ERROR_OPERATION, message = OPERATION_ERROR_MSG, errorCode = ERROR_OPERATION, cause = receiptHandleEncoded);
         }
     }
+
+    private function buildPayload(map<string> parameters) returns string {
+        string payload = "";
+        int parameterNumber = 1;
+        foreach var [key, value] in parameters.entries() {
+            if (parameterNumber > 1) {
+                payload = payload + "&";
+            }
+            payload = payload + key + "=" + value;
+            parameterNumber = parameterNumber + 1;
+        }
+        return payload;
+    }
+
+    private function generatePOSTRequest(string amzTarget, string canonicalUri, string payload)
+            returns http:Request|GeneratePOSTRequestFailed {
+        time:Time|error time = time:toTimeZone(time:currentTime(), "GMT");
+        string|error amzDate;
+        string|error dateStamp;
+        if (time is time:Time) {
+            amzDate = time:format(time, ISO8601_BASIC_DATE_FORMAT);
+            dateStamp = time:format(time, SHORT_DATE_FORMAT);
+            if (amzDate is string && dateStamp is string) {
+                string contentType = "application/x-www-form-urlencoded";
+                string requestParameters =  payload;
+                string canonicalQuerystring = "";
+                string canonicalHeaders = "content-type:" + contentType + "\n" + "host:" + self.host + "\n"
+                    + "x-amz-date:" + amzDate + "\n" + "x-amz-target:" + amzTarget + "\n";
+                string signedHeaders = "content-type;host;x-amz-date;x-amz-target";
+                string payloadHash = array:toBase16(crypto:hashSha256(requestParameters.toBytes())).toLowerAscii();
+                string canonicalRequest = POST + "\n" + canonicalUri + "\n" + canonicalQuerystring + "\n"
+                    + canonicalHeaders + "\n" + signedHeaders + "\n" + payloadHash;
+                string algorithm = "AWS4-HMAC-SHA256";
+                string credentialScope = dateStamp + "/" + self.region + "/" + SQS_SERVICE_NAME + "/" + "aws4_request";
+                string stringToSign = algorithm + "\n" +  amzDate + "\n" +  credentialScope + "\n"
+                    +  array:toBase16(crypto:hashSha256(canonicalRequest.toBytes())).toLowerAscii();
+                byte[] signingKey = self.getSignatureKey(self.secretKey, dateStamp, self.region, SQS_SERVICE_NAME);
+                string signature = array:toBase16(crypto:hmacSha256(stringToSign
+                    .toBytes(), signingKey)).toLowerAscii();
+                string authorizationHeader = algorithm + " " + "Credential=" + self.accessKey + "/"
+                    + credentialScope + ", " +  "SignedHeaders=" + signedHeaders + ", " + "Signature=" + signature;
+
+                map<string> headers = {};
+                headers["Content-Type"] = contentType;
+                headers["X-Amz-Date"] = amzDate;
+                headers["X-Amz-Target"] = amzTarget;
+                headers["Authorization"] = authorizationHeader;
+
+                string msgBody = requestParameters;
+                http:Request request = new;
+                request.setTextPayload(msgBody);
+                foreach var [k,v] in headers.entries() {
+                    request.setHeader(k, v);
+                }
+                return request;
+            } else {
+                if (amzDate is error) {
+                    return error(GENERATE_POST_REQUEST_FAILED, message = GENERATE_POST_REQUEST_FAILED_MSG,
+                        errorCode = GENERATE_POST_REQUEST_FAILED, cause = amzDate);
+                } else if (dateStamp is error) {
+                    return error(GENERATE_POST_REQUEST_FAILED, message = GENERATE_POST_REQUEST_FAILED_MSG,
+                        errorCode = GENERATE_POST_REQUEST_FAILED, cause = dateStamp);
+                } else {
+                    return error(GENERATE_POST_REQUEST_FAILED, message = GENERATE_POST_REQUEST_FAILED_MSG,
+                        errorCode = GENERATE_POST_REQUEST_FAILED);
+                }
+            }
+        } else {
+            return error(GENERATE_POST_REQUEST_FAILED, message = GENERATE_POST_REQUEST_FAILED_MSG,
+                errorCode = GENERATE_POST_REQUEST_FAILED, cause = time);
+        }
+
+    }
+
+    private function sign(byte[] key, string msg) returns byte[] {
+        return crypto:hmacSha256(msg.toBytes(), key);
+    }
+
+    private function getSignatureKey(string secretKey, string datestamp, string region, string serviceName)  returns byte[] {
+        string awskey = ("AWS4" + secretKey);
+        byte[] kDate = self.sign(awskey.toBytes(), datestamp);
+        byte[] kRegion = self.sign(kDate, region);
+        byte[] kService = self.sign(kRegion, serviceName);
+        byte[] kSigning = self.sign(kService, "aws4_request");
+        return kSigning;
+    }
+
 };
 
 # Configuration provided for the client
@@ -202,13 +281,11 @@ public type Client client object {
 # + secretKey - secretKey of Amazon Account
 # + region - region of SQS Queue
 # + accountNumber - account number of the SQS queue
-# + trustStore - trust store file path to establish TLS connections
-# + trustStorePassword - trust store password to open the trust store
+# + secureSocketConfig - HTTP client configuration
 public type Configuration record {
     string accessKey;
     string secretKey;
     string region;
     string accountNumber;
-    string trustStore;
-    string trustStorePassword;
+    http:ClientSecureSocket secureSocketConfig?;
 };

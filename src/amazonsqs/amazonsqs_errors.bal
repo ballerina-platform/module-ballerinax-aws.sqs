@@ -39,19 +39,19 @@ public type GeneratePOSTRequestFailed error<GENERATE_POST_REQUEST_FAILED, ErrorD
 
 // AmazonSQS Connector Error Types
 
-public const CLIENT_ERROR = "{wso2/amazonsqs}ClientError";
-public type ClientError error<CLIENT_ERROR, ErrorDetail>;
+public const ERROR_CLIENT = "{wso2/amazonsqs}ErrorClient";
+public type ErrorClient error<ERROR_CLIENT, ErrorDetail>;
 
-public const SERVER_ERROR = "{wso2/amazonsqs}ServerError";
-public type ServerError error<SERVER_ERROR, ErrorDetail>;
+public const ERROR_SERVER = "{wso2/amazonsqs}ErrorServer";
+public type ErrorServer error<ERROR_SERVER, ErrorDetail>;
 
-public const OPERATION_ERROR = "{wso2/amazonsqs}OperationError";
-public type OperationError error<OPERATION_ERROR, ErrorDetail>;
+public const ERROR_OPERATION = "{wso2/amazonsqs}ErrorOperation";
+public type ErrorOperation error<ERROR_OPERATION, ErrorDetail>;
 
 // AmazonSQS Data Mappings Error Types
 
-public const DATA_MAPPING_ERROR = "{wso2/amazonsqs}DataMappingError";
-public type DataMappingError error<DATA_MAPPING_ERROR, ErrorDetail>;
+public const ERROR_DATA_MAPPING = "{wso2/amazonsqs}ErrorDataMapping";
+public type ErrorDataMapping error<ERROR_DATA_MAPPING, ErrorDetail>;
 
 public const CONVERT_XML_TO_OUTBOUND_MESSAGE_FAILED = "{wso2/amazonsqs}ConvertXmlToOutboundMessageFailed";
 public const CONVERT_XML_TO_INBOUND_MESSAGES_FAILED = "{wso2/amazonsqs}ConvertXmlToInboundMessagesFailed";
@@ -66,7 +66,7 @@ public const FILE_READ_FAILED = "{wso2/amazonsqs}FileReadFailed";
 public type FileReadFailed error<FILE_READ_FAILED, ErrorDetail>;
 
 public const RESPONSE_HANDLE_FAILED = "{wso2/amazonsqs}ResponseHandleFailed";
-public type ResponseHandleFailed error<CLIENT_ERROR|SERVER_ERROR, ErrorDetail>;
+public type ResponseHandleFailed error<ERROR_CLIENT|ERROR_SERVER, ErrorDetail>;
 
 // Error messages.
 
