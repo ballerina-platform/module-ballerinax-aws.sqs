@@ -14,11 +14,10 @@
 // specific language governing permissions and limitations
 // under the License.
 
+import ballerina/crypto;
 import ballerina/encoding;
 import ballerina/http;
-
 import ballerina/lang.array;
-import ballerina/crypto;
 import ballerina/time;
 
 # Object to initialize the connection with Amazon SQS.

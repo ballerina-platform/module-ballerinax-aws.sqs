@@ -56,9 +56,6 @@ Follow the method explained below to obtain AWS credentials.
 
 For more information please visit https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-setting-up.html .  
 
-Set your trust store file location as the `TRUST_STORE` parameter. Default Ballerina trust store location is at _${ballerina.home}/bre/security/ballerinaTruststore.p12_. Password of that trust store should be specified in `TRUST_STORE_PASSWORD` parameter. Default password is _ballerina_.
-
-
 You can now enter the credentials in the SQS client config and create SQS client by passing the config:
 
 ```ballerina
@@ -218,10 +215,10 @@ public function main(string... args) {
 
     // Add the SQS credentials as the Configuration
     amazonsqs:Configuration configuration = {
-        accessKey: "AKIAIOSFODNN7EXAMPLE",
-        secretKey: "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY",
-        region: "us-east-2",
-        accountNumber: "610973236798"
+        accessKey: "",
+        secretKey: "",
+        region: "",
+        accountNumber: ""
     };
 
     amazonsqs:Client sqsClient = new(configuration);
@@ -277,9 +274,7 @@ public function main(string... args) {
     // Delete the received the message from the queue
     boolean|error response4 = sqsClient->deleteMessage(queueResourcePath, receivedReceiptHandler);
     if (response4 is boolean && response4) {
-        if (response4) {
-            log:printInfo("Successfully deleted the message from the queue.");
-        }
+        log:printInfo("Successfully deleted the message from the queue.");
     }
 
 }
