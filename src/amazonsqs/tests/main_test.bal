@@ -24,15 +24,6 @@ Configuration configuration = {
     secretKey: config:getAsString("SECRET_ACCESS_KEY"),
     region: config:getAsString("REGION"),
     accountNumber: config:getAsString("ACCOUNT_NUMBER")
-
-    // For secure connections with SQS add "secureSocketConfig" as a field.
-    //
-    // secureSocketConfig: {
-    //     trustStore: {
-    //         path: config:getAsString("TRUSTSTORE_PATH"),
-    //         password: config:getAsString("TRUSTSTORE_PASSWORD")
-    //     }
-    // }
 };
 
 Client sqs = new(configuration);
