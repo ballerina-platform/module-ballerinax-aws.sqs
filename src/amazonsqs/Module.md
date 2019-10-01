@@ -71,8 +71,8 @@ amazonsqs:Configuration configuration = {
     accountNumber: "<ACCOUNT_NUMBER>",
     secureSocketConfig: {
         trustStore: {
-            path: config:getAsString("<TRUSTSTORE_PATH>"),
-            password: config:getAsString("<TRUSTSTORE_PASSWORD>")
+            path: "<TRUSTSTORE_PATH>",
+            password: "<TRUSTSTORE_PASSWORD>"
         }
     }
 };
