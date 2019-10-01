@@ -16,18 +16,7 @@ Amazon SQS Connector allows you to connect to the Amazon SQS service via REST AP
 First, import the `wso2/amazonsqs` module and related other modules into the Ballerina project and create a `main` method.
 
 ```ballerina
-import ballerina/config;
-import ballerina/log;
 import wso2/amazonsqs;
-
-public function main(string... args) {
-
-}
-```
-Rest of the code can be written inside the `main` method. The source code can be saved in a file for example, `demo.bal`. The file can be executed with the following command where `ballerina.conf` is the configuration that is described below.
-
-```
-ballerina run demo.bal --b7a.config.file=path/to/ballerina.conf
 ```
 
 The Amazon SQS connector can be instantiated using the Access Key ID, Secret Access Key, Region of the Amazon SQS geographic location 
@@ -56,19 +45,41 @@ Follow the method explained below to obtain AWS credentials.
 
 For more information please visit https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-setting-up.html .  
 
-You can now enter the credentials in the SQS client config and create SQS client by passing the config:
+**Create Amazon SQS client**
+
+You can now enter the credentials in the SQS client configuration and create SQS client by passing the configuration:
 
 ```ballerina
 amazonsqs:Configuration configuration = {
-    accessKey: config:getAsString("ACCESS_KEY_ID"),
-    secretKey: config:getAsString("SECRET_ACCESS_KEY"),
-    region: config:getAsString("REGION"),
-    accountNumber: config:getAsString("ACCOUNT_NUMBER")
+    accessKey: "<ACCESS_KEY_ID>",
+    secretKey: "<SECRET_ACCESS_KEY>",
+    region: "<REGION>",
+    accountNumber: "<ACCOUNT_NUMBER>"
 };
 
 amazonsqs:Client sqsClient = new(configuration);
 ```
-You can create a queue in SQS as follows with `createQueue` method. Successful creation returns the created queue URL as a string and the error cases returns an `error` object.
+
+If you want to add your own key store to define the `secureSocketConfig`, change the SQS configuration as
+mentioned below.
+
+```ballerina
+amazonsqs:Configuration configuration = {
+    accessKey: "<ACCESS_KEY_ID>",
+    secretKey: "<SECRET_ACCESS_KEY>",
+    region: "<REGION>",
+    accountNumber: "<ACCOUNT_NUMBER>",
+    secureSocketConfig: {
+        trustStore: {
+            path: "<TRUSTSTORE_PATH>",
+            password: "<TRUSTSTORE_PASSWORD>"
+        }
+    }
+};
+```
+**Creating a SQS Queue**
+
+You can create a queue in SQS as follows with `createQueue` method for a preferred queue name and the required set of attributes. Successful creation returns the created queue URL as a string and the error cases returns an `error` object.
 
 ```ballerina
 map<string> attributes = {};
@@ -81,7 +92,9 @@ if (response is string) {
 }
 ```
 
-You can send a message to SQS as follows with `sendMessage` method. Successful send operation returns an `OutboundMessage` object and the error cases returns an `error` object.
+**Sending a Message to a SQS Queue**
+
+You can send a message to SQS as follows with `sendMessage` method. Use message to be sent, appropriate attribute parameters for the queue and the path to the queue from Amazon host address as parameters to the operation. Successful send operation returns an `OutboundMessage` object and the error cases returns an `error` object.
 
 ```ballerina
 map<string> attributes = {};
@@ -101,7 +114,9 @@ if (response is amazonsqs:OutboundMessage) {
 }
 ```
 
-A sent message can be received with `receiveMessage` method. Successful receive operation returns an array of `InboundMessage` objects and the error cases returns an `error` object.
+**Receiving a Message from the SQS Queue**
+
+A sent message can be received with `receiveMessage` method. Path to the queue from Amazon host address and appropriate attribute parameters should be used as the parameters to the operation. Successful receive operation returns an array of `InboundMessage` objects each containing the message and the `receiptHandler` while the error cases returns an `error` object.
 
 ```ballerina
 map<string> attributes = {};
@@ -116,6 +131,8 @@ if (response is amazonsqs:InboundMessage[]) {
     log:printInfo("\nReceipt Handle: " + response[0].receiptHandle);
 }
 ```
+
+**Deleting a Message from the SQS Queue**
 
 A received message should be deleted with `deleteMessage` method within `VisibilityTimeout` number of seconds providing the received `receiptHandler` string. Successful delete operation returns a boolean value `true` and the error cases returns a `false` value or an `error` object.
 
