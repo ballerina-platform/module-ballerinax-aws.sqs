@@ -1,4 +1,4 @@
-// Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+// Copyright (c) 2021, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 //
 // WSO2 Inc. licenses this file to you under the Apache License,
 // Version 2.0 (the "License"); you may not use this file except
@@ -15,18 +15,18 @@
 // under the License.
 
 import ballerina/http;
-import ballerinax/java;
-import ballerinax/java.arrays as jarrays;
+import ballerina/jballerina.java as java;
+import ballerina/jballerina.java.arrays as jarrays;
 
 # Handles the HTTP response.
 #
 # + httpResponse - Http response or error
 # + return - If successful returns `json` response. Else returns error.
-function handleResponse(http:Response|error httpResponse) returns @untainted xml|ResponseHandleFailed {
+isolated function handleResponse(http:Response|http:PayloadType|error httpResponse) returns @untainted xml|ResponseHandleFailed {
     if (httpResponse is http:Response) {
         if (httpResponse.statusCode == http:STATUS_NO_CONTENT){
             //If status 204, then no response body. So returns json boolean true.
-            return error(ERROR_SERVER, message = NO_CONTENT_SET_WITH_RESPONSE_MSG, errorCode = RESPONSE_HANDLE_FAILED);
+            return error ResponseHandleFailed(NO_CONTENT_SET_WITH_RESPONSE_MSG);
         }
         var xmlResponse = httpResponse.getXmlPayload();
         if (xmlResponse is xml) {
@@ -37,18 +37,19 @@ function handleResponse(http:Response|error httpResponse) returns @untainted xml
                 //If status is not 200 or 204, request is unsuccessful. Returns error.
                 xmlns "http://queue.amazonaws.com/doc/2012-11-05/" as ns;
                 string xmlResponseErrorCode = httpResponse.statusCode.toString();
-                string responseErrorMessage = xmlResponse[ns:'error][ns:message].getTextValue();
+                string responseErrorMessage = (xmlResponse/<ns:'error>/<ns:message>/*).toString();
                 string errorMsg = STATUS_CODE + COLON_SYMBOL + xmlResponseErrorCode + 
                     SEMICOLON_SYMBOL + WHITE_SPACE + MESSAGE + COLON_SYMBOL + WHITE_SPACE + 
                     responseErrorMessage;
-                return error(ERROR_SERVER, message = errorMsg, errorCode = RESPONSE_HANDLE_FAILED);
+                return error ResponseHandleFailed(errorMsg);
             }
         } else {
-                return error(ERROR_SERVER, message = RESPONSE_PAYLOAD_IS_NOT_XML_MSG, errorCode = RESPONSE_HANDLE_FAILED);
+                return error ResponseHandleFailed(RESPONSE_PAYLOAD_IS_NOT_XML_MSG);
         }
+    } else if (httpResponse is http:PayloadType) {
+        return error ResponseHandleFailed(UNREACHABLE_STATE);
     } else {
-        return error(ERROR_CLIENT, message = ERROR_OCCURRED_WHILE_INVOKING_REST_API_MSG,
-            errorCode = RESPONSE_HANDLE_FAILED, cause = httpResponse);
+        return error ResponseHandleFailed(ERROR_OCCURRED_WHILE_INVOKING_REST_API_MSG, httpResponse);
     }
 }
 
@@ -59,7 +60,3 @@ public function splitString(string str, string delimeter, int arrIndex) returns 
     handle arrEle =  jarrays:get(arr, arrIndex);
     return arrEle.toString();
 }
-
-function split(handle receiver, handle delimeter) returns handle = @java:Method {
-    class: "java.lang.String"
-} external;

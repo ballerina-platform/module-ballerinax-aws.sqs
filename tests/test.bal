@@ -1,4 +1,4 @@
-// Copyright (c) 2019 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+// Copyright (c) 2021 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 //
 // WSO2 Inc. licenses this file to you under the Apache License,
 // Version 2.0 (the "License"); you may not use this file except
@@ -14,19 +14,25 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import ballerina/config;
 import ballerina/test;
 import ballerina/log;
-import ballerina/math;
+import ballerina/random;
+import ballerina/lang.'float;
+import ballerina/os;
+
+configurable string accessKeyId = os:getEnv("ACCESS_KEY_ID");
+configurable string secretAccessKey = os:getEnv("SECRET_ACCESS_KEY");
+configurable string region = os:getEnv("REGION");
+configurable string accountNumber = os:getEnv("ACCOUNT_NUMBER");
 
 Configuration configuration = {
-    accessKey: config:getAsString("ACCESS_KEY_ID"),
-    secretKey: config:getAsString("SECRET_ACCESS_KEY"),
-    region: config:getAsString("REGION"),
-    accountNumber: config:getAsString("ACCOUNT_NUMBER")
+    accessKey: accessKeyId,
+    secretKey: secretAccessKey,
+    region: region,
+    accountNumber: accountNumber
 };
 
-Client sqs = new(configuration);
+Client sqs = check new (configuration);
 string fifoQueueResourcePath = "";
 string standardQueueResourcePath = "";
 string receivedReceiptHandler = "";
@@ -88,7 +94,7 @@ function testCreateStandardQueue() {
 }
 
 @test:Config {
-    dependsOn: ["testCreateFIFOQueue"],
+    dependsOn: [testCreateFIFOQueue],
     groups: ["group1"]
 }
 function testSendMessage() {
@@ -119,7 +125,7 @@ function testSendMessage() {
 }
 
 @test:Config {
-    dependsOn: ["testSendMessage"],
+    dependsOn: [testSendMessage],
     groups: ["group1"]
 }
 function testReceiveMessage() {
@@ -147,7 +153,7 @@ function testReceiveMessage() {
 }
 
 @test:Config {
-    dependsOn: ["testReceiveMessage"],
+    dependsOn: [testReceiveMessage],
     groups: ["group1"]
 }
 function testDeleteMessage() {
@@ -168,7 +174,7 @@ function testDeleteMessage() {
 }
 
 @test:Config {
-    dependsOn: ["testCreateStandardQueue"],
+    dependsOn: [testCreateStandardQueue],
     groups: ["group2"]
 }
 function testCRUDOperationsForMultipleMessages() {
@@ -232,9 +238,43 @@ function testCRUDOperationsForMultipleMessages() {
     }
 }
 
-function genRandQueueName(boolean isFifo = false) returns string {
-    float ranNumFloat = math:random()*10000000;
-    anydata ranNumInt = math:round(ranNumFloat);
+@test:AfterSuite {}
+function testDeleteStandardQueue() {
+    boolean|error response = sqs->deleteQueue(standardQueueResourcePath);
+    if (response is boolean) {
+        if (response) {
+            log:printInfo("Successfully deleted the queue.");
+            test:assertTrue(true);
+        } else {
+            log:printInfo("Error occurred while deleting the queue.");
+            test:assertTrue(false);
+        }
+    } else {
+        log:printInfo("Error occurred while deleting the queue.");
+        test:assertTrue(false);
+    }
+}
+
+@test:AfterSuite {}
+function testDeleteFIFOQueue() {
+    boolean|error response = sqs->deleteQueue(fifoQueueResourcePath);
+    if (response is boolean) {
+        if (response) {
+            log:printInfo("Successfully deleted the queue.");
+            test:assertTrue(true);
+        } else {
+            log:printInfo("Error occurred while deleting the queue.");
+            test:assertTrue(false);
+        }
+    } else {
+        log:printInfo("Error occurred while deleting the queue.");
+        test:assertTrue(false);
+    }
+}
+
+isolated function genRandQueueName(boolean isFifo = false) returns string {
+    float ranNumFloat = random:createDecimal()*10000000;
+    anydata ranNumInt = <int> float:round(ranNumFloat);
     string queueName = "testQueue" + ranNumInt.toString();
     if (isFifo) {
         return queueName + ".fifo";

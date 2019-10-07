@@ -1,4 +1,4 @@
-# Copyright (c) 2019, WSO2 Inc. (http://wso2.com) All Rights Reserved.
+# Copyright (c) 2021, WSO2 Inc. (http://wso2.com) All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
 # limitations under the License.
 
 script:
-  - wget https://product-dist.ballerina.io/downloads/1.0.1/ballerina-linux-installer-x64-1.0.1.deb
-  - sudo dpkg -i ballerina-linux-installer-x64-1.0.1.deb
+  - wget http://dist-dev.ballerina.io/downloads/swan-lake-alpha2/ballerina-linux-installer-x64-swan-lake-alpha2.deb
+  - sudo dpkg -i ballerina-linux-installer-x64-swan-lake-alpha2.deb
   - sudo apt-get install -f
   - ballerina --version
-  - ballerina build -c --skip-tests amazonsqs
+  - ballerina build -c --skip-tests aws.sqs

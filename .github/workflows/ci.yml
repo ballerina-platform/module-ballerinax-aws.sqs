@@ -1,0 +1,21 @@
+name: CI
+
+on: [push]
+
+jobs:
+    build:
+
+        runs-on: ubuntu-latest
+
+        steps:
+            - uses: actions/checkout@v2
+            - name: Ballerina Build
+              uses: ballerina-platform/ballerina-action/@master
+              with:
+                  args:
+                      build -c
+              env:
+                  ACCESS_KEY_ID: ${{ secrets.ACCESS_KEY_ID }}
+                  SECRET_ACCESS_KEY: ${{ secrets.SECRET_ACCESS_KEY }}
+                  REGION: ${{ secrets.REGION }}
+                  ACCOUNT_NUMBER: ${{ secrets.ACCOUNT_NUMBER }}
