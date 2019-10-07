@@ -15,7 +15,7 @@ The following sections provide you with information on how to use the Ballerina 
 - [Working with Amazon SQS Connector Actions](#Working-with-Amazon-SQS-Connector)
 - [Sample](#sample)
 
-### Contribute To develop
+### Contribute to development
 
 Clone the repository by running the following command 
 ```shell
