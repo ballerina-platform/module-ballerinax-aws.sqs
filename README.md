@@ -5,9 +5,9 @@
 Amazon SQS Connector allows you to connect to the Amazon Simple Queue Service (SQS) via REST API from Ballerina.
 
 ## Compatibility
-| Ballerina Language Version | Amazon SQS API version  |
-| -------------------------- | ----------------------  |
-| 1.0.1                      | 2012-11-05              |
+| Ballerina Language Versions | Amazon SQS API version  |
+| --------------------------- | ----------------------  |
+| 1.0.x, 1.1.x                | 2012-11-05              |
 
 The following sections provide you with information on how to use the Ballerina Amazon SQS connector.
 
