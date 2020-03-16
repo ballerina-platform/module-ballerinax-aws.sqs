@@ -20,7 +20,7 @@ const SQS_CONTENT_TYPE = "application/x-www-form-urlencoded";
 const HOST = "Host";
 const X_AMZ_CONTENT_SHA256 = "X-Amz-Content-Sha256";
 const UNSIGNED_PAYLOAD = "UNSIGNED-PAYLOAD";
-const AMAZONSQS_ERROR_CODE = "(wso2/amazonsqs)AmazonsqsError";
+const AMAZONSQS_ERROR_CODE = "(ballerinax/aws.sqs)AmazonsqsError";
 const AMAZON_HOST = "amazonaws.com";
 
 const ISO8601_BASIC_DATE_FORMAT = "yyyyMMdd'T'HHmmss'Z'";

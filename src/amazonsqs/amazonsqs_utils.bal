@@ -37,7 +37,7 @@ function handleResponse(http:Response|error httpResponse) returns @untainted xml
                 //If status is not 200 or 204, request is unsuccessful. Returns error.
                 xmlns "http://queue.amazonaws.com/doc/2012-11-05/" as ns;
                 string xmlResponseErrorCode = httpResponse.statusCode.toString();
-                string responseErrorMessage = xmlResponse[ns:'error][ns:message].getTextValue();
+                string responseErrorMessage = (xmlResponse/<ns:'error>/<ns:message>/*).toString();
                 string errorMsg = STATUS_CODE + COLON_SYMBOL + xmlResponseErrorCode + 
                     SEMICOLON_SYMBOL + WHITE_SPACE + MESSAGE + COLON_SYMBOL + WHITE_SPACE + 
                     responseErrorMessage;

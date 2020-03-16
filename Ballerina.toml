@@ -1,7 +1,7 @@
 [project]
-org-name= "wso2"
+org-name= "ballerinax"
 license= ["Apache-2.0"]
-authors = ["WSO2"]
-version= "0.10.0"
+authors = ["Ballerina"]
+version= "0.11.0"
 keywords = ["amazonsqs", "Amazon", "SQS", "Ballerina", "connector", "client"]
-repository = "https://github.com/wso2-ballerina/module-amazonsqs"
+repository = "https://github.com/ballerina-platform/module-amazonsqs"

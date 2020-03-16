@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/wso2-ballerina/module-amazonsqs.svg?branch=master)](https://travis-ci.org/wso2-ballerina/module-amazonsqs)
+[![Build Status](https://travis-ci.org/ballerina-platform/module-amazonsqs.svg?branch=master)](https://travis-ci.org/ballerina-platform/module-amazonsqs)
 
 # Ballerina Amazon SQS Connector
 
@@ -7,7 +7,7 @@ Amazon SQS Connector allows you to connect to the Amazon Simple Queue Service (S
 ## Compatibility
 | Ballerina Language Versions | Amazon SQS API version  |
 | --------------------------- | ----------------------  |
-| 1.0.x, 1.1.x                | 2012-11-05              |
+|            1.2.x            | 2012-11-05              |
 
 The following sections provide you with information on how to use the Ballerina Amazon SQS connector.
 
@@ -24,42 +24,42 @@ git clone https://github.com/wso2-ballerina/module-amazonsqs.git
 
 ### Working with Amazon SQS Connector
 
-First, import the `wso2/amazonsqs` module into the Ballerina project.
+First, import the `ballerinax/aws.sqs` module into the Ballerina project.
 
 ```ballerina
-import wso2/amazonsqs;
+import ballerinax/aws.sqs;
 ```
 
 In order for you to use the Amazon SQS Connector, first you need to create an Amazon SQS Client.
 
-Ballerina provides a [config module](https://ballerina.io/learn/api-docs/ballerina/config.html) to obtain parameters from the configuration file. Specify the configuration object and create the client as follows.
+Ballerina provides a [config module](https://ballerina.io/v1-1/learn/by-example/config-api.html) to obtain parameters from the configuration file. Specify the configuration object and create the client as follows.
 
 ```ballerina
-amazonsqs:Configuration configuration = {
+aws.sqs:Configuration configuration = {
     accessKey: config:getAsString("ACCESS_KEY_ID"),
     secretKey: config:getAsString("SECRET_ACCESS_KEY"),
     region: config:getAsString("REGION"),
     accountNumber: config:getAsString("ACCOUNT_NUMBER")
 };
 
-amazonsqs:Client sqsClient = new(configuration);
+aws.sqs:Client sqsClient = new(configuration);
 ```
 
 ##### Sample
 
 ```ballerina
 import ballerina/log;
-import wso2/amazonsqs;
+import ballerinax/aws.sqs;
 
 // Add the SQS credentials as the Configuration
-amazonsqs:Configuration configuration = {
+aws.sqs:Configuration configuration = {
     accessKey: "<ACCESS_KEY>",
     secretKey: "<SECRET_ACCESS>",
     region: "<REGION>",
     accountNumber: "<ACCOUNT_NUMBER>"
 };
 
-amazonsqs:Client sqsClient = new(configuration);
+aws.sqs:Client sqsClient = new(configuration);
 
 public function main(string... args) {
 
