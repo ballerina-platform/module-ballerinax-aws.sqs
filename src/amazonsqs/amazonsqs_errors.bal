@@ -29,43 +29,43 @@ public type ErrorDetail record {
 
 // Ballerina Basic Error Types
 
-public const HTTP_CLIENT_POST_REQUEST_FAILED = "{wso2/amazonsqs}HTTPClientPOSTRequestFailed";
+public const HTTP_CLIENT_POST_REQUEST_FAILED = "{ballerinax/aws.sqs}HTTPClientPOSTRequestFailed";
 public type HTTPClientPOSTRequestFailed error<HTTP_CLIENT_POST_REQUEST_FAILED, ErrorDetail>;
 
 // AmazonSQS Authenticator Error Types
 
-public const GENERATE_POST_REQUEST_FAILED = "{wso2/amazonsqs}GeneratePOSTRequestFailed";
+public const GENERATE_POST_REQUEST_FAILED = "{ballerinax/aws.sqs}GeneratePOSTRequestFailed";
 public type GeneratePOSTRequestFailed error<GENERATE_POST_REQUEST_FAILED, ErrorDetail>;
 
 // AmazonSQS Connector Error Types
 
-public const ERROR_CLIENT = "{wso2/amazonsqs}ErrorClient";
+public const ERROR_CLIENT = "{ballerinax/aws.sqs}ErrorClient";
 public type ErrorClient error<ERROR_CLIENT, ErrorDetail>;
 
-public const ERROR_SERVER = "{wso2/amazonsqs}ErrorServer";
+public const ERROR_SERVER = "{ballerinax/aws.sqs}ErrorServer";
 public type ErrorServer error<ERROR_SERVER, ErrorDetail>;
 
-public const ERROR_OPERATION = "{wso2/amazonsqs}ErrorOperation";
+public const ERROR_OPERATION = "{ballerinax/aws.sqs}ErrorOperation";
 public type ErrorOperation error<ERROR_OPERATION, ErrorDetail>;
 
 // AmazonSQS Data Mappings Error Types
 
-public const ERROR_DATA_MAPPING = "{wso2/amazonsqs}ErrorDataMapping";
+public const ERROR_DATA_MAPPING = "{ballerinax/aws.sqs}ErrorDataMapping";
 public type ErrorDataMapping error<ERROR_DATA_MAPPING, ErrorDetail>;
 
-public const CONVERT_XML_TO_OUTBOUND_MESSAGE_FAILED = "{wso2/amazonsqs}ConvertXmlToOutboundMessageFailed";
-public const CONVERT_XML_TO_INBOUND_MESSAGES_FAILED = "{wso2/amazonsqs}ConvertXmlToInboundMessagesFailed";
-public const CONVERT_XML_TO_INBOUND_MESSAGE_FAILED = "{wso2/amazonsqs}ConvertXmlToInboundMessageFailed";
-public const CONVERT_XML_TO_INBOUND_MESSAGE_MESSAGE_ATTRIBUTES_FAILED = "{wso2/amazonsqs}ConvertXmlToInboundMessageMessageAttributesFailed";
-public const CONVERT_XML_TO_INBOUND_MESSAGE_MESSAGE_ATTRIBUTE_FAILED = "{wso2/amazonsqs}ConvertXmlToInboundMessageMessageAttributeFailed";
-public const CONVERT_XML_MESSAGE_ATTRIBUTE_VALUE_TO_LIST_VALUES_FAILED = "{wso2/amazonsqs}ConvertXmlMessageAttributeValueToListValuesFailed";
+public const CONVERT_XML_TO_OUTBOUND_MESSAGE_FAILED = "{ballerinax/aws.sqs}ConvertXmlToOutboundMessageFailed";
+public const CONVERT_XML_TO_INBOUND_MESSAGES_FAILED = "{ballerinax/aws.sqs}ConvertXmlToInboundMessagesFailed";
+public const CONVERT_XML_TO_INBOUND_MESSAGE_FAILED = "{ballerinax/aws.sqs}ConvertXmlToInboundMessageFailed";
+public const CONVERT_XML_TO_INBOUND_MESSAGE_MESSAGE_ATTRIBUTES_FAILED = "{ballerinax/aws.sqs}ConvertXmlToInboundMessageMessageAttributesFailed";
+public const CONVERT_XML_TO_INBOUND_MESSAGE_MESSAGE_ATTRIBUTE_FAILED = "{ballerinax/aws.sqs}ConvertXmlToInboundMessageMessageAttributeFailed";
+public const CONVERT_XML_MESSAGE_ATTRIBUTE_VALUE_TO_LIST_VALUES_FAILED = "{ballerinax/aws.sqs}ConvertXmlMessageAttributeValueToListValuesFailed";
 
 // AmazonSQS Other Error Types
 
-public const FILE_READ_FAILED = "{wso2/amazonsqs}FileReadFailed";
+public const FILE_READ_FAILED = "{ballerinax/aws.sqs}FileReadFailed";
 public type FileReadFailed error<FILE_READ_FAILED, ErrorDetail>;
 
-public const RESPONSE_HANDLE_FAILED = "{wso2/amazonsqs}ResponseHandleFailed";
+public const RESPONSE_HANDLE_FAILED = "{ballerinax/aws.sqs}ResponseHandleFailed";
 public type ResponseHandleFailed error<ERROR_CLIENT|ERROR_SERVER, ErrorDetail>;
 
 // Error messages.
