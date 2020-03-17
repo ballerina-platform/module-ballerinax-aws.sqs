@@ -49,21 +49,21 @@ For more information please visit https://docs.aws.amazon.com/AWSSimpleQueueServ
 You can now enter the credentials in the SQS client configuration and create SQS client by passing the configuration:
 
 ```ballerina
-aws.sqs:Configuration configuration = {
+sqs:Configuration configuration = {
     accessKey: "<ACCESS_KEY_ID>",
     secretKey: "<SECRET_ACCESS_KEY>",
     region: "<REGION>",
     accountNumber: "<ACCOUNT_NUMBER>"
 };
 
-aws.sqs:Client sqsClient = new(configuration);
+sqs:Client sqsClient = new(configuration);
 ```
 
 If you want to add your own key store to define the `secureSocketConfig`, change the SQS configuration as
 mentioned below.
 
 ```ballerina
-aws.sqs:Configuration configuration = {
+sqs:Configuration configuration = {
     accessKey: "<ACCESS_KEY_ID>",
     secretKey: "<SECRET_ACCESS_KEY>",
     region: "<REGION>",
@@ -106,9 +106,9 @@ attributes["MessageAttribute.2.Name"] = "Name2";
 attributes["MessageAttribute.2.Value.StringValue"] = "Value2";
 attributes["MessageAttribute.2.Value.DataType"] = "String";
 string queueUrl = "";
-aws.sqs:OutboundMessage|error response = sqsClient->sendMessage("Sample text message.", "/123456789012/demo.fifo",
+sqs:OutboundMessage|error response = sqsClient->sendMessage("Sample text message.", "/123456789012/demo.fifo",
     attributes);
-if (response is aws.sqs:OutboundMessage) {
+if (response is sqs:OutboundMessage) {
     log:printInfo("Sent message to SQS. MessageID: " + response.messageId);
 }
 ```
@@ -124,8 +124,8 @@ attributes["VisibilityTimeout"] = "600";
 attributes["WaitTimeSeconds"] = "2";
 attributes["AttributeName.1"] = "SenderId";
 attributes["MessageAttributeName.1"] = "Name2";
-aws.sqs:InboundMessage[]|error response = sqsClient->receiveMessage("/123456789012/demo.fifo", attributes);
-if (response is aws.sqs:InboundMessage[]) {
+sqs:InboundMessage[]|error response = sqsClient->receiveMessage("/123456789012/demo.fifo", attributes);
+if (response is sqs:InboundMessage[]) {
     log:printInfo("Successfully received the message. Message body of the first message: " + response[0].body);
     log:printInfo("\nReceipt Handle: " + response[0].receiptHandle);
 }
@@ -154,14 +154,14 @@ import ballerinax/aws.sqs;
 public function main(string... args) {
 
     // Add the SQS credentials as the Configuration
-    aws.sqs:Configuration configuration = {
+    sqs:Configuration configuration = {
         accessKey: "AKIAIOSFODNN7EXAMPLE",
         secretKey: "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY",
         region: "us-east-2",
         accountNumber: "610973236798"
     };
 
-    aws.sqs:Client sqsClient = new(configuration);
+    sqs:Client sqsClient = new(configuration);
 
     // Declare common variables
     string queueResourcePath = "";
@@ -173,7 +173,7 @@ public function main(string... args) {
     if (response1 is string) {
         log:printInfo("Created queue URL: " + response1);
         // Keep the queue URL for future operations
-        queueResourcePath = aws.sqs:splitString(response1, "amazonaws.com", 1);
+        queueResourcePath = sqs:splitString(response1, "amazonaws.com", 1);
     } else {
         log:printInfo("Error occurred while creating a queue");
     }
@@ -187,9 +187,9 @@ public function main(string... args) {
     attributes["MessageAttribute.2.Value.StringValue"] = "Value2";
     attributes["MessageAttribute.2.Value.DataType"] = "String";
     string queueUrl = "";
-    aws.sqs:OutboundMessage|error response2 = sqsClient->sendMessage("Sample text message.", queueResourcePath,
+    sqs:OutboundMessage|error response2 = sqsClient->sendMessage("Sample text message.", queueResourcePath,
         attributes);
-    if (response2 is aws.sqs:OutboundMessage) {
+    if (response2 is sqs:OutboundMessage) {
         log:printInfo("Sent message to SQS. MessageID: " + response2.messageId);
     }
 
@@ -200,8 +200,8 @@ public function main(string... args) {
     attributes["WaitTimeSeconds"] = "2";
     attributes["AttributeName.1"] = "SenderId";
     attributes["MessageAttributeName.1"] = "Name2";
-    aws.sqs:InboundMessage[]|error response3 = sqsClient->receiveMessage(queueResourcePath, attributes);
-    if (response3 is aws.sqs:InboundMessage[] && response3.length() > 0) {
+    sqs:InboundMessage[]|error response3 = sqsClient->receiveMessage(queueResourcePath, attributes);
+    if (response3 is sqs:InboundMessage[] && response3.length() > 0) {
         log:printInfo("Successfully received the message. Message body: " + response3[0].body);
         log:printInfo("\nReceipt Handle: " + response3[0].receiptHandle);
         // Keep receipt handle for deleting the message from the queue
@@ -230,14 +230,14 @@ import ballerinax/aws.sqs;
 public function main(string... args) {
 
     // Add the SQS credentials as the Configuration
-    aws.sqs:Configuration configuration = {
+    sqs:Configuration configuration = {
         accessKey: "<ACCESS_KEY>",
         secretKey: "<SECRET_ACCESS>",
         region: "<REGION>",
         accountNumber: "<ACCOUNT_NUMBER>"
     };
 
-    aws.sqs:Client sqsClient = new(configuration);
+    sqs:Client sqsClient = new(configuration);
 
     // Declare common variables
     string queueResourcePath = "";
@@ -252,7 +252,7 @@ public function main(string... args) {
     if (response1 is string) {
         log:printInfo("Created queue URL: " + response1);
         // Keep the queue URL for future operations
-        queueResourcePath = aws.sqs:splitString(response1, "amazonaws.com", 1);
+        queueResourcePath = sqs:splitString(response1, "amazonaws.com", 1);
     }
 
     // Send a message to the created queue
@@ -266,9 +266,9 @@ public function main(string... args) {
     attributes["MessageAttribute.2.Value.StringValue"] = "Value2";
     attributes["MessageAttribute.2.Value.DataType"] = "String";
     string queueUrl = "";
-    aws.sqs:OutboundMessage|error response2 = sqsClient->sendMessage("Sample text message.", queueResourcePath,
+    sqs:OutboundMessage|error response2 = sqsClient->sendMessage("Sample text message.", queueResourcePath,
         attributes);
-    if (response2 is aws.sqs:OutboundMessage) {
+    if (response2 is sqs:OutboundMessage) {
         log:printInfo("Sent message to SQS. MessageID: " + response2.messageId);
     }
 
@@ -279,8 +279,8 @@ public function main(string... args) {
     attributes["WaitTimeSeconds"] = "2";
     attributes["AttributeName.1"] = "SenderId";
     attributes["MessageAttributeName.1"] = "Name2";
-    aws.sqs:InboundMessage[]|error response3 = sqsClient->receiveMessage(queueResourcePath, attributes);
-    if (response3 is aws.sqs:InboundMessage[] && response3.length() > 0) {
+    sqs:InboundMessage[]|error response3 = sqsClient->receiveMessage(queueResourcePath, attributes);
+    if (response3 is sqs:InboundMessage[] && response3.length() > 0) {
         log:printInfo("Successfully received the message. Message body: " + response3[0].body);
         log:printInfo("\nReceipt Handle: " + response3[0].receiptHandle);
         // Keep receipt handle for deleting the message from the queue

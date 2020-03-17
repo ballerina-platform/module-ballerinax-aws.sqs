@@ -35,14 +35,14 @@ In order for you to use the Amazon SQS Connector, first you need to create an Am
 Ballerina provides a [config module](https://ballerina.io/v1-1/learn/by-example/config-api.html) to obtain parameters from the configuration file. Specify the configuration object and create the client as follows.
 
 ```ballerina
-aws.sqs:Configuration configuration = {
+sqs:Configuration configuration = {
     accessKey: config:getAsString("ACCESS_KEY_ID"),
     secretKey: config:getAsString("SECRET_ACCESS_KEY"),
     region: config:getAsString("REGION"),
     accountNumber: config:getAsString("ACCOUNT_NUMBER")
 };
 
-aws.sqs:Client sqsClient = new(configuration);
+sqs:Client sqsClient = new(configuration);
 ```
 
 ##### Sample
@@ -52,14 +52,14 @@ import ballerina/log;
 import ballerinax/aws.sqs;
 
 // Add the SQS credentials as the Configuration
-aws.sqs:Configuration configuration = {
+sqs:Configuration configuration = {
     accessKey: "<ACCESS_KEY>",
     secretKey: "<SECRET_ACCESS>",
     region: "<REGION>",
     accountNumber: "<ACCOUNT_NUMBER>"
 };
 
-aws.sqs:Client sqsClient = new(configuration);
+sqs:Client sqsClient = new(configuration);
 
 public function main(string... args) {
 
