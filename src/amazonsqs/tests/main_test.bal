@@ -14,16 +14,17 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import ballerina/config;
 import ballerina/test;
 import ballerina/log;
 import ballerina/math;
+import ballerina/system;
+import ballerina/config;
 
 Configuration configuration = {
-    accessKey: config:getAsString("ACCESS_KEY_ID"),
-    secretKey: config:getAsString("SECRET_ACCESS_KEY"),
-    region: config:getAsString("REGION"),
-    accountNumber: config:getAsString("ACCOUNT_NUMBER")
+    accessKey: getConfigValue("ACCESS_KEY_ID"),
+    secretKey: getConfigValue("SECRET_ACCESS_KEY"),
+    region: getConfigValue("REGION"),
+    accountNumber: getConfigValue("ACCOUNT_NUMBER")
 };
 
 Client sqs = new(configuration);
@@ -241,4 +242,8 @@ function genRandQueueName(boolean isFifo = false) returns string {
     } else {
         return queueName;
     }
+}
+
+function getConfigValue(string key) returns string {
+    return (system:getEnv(key) != "") ? system:getEnv(key) : config:getAsString(key);
 }
