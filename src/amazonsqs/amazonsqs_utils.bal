@@ -15,8 +15,8 @@
 // under the License.
 
 import ballerina/http;
-import ballerinax/java;
-import ballerinax/java.arrays as jarrays;
+import ballerina/java;
+import ballerina/java.arrays as jarrays;
 
 # Handles the HTTP response.
 #
