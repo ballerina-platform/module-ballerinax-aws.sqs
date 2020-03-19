@@ -1,7 +1,7 @@
-Connects to Amazon SQS service.
+Connects to AWS SQS service.
 
 # Module Overview
-Amazon SQS Connector allows you to connect to the Amazon SQS service via REST API from Ballerina. This connector allows you to create a new SQS queue, send messages to a queue, receive messages from a queue, and delete the received messages from the queue.
+AWS SQS Connector allows you to connect to the Amazon SQS service via REST API from Ballerina. This connector allows you to create a new SQS queue, send messages to a queue, receive messages from a queue, and delete the received messages from the queue.
 
 ## Compatibility
 
@@ -19,7 +19,7 @@ First, import the `ballerinax/aws.sqs` module and other related modules into the
 import ballerinax/aws.sqs;
 ```
 
-The Amazon SQS connector can be instantiated using the Access Key ID, Secret Access Key, Region of the Amazon SQS geographic location, and the Account Number in the Amazon SQS client configuration.
+The AWS SQS connector can be instantiated using the Access Key ID, Secret Access Key, Region of the AWS SQS geographic location, and the Account Number in the AWS SQS client configuration.
 
 ### Signing Up for AWS
 
@@ -44,7 +44,7 @@ Follow the method explained below to obtain AWS credentials.
 
 For more information please visit https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-setting-up.html .  
 
-**Create Amazon SQS client**
+**Create AWS SQS client**
 
 You can now enter the credentials in the SQS client configuration and create SQS client by passing the configuration:
 
@@ -93,7 +93,7 @@ if (response is string) {
 
 **Sending a Message to a SQS Queue**
 
-You can send a message to SQS as follows with `sendMessage` method. Use message to be sent, appropriate attribute parameters for the queue, and the path to the queue from Amazon host address as parameters to the operation. Successful send operation returns an `OutboundMessage` object and the error cases return an `error` object.
+You can send a message to SQS as follows with `sendMessage` method. Use message to be sent, appropriate attribute parameters for the queue, and the path to the queue from AWS host address as parameters to the operation. Successful send operation returns an `OutboundMessage` object and the error cases return an `error` object.
 
 ```ballerina
 map<string> attributes = {};
@@ -115,7 +115,7 @@ if (response is sqs:OutboundMessage) {
 
 **Receiving a Message from the SQS Queue**
 
-A sent message can be received with `receiveMessage` method. The path to the queue from the Amazon host address and appropriate attribute parameters should be used as the parameters for the operation. A successful receive operation returns an array of `InboundMessage` objects, each containing the message and the `receiptHandler`, while the error cases returns an `error` object.
+A sent message can be received with `receiveMessage` method. The path to the queue from the AWS host address and appropriate attribute parameters should be used as the parameters for the operation. A successful receive operation returns an array of `InboundMessage` objects, each containing the message and the `receiptHandler`, while the error cases returns an `error` object.
 
 ```ballerina
 map<string> attributes = {};

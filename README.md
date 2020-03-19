@@ -12,17 +12,17 @@ Amazon SQS Connector allows you to connect to the Amazon Simple Queue Service (S
 The following sections provide you with information on how to use the Ballerina Amazon SQS connector.
 
 - [Contribute To Develop](#contribute-to-develop)
-- [Working with Amazon SQS Connector Actions](#Working-with-Amazon-SQS-Connector)
+- [Working with Amazon SQS Connector Actions](#Working-with-AWS-SQS-Connector)
 - [Sample](#sample)
 
 ### Contribute to development
 
 Clone the repository by running the following command 
 ```shell
-git clone https://github.com/wso2-ballerina/module-amazonsqs.git
+git clone git@github.com:ballerina-platform/module-amazonsqs.git
 ```
 
-### Working with Amazon SQS Connector
+### Working with AWS SQS Connector
 
 First, import the `ballerinax/aws.sqs` module into the Ballerina project.
 
@@ -30,7 +30,7 @@ First, import the `ballerinax/aws.sqs` module into the Ballerina project.
 import ballerinax/aws.sqs;
 ```
 
-In order for you to use the Amazon SQS Connector, first you need to create an Amazon SQS Client.
+In order for you to use the AWS SQS Connector, first you need to create an AWS SQS Client.
 
 Ballerina provides a [config module](https://ballerina.io/v1-1/learn/by-example/config-api.html) to obtain parameters from the configuration file. Specify the configuration object and create the client as follows.
 

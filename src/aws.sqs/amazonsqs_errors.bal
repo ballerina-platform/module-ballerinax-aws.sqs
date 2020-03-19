@@ -14,30 +14,28 @@
 // specific language governing permissions and limitations
 // under the License.
 
-# Holds the details of an AmazonSQS error
+# Holds the details of an AWS SQS error
 #
 # + message - Specific error message for the error
-# + errorCode - Error code for the error
 # + cause - Cause of the error; If this error occurred due to another error (Probably from another module)
 public type ErrorDetail record {
     string message;
-    string errorCode;
     error cause?;
 };
 
-// Ballerina AmazonSQS Client Error Types
+// Ballerina AWS SQS Client Error Types
 
 // Ballerina Basic Error Types
 
 public const HTTP_CLIENT_POST_REQUEST_FAILED = "{ballerinax/aws.sqs}HTTPClientPOSTRequestFailed";
 public type HTTPClientPOSTRequestFailed error<HTTP_CLIENT_POST_REQUEST_FAILED, ErrorDetail>;
 
-// AmazonSQS Authenticator Error Types
+// AWS SQS Authenticator Error Types
 
 public const GENERATE_POST_REQUEST_FAILED = "{ballerinax/aws.sqs}GeneratePOSTRequestFailed";
 public type GeneratePOSTRequestFailed error<GENERATE_POST_REQUEST_FAILED, ErrorDetail>;
 
-// AmazonSQS Connector Error Types
+// AWS SQS Connector Error Types
 
 public const ERROR_CLIENT = "{ballerinax/aws.sqs}ErrorClient";
 public type ErrorClient error<ERROR_CLIENT, ErrorDetail>;
@@ -48,7 +46,7 @@ public type ErrorServer error<ERROR_SERVER, ErrorDetail>;
 public const ERROR_OPERATION = "{ballerinax/aws.sqs}ErrorOperation";
 public type ErrorOperation error<ERROR_OPERATION, ErrorDetail>;
 
-// AmazonSQS Data Mappings Error Types
+// AWS SQS Data Mappings Error Types
 
 public const ERROR_DATA_MAPPING = "{ballerinax/aws.sqs}ErrorDataMapping";
 public type ErrorDataMapping error<ERROR_DATA_MAPPING, ErrorDetail>;
@@ -60,7 +58,7 @@ public const CONVERT_XML_TO_INBOUND_MESSAGE_MESSAGE_ATTRIBUTES_FAILED = "{baller
 public const CONVERT_XML_TO_INBOUND_MESSAGE_MESSAGE_ATTRIBUTE_FAILED = "{ballerinax/aws.sqs}ConvertXmlToInboundMessageMessageAttributeFailed";
 public const CONVERT_XML_MESSAGE_ATTRIBUTE_VALUE_TO_LIST_VALUES_FAILED = "{ballerinax/aws.sqs}ConvertXmlMessageAttributeValueToListValuesFailed";
 
-// AmazonSQS Other Error Types
+// AWS SQS Other Error Types
 
 public const FILE_READ_FAILED = "{ballerinax/aws.sqs}FileReadFailed";
 public type FileReadFailed error<FILE_READ_FAILED, ErrorDetail>;
