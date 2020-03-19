@@ -155,10 +155,10 @@ public function main(string... args) {
 
     // Add the SQS credentials as the Configuration
     sqs:Configuration configuration = {
-        accessKey: "AKIAIOSFODNN7EXAMPLE",
-        secretKey: "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY",
-        region: "us-east-2",
-        accountNumber: "610973236798"
+        accessKey: "<ACCESS_KEY>",
+        secretKey: "<SECRET_ACCESS>",
+        region: "<REGION>",
+        accountNumber: "<ACCOUNT_NUMBER>"
     };
 
     sqs:Client sqsClient = new(configuration);
