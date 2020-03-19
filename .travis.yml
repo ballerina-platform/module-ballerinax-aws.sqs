@@ -17,4 +17,4 @@ script:
   - sudo dpkg -i ballerina-linux-installer-x64-1.1.4.deb
   - sudo apt-get install -f
   - ballerina --version
-  - ballerina build -c --skip-tests amazonsqs
+  - ballerina build -c --skip-tests aws.sqs
