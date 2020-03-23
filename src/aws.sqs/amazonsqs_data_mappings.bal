@@ -15,11 +15,12 @@
 // under the License.
 
 import ballerina/io;
+import ballerina/lang.'xml as xmllib;
 
 xmlns "http://queue.amazonaws.com/doc/2012-11-05/" as ns;
 
 function xmlToCreatedQueueUrl(xml response) returns string {
-    string|error queueUrl = response[ns:CreateQueueResult][ns:QueueUrl].getTextValue();
+    string|error queueUrl = (response/<ns:CreateQueueResult>/<ns:QueueUrl>/*).toString();
     if (queueUrl is string) {
         return queueUrl != "" ? queueUrl.toString() : EMPTY_STRING;
     } else {
@@ -29,12 +30,12 @@ function xmlToCreatedQueueUrl(xml response) returns string {
 
 function xmlToOutboundMessage(xml response) returns OutboundMessage|ErrorDataMapping {
     xml msgSource = response[ns:SendMessageResult];
-    if (!msgSource.isEmpty()) {
+    if (msgSource.toString() != "") {
         OutboundMessage sentMessage = {
-            md5OfMessageAttributes: msgSource[ns:MD5OfMessageAttributes].getTextValue(),
-            md5OfMessageBody: msgSource[ns:MD5OfMessageBody].getTextValue(),
-            messageId: msgSource[ns:MessageId].getTextValue(),
-            sequenceNumber: msgSource[ns:SequenceNumber].getTextValue()
+            md5OfMessageAttributes: (msgSource/<ns:MD5OfMessageAttributes>/*).toString(),
+            md5OfMessageBody: (msgSource/<ns:MD5OfMessageBody>/*).toString(),
+            messageId: (msgSource/<ns:MessageId>/*).toString(),
+            sequenceNumber: (msgSource/<ns:SequenceNumber>/*).toString()
         };
         return sentMessage;
     } else {
@@ -46,7 +47,7 @@ function xmlToOutboundMessage(xml response) returns OutboundMessage|ErrorDataMap
 function xmlToInboundMessages(xml response) returns InboundMessage[]|ErrorDataMapping {
     xml messages = response[ns:ReceiveMessageResult][ns:Message];
     InboundMessage[] receivedMessages = [];
-    if (!messages.isSingleton()) {
+    if (messages.elements().length() != 1) {
         int i = 0;
         foreach var b in messages.elements() {
             if (b is xml) {
@@ -82,12 +83,12 @@ function xmlToInboundMessage(xml message) returns InboundMessage|ErrorDataMappin
     if (messageAttributes is map<MessageAttributeValue>) {
         InboundMessage receivedMessage = {
             attributes: xmlToInboundMessageAttributes(attribute),
-            body: message[ns:Body].getTextValue(),
-            md5OfBody: message[ns:MD5OfBody].getTextValue(),
-            md5OfMessageAttributes: message[ns:MD5OfMessageAttributes].getTextValue(),
+            body: (message/<ns:Body>/*).toString(),
+            md5OfBody: (message/<ns:MD5OfBody>/*).toString(),
+            md5OfMessageAttributes: (message/<ns:MD5OfMessageAttributes>/*).toString(),
             messageAttributes: messageAttributes,
-            messageId: message[ns:MessageId].getTextValue(),
-            receiptHandle: message[ns:ReceiptHandle].getTextValue()
+            messageId: (message/<ns:MessageId>/*).toString(),
+            receiptHandle: (message/<ns:ReceiptHandle>/*).toString()
         };
         return receivedMessage;
     } else {
@@ -99,19 +100,19 @@ function xmlToInboundMessage(xml message) returns InboundMessage|ErrorDataMappin
 
 function xmlToInboundMessageAttributes(xml attribute) returns map<string> {
     map<string> attributes = {};
-    if (!attribute.isSingleton()) {
+    if (attribute.elements().length() != 1) {
         int i = 0;
         foreach var b in attribute.elements() {
             if (b is xml) {
-                string attName = b[ns:Name].getTextValue();
-                string attValue = b[ns:Value].getTextValue();
+                string attName = (b/<ns:Name>/*).toString();
+                string attValue = (b/<ns:Value>/*).toString();
                 attributes[attName] = attValue;
                 i = i + 1;
             }
         }
     } else {
-        string attName = attribute[ns:Name].getTextValue();
-        string attValue = attribute[ns:Value].getTextValue();
+        string attName = (attribute/<ns:Name>/*).toString();
+        string attValue = (attribute/<ns:Value>/*).toString();
         attributes[attName] = attValue;
     }
     return attributes;
@@ -122,7 +123,7 @@ function xmlToInboundMessageMessageAttributes(xml msgAttributes)
     map<MessageAttributeValue> messageAttributes = {};
     string messageAttributeName = "";
     MessageAttributeValue messageAttributeValue;
-    if (!msgAttributes.isSingleton()) {
+    if (msgAttributes.elements().length() != 1) {
         int i = 0;
         foreach var b in msgAttributes.elements() {
             if (b is xml) {
@@ -155,7 +156,7 @@ function xmlToInboundMessageMessageAttributes(xml msgAttributes)
 
 function xmlToInboundMessageMessageAttribute(xml msgAttribute) 
         returns ([string, MessageAttributeValue]|ErrorDataMapping) {
-    string msgAttributeName = msgAttribute[ns:Name].getTextValue();
+    string msgAttributeName = (msgAttribute/<ns:Name>/*).toString();
     xml msgAttributeValue = msgAttribute[ns:Value];
     string[] binaryListValues; 
     string[] stringListValues;
@@ -164,10 +165,10 @@ function xmlToInboundMessageMessageAttribute(xml msgAttribute)
         [binaryListValues, stringListValues] = strListVals;
         MessageAttributeValue messageAttributeValue = {
             binaryListValues: binaryListValues,
-            binaryValue: msgAttributeValue[ns:BinaryValue].getTextValue(),
-            dataType: msgAttributeValue[ns:DataType].getTextValue(),
+            binaryValue: (msgAttributeValue/<ns:BinaryValue>/*).toString(),
+            dataType: (msgAttributeValue/<ns:DataType>/*).toString(),
             stringListValues: stringListValues,
-            stringValue: msgAttributeValue[ns:StringValue].getTextValue()
+            stringValue: (msgAttributeValue/<ns:StringValue>/*).toString()
         };
         return [msgAttributeName, messageAttributeValue];
     } else {
@@ -191,7 +192,8 @@ function xmlMessageAttributeValueToListValues(xml msgAttributeVal)
 }
 
 function isXmlDeleteResponse(xml response) returns boolean {
-    string topElementName = response.getElementName();
+    xmllib:Element topElement = <xmllib:Element> response;
+    string topElementName = topElement.getName();
     if (topElementName.endsWith("DeleteMessageResponse")) {
         return true ;
     } else {
