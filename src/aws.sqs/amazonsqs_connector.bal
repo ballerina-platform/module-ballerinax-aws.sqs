@@ -35,7 +35,7 @@ public type Client client object {
     string acctNum;
     string host;
 
-    public function __init(Configuration config) {
+    public function init(Configuration config) {
         self.accessKey = config.accessKey;
         self.secretKey = config.secretKey;
         self.acctNum = config.accountNumber;
@@ -77,10 +77,10 @@ public type Client client object {
             if (response is xml){
                 return xmlToCreatedQueueUrl(response);
             } else {
-                 return error(ERROR_OPERATION, message = OPERATION_ERROR_MSG, errorCode = ERROR_OPERATION, cause = response);
+                 return ErrorOperation(OPERATION_ERROR_MSG, response);
             }
         } else {
-            return error(ERROR_OPERATION, message = OPERATION_ERROR_MSG, errorCode = ERROR_OPERATION, cause = request);
+            return ErrorOperation(OPERATION_ERROR_MSG, request);
         }
     }
 
@@ -111,16 +111,16 @@ public type Client client object {
                     if (result is OutboundMessage) {
                         return result;
                     } else {
-                        return error(ERROR_OPERATION, message = OPERATION_ERROR_MSG, errorCode = ERROR_OPERATION, cause = result);
+                        return ErrorOperation(OPERATION_ERROR_MSG, result);
                     }
                 } else {
-                    return error(ERROR_OPERATION, message = OPERATION_ERROR_MSG, errorCode = ERROR_OPERATION, cause = response);
+                    return ErrorOperation(OPERATION_ERROR_MSG, response);
                 }
             } else {
-                return error(ERROR_OPERATION, message = OPERATION_ERROR_MSG, errorCode = ERROR_OPERATION, cause = request);
+                return ErrorOperation(OPERATION_ERROR_MSG, request);
             }
         } else {
-            return error(ERROR_OPERATION, message = OPERATION_ERROR_MSG, errorCode = ERROR_OPERATION, cause = msgbody);
+            return ErrorOperation(OPERATION_ERROR_MSG, msgbody);
         }
     }
 
@@ -147,13 +147,13 @@ public type Client client object {
                 if (result is InboundMessage[]) {
                     return result;
                 } else {
-                    return error(ERROR_OPERATION, message = OPERATION_ERROR_MSG, errorCode = ERROR_OPERATION, cause = result);
+                    return ErrorOperation(OPERATION_ERROR_MSG, result);
                 }
             } else {
-                return error(ERROR_OPERATION, message = OPERATION_ERROR_MSG, errorCode = ERROR_OPERATION, cause = response);
+                return ErrorOperation(OPERATION_ERROR_MSG, response);
             }
         } else {
-            return error(ERROR_OPERATION, message = OPERATION_ERROR_MSG, errorCode = ERROR_OPERATION, cause = request);
+            return ErrorOperation(OPERATION_ERROR_MSG, request);
         }
     }
 
@@ -177,13 +177,13 @@ public type Client client object {
                 if (response is xml) {
                     return isXmlDeleteResponse(response);
                 } else {
-                    return error(ERROR_OPERATION, message = OPERATION_ERROR_MSG, errorCode = ERROR_OPERATION, cause = response);
+                    return ErrorOperation(OPERATION_ERROR_MSG, response);
                 }
             } else {
-                return error(ERROR_OPERATION, message = OPERATION_ERROR_MSG, errorCode = ERROR_OPERATION, cause = request);
+                return ErrorOperation(OPERATION_ERROR_MSG, request);
             }
         } else {
-            return error(ERROR_OPERATION, message = OPERATION_ERROR_MSG, errorCode = ERROR_OPERATION, cause = receiptHandleEncoded);
+            return ErrorOperation(OPERATION_ERROR_MSG, receiptHandleEncoded);
         }
     }
 
@@ -243,19 +243,15 @@ public type Client client object {
                 return request;
             } else {
                 if (amzDate is error) {
-                    return error(GENERATE_POST_REQUEST_FAILED, message = GENERATE_POST_REQUEST_FAILED_MSG,
-                        errorCode = GENERATE_POST_REQUEST_FAILED, cause = amzDate);
+                    return GeneratePOSTRequestFailed(GENERATE_POST_REQUEST_FAILED_MSG, amzDate);
                 } else if (dateStamp is error) {
-                    return error(GENERATE_POST_REQUEST_FAILED, message = GENERATE_POST_REQUEST_FAILED_MSG,
-                        errorCode = GENERATE_POST_REQUEST_FAILED, cause = dateStamp);
+                    return GeneratePOSTRequestFailed(GENERATE_POST_REQUEST_FAILED_MSG, dateStamp);
                 } else {
-                    return error(GENERATE_POST_REQUEST_FAILED, message = GENERATE_POST_REQUEST_FAILED_MSG,
-                        errorCode = GENERATE_POST_REQUEST_FAILED);
+                    return GeneratePOSTRequestFailed(GENERATE_POST_REQUEST_FAILED_MSG);
                 }
             }
         } else {
-            return error(GENERATE_POST_REQUEST_FAILED, message = GENERATE_POST_REQUEST_FAILED_MSG,
-                errorCode = GENERATE_POST_REQUEST_FAILED, cause = time);
+            return GeneratePOSTRequestFailed(GENERATE_POST_REQUEST_FAILED_MSG);
         }
 
     }
