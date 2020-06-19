@@ -7,7 +7,7 @@ AWS SQS Connector allows you to connect to the Amazon SQS service via REST API f
 
 |                    |    Versions     |  
 |:------------------:|:---------------:|
-| Ballerina Language |   1.2.x         |
+| Ballerina Language |   2.0.0         |
 | Amazon SQS API     |   2012-11-05    |
 
 
