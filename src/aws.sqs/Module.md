@@ -5,10 +5,10 @@ AWS SQS Connector allows you to connect to the Amazon SQS service via REST API f
 
 ## Compatibility
 
-|                    |    Versions     |  
-|:------------------:|:---------------:|
-| Ballerina Language |   2.0.0         |
-| Amazon SQS API     |   2012-11-05    |
+|                    |    Versions          |  
+|:------------------:|:--------------------:|
+| Ballerina Language |   Swan Lake Preview1 |
+| Amazon SQS API     |   2012-11-05         |
 
 
 ## Sample

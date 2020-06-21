@@ -55,7 +55,7 @@ public type Client client object {
     # + attributes - Other attribute parameters 
     # + return - If success, URL of the created queue, else returns error
     public remote function createQueue(string queueName, map<string> attributes)
-            returns @tainted string|ErrorOperation{
+            returns @tainted string|OperationError{
         string amzTarget = AMAZON_SQS_API_VERSION + "." + ACTION_CREATE_QUEUE;
         string endpoint = "/";
         string payload;
@@ -77,10 +77,10 @@ public type Client client object {
             if (response is xml){
                 return xmlToCreatedQueueUrl(response);
             } else {
-                 return ErrorOperation(OPERATION_ERROR_MSG, response);
+                 return OperationError(OPERATION_ERROR_MSG, response);
             }
         } else {
-            return ErrorOperation(OPERATION_ERROR_MSG, request);
+            return OperationError(OPERATION_ERROR_MSG, request);
         }
     }
 
@@ -91,7 +91,7 @@ public type Client client object {
     # + attributes - Non-mandatory parameters for sending a message 
     # + return - If success, details of the sent message, else returns error
     public remote function sendMessage(string messageBody, string queueResourcePath, map<string> attributes) 
-            returns @tainted OutboundMessage|ErrorOperation {
+            returns @tainted OutboundMessage|OperationError {
         string|error msgbody = encoding:encodeUriComponent(messageBody, UTF_8);
         if (msgbody is string) {
             string amzTarget = AMAZON_SQS_API_VERSION + "." + ACTION_SEND_MESSAGE;
@@ -107,20 +107,20 @@ public type Client client object {
                 var httpResponse = self.clientEp->post(queueResourcePath, request);
                 xml|ResponseHandleFailed response = handleResponse(httpResponse);
                 if (response is xml){
-                    OutboundMessage|ErrorDataMapping result = xmlToOutboundMessage(response);
+                    OutboundMessage|DataMappingError result = xmlToOutboundMessage(response);
                     if (result is OutboundMessage) {
                         return result;
                     } else {
-                        return ErrorOperation(OPERATION_ERROR_MSG, result);
+                        return OperationError(OPERATION_ERROR_MSG, result);
                     }
                 } else {
-                    return ErrorOperation(OPERATION_ERROR_MSG, response);
+                    return OperationError(OPERATION_ERROR_MSG, response);
                 }
             } else {
-                return ErrorOperation(OPERATION_ERROR_MSG, request);
+                return OperationError(OPERATION_ERROR_MSG, request);
             }
         } else {
-            return ErrorOperation(OPERATION_ERROR_MSG, msgbody);
+            return OperationError(OPERATION_ERROR_MSG, msgbody);
         }
     }
 
@@ -130,7 +130,7 @@ public type Client client object {
     # + attributes - Non-mandatory parameters for receiving a message
     # + return - If success, details of the received message, else returns error
     public remote function receiveMessage(string queueResourcePath, map<string> attributes) 
-            returns @tainted InboundMessage[]|ErrorOperation {
+            returns @tainted InboundMessage[]|OperationError {
         string amzTarget = AMAZON_SQS_API_VERSION + "." + ACTION_RECEIVE_MESSAGE;
         map<string> parameters = {};
         parameters[PAYLOAD_PARAM_ACTION] = ACTION_RECEIVE_MESSAGE;
@@ -143,17 +143,17 @@ public type Client client object {
             var httpResponse = self.clientEp->post(queueResourcePath, request);
             xml|ResponseHandleFailed response = handleResponse(httpResponse);
             if (response is xml){
-                InboundMessage[]|ErrorDataMapping result = xmlToInboundMessages(response);
+                InboundMessage[]|DataMappingError result = xmlToInboundMessages(response);
                 if (result is InboundMessage[]) {
                     return result;
                 } else {
-                    return ErrorOperation(OPERATION_ERROR_MSG, result);
+                    return OperationError(OPERATION_ERROR_MSG, result);
                 }
             } else {
-                return ErrorOperation(OPERATION_ERROR_MSG, response);
+                return OperationError(OPERATION_ERROR_MSG, response);
             }
         } else {
-            return ErrorOperation(OPERATION_ERROR_MSG, request);
+            return OperationError(OPERATION_ERROR_MSG, request);
         }
     }
 
@@ -163,7 +163,7 @@ public type Client client object {
     # + receiptHandle - Receipt Handle parameter for the message(s) to be deleted
     # + return - Whether the message(s) were successfully deleted or whether an error occurred
     public remote function deleteMessage(string queueResourcePath, string receiptHandle)
-            returns @tainted boolean|ErrorOperation {
+            returns @tainted boolean|OperationError {
         string amzTarget = AMAZON_SQS_API_VERSION + "." + ACTION_DELETE_MESSAGE;
         string|error receiptHandleEncoded = encoding:encodeUriComponent(receiptHandle, UTF_8);
         if (receiptHandleEncoded is string) {
@@ -177,13 +177,13 @@ public type Client client object {
                 if (response is xml) {
                     return isXmlDeleteResponse(response);
                 } else {
-                    return ErrorOperation(OPERATION_ERROR_MSG, response);
+                    return OperationError(OPERATION_ERROR_MSG, response);
                 }
             } else {
-                return ErrorOperation(OPERATION_ERROR_MSG, request);
+                return OperationError(OPERATION_ERROR_MSG, request);
             }
         } else {
-            return ErrorOperation(OPERATION_ERROR_MSG, receiptHandleEncoded);
+            return OperationError(OPERATION_ERROR_MSG, receiptHandleEncoded);
         }
     }
 

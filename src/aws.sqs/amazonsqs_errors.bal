@@ -31,17 +31,11 @@ public type GeneratePOSTRequestFailed distinct error;
 
 // AWS SQS Connector Error Types
 
-public type ErrorOperation distinct error;
+public type OperationError distinct error;
 
 // AWS SQS Data Mappings Error Types
 
-public type ErrorDataMapping distinct error;
-
-public const CONVERT_XML_TO_OUTBOUND_MESSAGE_FAILED = "{ballerinax/aws.sqs}ConvertXmlToOutboundMessageFailed";
-public const CONVERT_XML_TO_INBOUND_MESSAGES_FAILED = "{ballerinax/aws.sqs}ConvertXmlToInboundMessagesFailed";
-public const CONVERT_XML_TO_INBOUND_MESSAGE_FAILED = "{ballerinax/aws.sqs}ConvertXmlToInboundMessageFailed";
-public const CONVERT_XML_TO_INBOUND_MESSAGE_MESSAGE_ATTRIBUTES_FAILED = "{ballerinax/aws.sqs}ConvertXmlToInboundMessageMessageAttributesFailed";
-public const CONVERT_XML_TO_INBOUND_MESSAGE_MESSAGE_ATTRIBUTE_FAILED = "{ballerinax/aws.sqs}ConvertXmlToInboundMessageMessageAttributeFailed";
+public type DataMappingError distinct error;
 
 // AWS SQS Other Error Types
 
