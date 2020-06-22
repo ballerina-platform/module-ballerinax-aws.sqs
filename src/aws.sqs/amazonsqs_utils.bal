@@ -26,7 +26,7 @@ function handleResponse(http:Response|error httpResponse) returns @untainted xml
     if (httpResponse is http:Response) {
         if (httpResponse.statusCode == http:STATUS_NO_CONTENT){
             //If status 204, then no response body. So returns json boolean true.
-            return error(ERROR_SERVER, message = NO_CONTENT_SET_WITH_RESPONSE_MSG, errorCode = RESPONSE_HANDLE_FAILED);
+            return ResponseHandleFailed(NO_CONTENT_SET_WITH_RESPONSE_MSG);
         }
         var xmlResponse = httpResponse.getXmlPayload();
         if (xmlResponse is xml) {
@@ -41,14 +41,13 @@ function handleResponse(http:Response|error httpResponse) returns @untainted xml
                 string errorMsg = STATUS_CODE + COLON_SYMBOL + xmlResponseErrorCode + 
                     SEMICOLON_SYMBOL + WHITE_SPACE + MESSAGE + COLON_SYMBOL + WHITE_SPACE + 
                     responseErrorMessage;
-                return error(ERROR_SERVER, message = errorMsg, errorCode = RESPONSE_HANDLE_FAILED);
+                return ResponseHandleFailed(errorMsg);
             }
         } else {
-                return error(ERROR_SERVER, message = RESPONSE_PAYLOAD_IS_NOT_XML_MSG, errorCode = RESPONSE_HANDLE_FAILED);
+                return ResponseHandleFailed(RESPONSE_PAYLOAD_IS_NOT_XML_MSG);
         }
     } else {
-        return error(ERROR_CLIENT, message = ERROR_OCCURRED_WHILE_INVOKING_REST_API_MSG,
-            errorCode = RESPONSE_HANDLE_FAILED, cause = httpResponse);
+        return ResponseHandleFailed(ERROR_OCCURRED_WHILE_INVOKING_REST_API_MSG, httpResponse);
     }
 }
 
