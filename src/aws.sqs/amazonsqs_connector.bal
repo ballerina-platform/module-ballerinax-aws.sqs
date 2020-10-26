@@ -26,7 +26,7 @@ import ballerina/time;
 # + secretKey - The Amazon API secret key
 # + region - The Amazon API Region
 # + acctNum - The account number of the SQS service
-public type Client client object {
+public client class Client {
 
     http:Client clientEp;
     string accessKey;
@@ -187,7 +187,7 @@ public type Client client object {
         }
     }
 
-    private function buildPayload(map<string> parameters) returns string {
+    private isolated function buildPayload(map<string> parameters) returns string {
         string payload = "";
         int parameterNumber = 1;
         foreach var [key, value] in parameters.entries() {
@@ -200,7 +200,7 @@ public type Client client object {
         return payload;
     }
 
-    private function generatePOSTRequest(string amzTarget, string canonicalUri, string payload)
+    private isolated function generatePOSTRequest(string amzTarget, string canonicalUri, string payload)
             returns http:Request|GeneratePOSTRequestFailed {
         time:Time|error time = time:toTimeZone(time:currentTime(), "GMT");
         string|error amzDate;
@@ -256,11 +256,11 @@ public type Client client object {
 
     }
 
-    private function sign(byte[] key, string msg) returns byte[] {
+    private isolated function sign(byte[] key, string msg) returns byte[] {
         return crypto:hmacSha256(msg.toBytes(), key);
     }
 
-    private function getSignatureKey(string secretKey, string datestamp, string region, string serviceName)  returns byte[] {
+    private isolated function getSignatureKey(string secretKey, string datestamp, string region, string serviceName)  returns byte[] {
         string awskey = ("AWS4" + secretKey);
         byte[] kDate = self.sign(awskey.toBytes(), datestamp);
         byte[] kRegion = self.sign(kDate, region);
@@ -269,7 +269,7 @@ public type Client client object {
         return kSigning;
     }
 
-};
+}
 
 # Configuration provided for the client
 #

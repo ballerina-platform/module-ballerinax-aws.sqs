@@ -22,7 +22,7 @@ import ballerina/java.arrays as jarrays;
 #
 # + httpResponse - Http response or error
 # + return - If successful returns `json` response. Else returns error.
-function handleResponse(http:Response|error httpResponse) returns @untainted xml|ResponseHandleFailed {
+isolated function handleResponse(http:Response|error httpResponse) returns @untainted xml|ResponseHandleFailed {
     if (httpResponse is http:Response) {
         if (httpResponse.statusCode == http:STATUS_NO_CONTENT){
             //If status 204, then no response body. So returns json boolean true.
@@ -59,6 +59,6 @@ public function splitString(string str, string delimeter, int arrIndex) returns 
     return arrEle.toString();
 }
 
-function split(handle receiver, handle delimeter) returns handle = @java:Method {
-    class: "java.lang.String"
+isolated function split(handle receiver, handle delimeter) returns handle = @java:Method {
+    'class: "java.lang.String"
 } external;
