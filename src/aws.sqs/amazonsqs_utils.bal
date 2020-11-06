@@ -22,7 +22,7 @@ import ballerina/java.arrays as jarrays;
 #
 # + httpResponse - Http response or error
 # + return - If successful returns `json` response. Else returns error.
-isolated function handleResponse(http:Response|error httpResponse) returns @untainted xml|ResponseHandleFailed {
+isolated function handleResponse(http:Response|http:Payload|error httpResponse) returns @untainted xml|ResponseHandleFailed {
     if (httpResponse is http:Response) {
         if (httpResponse.statusCode == http:STATUS_NO_CONTENT){
             //If status 204, then no response body. So returns json boolean true.
@@ -45,6 +45,12 @@ isolated function handleResponse(http:Response|error httpResponse) returns @unta
             }
         } else {
                 return ResponseHandleFailed(RESPONSE_PAYLOAD_IS_NOT_XML_MSG);
+        }
+    } else if (httpResponse is http:Payload) {
+        if (httpResponse is xml) {
+            return httpResponse;   
+        } else {
+            return ResponseHandleFailed(RESPONSE_PAYLOAD_IS_NOT_XML_MSG);
         }
     } else {
         return ResponseHandleFailed(ERROR_OCCURRED_WHILE_INVOKING_REST_API_MSG, httpResponse);

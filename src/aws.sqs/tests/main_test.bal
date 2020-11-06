@@ -233,7 +233,7 @@ function testCRUDOperationsForMultipleMessages() {
     }
 }
 
-function genRandQueueName(boolean isFifo = false) returns string {
+isolated function genRandQueueName(boolean isFifo = false) returns string {
     float ranNumFloat = math:random()*10000000;
     anydata ranNumInt = math:round(ranNumFloat);
     string queueName = "testQueue" + ranNumInt.toString();
@@ -244,6 +244,6 @@ function genRandQueueName(boolean isFifo = false) returns string {
     }
 }
 
-function getConfigValue(string key) returns string {
+isolated function getConfigValue(string key) returns string {
     return (system:getEnv(key) != "") ? system:getEnv(key) : config:getAsString(key);
 }
