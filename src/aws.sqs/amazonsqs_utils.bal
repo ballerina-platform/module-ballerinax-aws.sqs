@@ -47,11 +47,7 @@ isolated function handleResponse(http:Response|http:Payload|error httpResponse) 
                 return ResponseHandleFailed(RESPONSE_PAYLOAD_IS_NOT_XML_MSG);
         }
     } else if (httpResponse is http:Payload) {
-        if (httpResponse is xml) {
-            return httpResponse;   
-        } else {
-            return ResponseHandleFailed(RESPONSE_PAYLOAD_IS_NOT_XML_MSG);
-        }
+        return ResponseHandleFailed(UNREACHABLE_STATE);
     } else {
         return ResponseHandleFailed(ERROR_OCCURRED_WHILE_INVOKING_REST_API_MSG, httpResponse);
     }

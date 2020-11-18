@@ -56,4 +56,5 @@ const string RESPONSE_PAYLOAD_IS_NOT_XML_MSG = "Response payload is not XML.";
 const string ERROR_OCCURRED_WHILE_INVOKING_REST_API_MSG = "Error occurred while invoking the REST API.";
 const string OUTBOUND_MESSAGE_RESPONSE_EMPTY_MSG = "Outbound Message response is empty.";
 const string OPERATION_ERROR_MSG = "Error has occurred during an operation.";
+const string UNREACHABLE_STATE = "Response type cannot be http payload";
 
