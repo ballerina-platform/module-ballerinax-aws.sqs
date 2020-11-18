@@ -19,7 +19,7 @@ import ballerina/lang.'xml as xmllib;
 
 xmlns "http://queue.amazonaws.com/doc/2012-11-05/" as ns;
 
-function xmlToCreatedQueueUrl(xml response) returns string {
+isolated function xmlToCreatedQueueUrl(xml response) returns string {
     string|error queueUrl = (response/<ns:CreateQueueResult>/<ns:QueueUrl>/*).toString();
     if (queueUrl is string) {
         return queueUrl != "" ? queueUrl.toString() : EMPTY_STRING;
@@ -28,7 +28,7 @@ function xmlToCreatedQueueUrl(xml response) returns string {
     }
 }
 
-function xmlToOutboundMessage(xml response) returns OutboundMessage|DataMappingError {
+isolated function xmlToOutboundMessage(xml response) returns OutboundMessage|DataMappingError {
     xml msgSource = response/<ns:SendMessageResult>;
     if (msgSource.toString() != "") {
         OutboundMessage sentMessage = {
@@ -43,7 +43,7 @@ function xmlToOutboundMessage(xml response) returns OutboundMessage|DataMappingE
     }
 }
 
-function xmlToInboundMessages(xml response) returns InboundMessage[]|DataMappingError {
+isolated function xmlToInboundMessages(xml response) returns InboundMessage[]|DataMappingError {
     xml messages = response/<ns:ReceiveMessageResult>/<ns:Message>;
     InboundMessage[] receivedMessages = [];
     if (messages.elements().length() != 1) {
@@ -70,7 +70,7 @@ function xmlToInboundMessages(xml response) returns InboundMessage[]|DataMapping
     }
 }
 
-function xmlToInboundMessage(xml message) returns InboundMessage|DataMappingError {
+isolated function xmlToInboundMessage(xml message) returns InboundMessage|DataMappingError {
     xml attribute = message/<ns:Attribute>;
     xml msgAttribute = message/<ns:MessageAttribute>;
 
@@ -91,7 +91,7 @@ function xmlToInboundMessage(xml message) returns InboundMessage|DataMappingErro
     }
 }
 
-function xmlToInboundMessageAttributes(xml attribute) returns map<string> {
+isolated function xmlToInboundMessageAttributes(xml attribute) returns map<string> {
     map<string> attributes = {};
     if (attribute.elements().length() != 1) {
         int i = 0;
@@ -111,7 +111,7 @@ function xmlToInboundMessageAttributes(xml attribute) returns map<string> {
     return attributes;
 }
 
-function xmlToInboundMessageMessageAttributes(xml msgAttributes) 
+isolated function xmlToInboundMessageMessageAttributes(xml msgAttributes) 
         returns map<MessageAttributeValue>|DataMappingError {
     map<MessageAttributeValue> messageAttributes = {};
     string messageAttributeName = "";
@@ -143,7 +143,7 @@ function xmlToInboundMessageMessageAttributes(xml msgAttributes)
     return messageAttributes;
 }
 
-function xmlToInboundMessageMessageAttribute(xml msgAttribute) 
+isolated function xmlToInboundMessageMessageAttribute(xml msgAttribute) 
         returns ([string, MessageAttributeValue]|DataMappingError) {
     string msgAttributeName = (msgAttribute/<ns:Name>/*).toString();
     xml msgAttributeValue = msgAttribute/<ns:Value>;
@@ -165,7 +165,7 @@ function xmlToInboundMessageMessageAttribute(xml msgAttribute)
     }
 }
 
-function xmlMessageAttributeValueToListValues(xml msgAttributeVal) 
+isolated function xmlMessageAttributeValueToListValues(xml msgAttributeVal) 
         returns ([string[], string[]]|DataMappingError) {
     string[] binaryListValues = [];
     string[] stringListValues = [];
@@ -178,7 +178,7 @@ function xmlMessageAttributeValueToListValues(xml msgAttributeVal)
     return [binaryListValues, stringListValues];
 }
 
-function isXmlDeleteResponse(xml response) returns boolean {
+isolated function isXmlDeleteResponse(xml response) returns boolean {
     xmllib:Element topElement = <xmllib:Element> response;
     string topElementName = topElement.getName();
     if (topElementName.endsWith("DeleteMessageResponse")) {
