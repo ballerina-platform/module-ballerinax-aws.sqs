@@ -1,4 +1,4 @@
-// Copyright (c) 2019 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+// Copyright (c) 2021 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 //
 // WSO2 Inc. licenses this file to you under the Apache License,
 // Version 2.0 (the "License"); you may not use this file except
@@ -16,18 +16,22 @@
 
 import ballerina/test;
 import ballerina/log;
-import ballerina/math;
-import ballerina/system;
-import ballerina/config;
+import ballerina/random;
+import ballerina/lang.'float;
+
+configurable string accessKeyId = os:getEnv("ACCESS_KEY_ID");
+configurable string secretAccessKey = os:getEnv("SECRET_ACCESS_KEY");
+configurable string region = os:getEnv("REGION");
+configurable string accountNumber = os:getEnv("ACCOUNT_NUMBER");
 
 Configuration configuration = {
-    accessKey: getConfigValue("ACCESS_KEY_ID"),
-    secretKey: getConfigValue("SECRET_ACCESS_KEY"),
-    region: getConfigValue("REGION"),
-    accountNumber: getConfigValue("ACCOUNT_NUMBER")
+    accessKey: accessKeyId,
+    secretKey: secretAccessKey,
+    region: region,
+    accountNumber: accountNumber
 };
 
-Client sqs = new(configuration);
+Client sqs = check new (configuration);
 string fifoQueueResourcePath = "";
 string standardQueueResourcePath = "";
 string receivedReceiptHandler = "";
@@ -46,18 +50,18 @@ function testCreateFIFOQueue() {
             string|error queueResourcePathAny = splitString(response, AMAZON_HOST, 1);
             if (queueResourcePathAny is string) {
                 fifoQueueResourcePath = queueResourcePathAny;
-                log:printInfo("SQS queue was created. Queue URL: " + response);
+                log:print("SQS queue was created. Queue URL: " + response);
                 test:assertTrue(true);
             } else {
-                log:printInfo("Queue URL is not Amazon!");
+                log:print("Queue URL is not Amazon!");
                 test:assertTrue(false);
             }
         } else {
-            log:printInfo("Error while creating the queue.");
+            log:print("Error while creating the queue.");
             test:assertTrue(false);
         }
     } else {
-        log:printInfo("Error while creating the queue.");
+        log:print("Error while creating the queue.");
         test:assertTrue(false);
     }
 }
@@ -72,24 +76,24 @@ function testCreateStandardQueue() {
             string|error queueResourcePathAny = splitString(response, AMAZON_HOST, 1);
             if (queueResourcePathAny is string) {
                 standardQueueResourcePath = queueResourcePathAny;
-                log:printInfo("SQS queue was created. Queue URL: " + response);
+                log:print("SQS queue was created. Queue URL: " + response);
                 test:assertTrue(true);
             } else {
-                log:printInfo("Queue URL is not Amazon!");
+                log:print("Queue URL is not Amazon!");
                 test:assertTrue(false);
             }
         } else {
-            log:printInfo("Error while creating the queue.");
+            log:print("Error while creating the queue.");
             test:assertTrue(false);
         }
     } else {
-        log:printInfo("Error while creating the queue.");
+        log:print("Error while creating the queue.");
         test:assertTrue(false);
     }
 }
 
 @test:Config {
-    dependsOn: ["testCreateFIFOQueue"],
+    dependsOn: [testCreateFIFOQueue],
     groups: ["group1"]
 }
 function testSendMessage() {
@@ -107,20 +111,20 @@ function testSendMessage() {
         attributes);
     if (response is OutboundMessage) {
         if (response.messageId != "") {
-            log:printInfo("Sent message to SQS. MessageID: " + response.messageId);
+            log:print("Sent message to SQS. MessageID: " + response.messageId);
             test:assertTrue(true);
         } else {
-            log:printInfo("Error while sending the message to the queue.");
+            log:print("Error while sending the message to the queue.");
             test:assertTrue(false);
         }
     } else {
-        log:printInfo("Error while sending the message to the queue.");
+        log:print("Error while sending the message to the queue.");
         test:assertTrue(false);
     }
 }
 
 @test:Config {
-    dependsOn: ["testSendMessage"],
+    dependsOn: [testSendMessage],
     groups: ["group1"]
 }
 function testReceiveMessage() {
@@ -135,20 +139,20 @@ function testReceiveMessage() {
     if (response is InboundMessage[]) {
         if (response[0].receiptHandle != "") {
             receivedReceiptHandler = <@untainted>response[0].receiptHandle;
-            log:printInfo("Successfully received the message. Receipt Handle: " + response[0].receiptHandle);
+            log:print("Successfully received the message. Receipt Handle: " + response[0].receiptHandle);
             test:assertTrue(true);
         } else {
-            log:printInfo("Error occurred while receiving the message.");
+            log:print("Error occurred while receiving the message.");
             test:assertTrue(false);
         }
     } else {
-        log:printInfo("Error occurred while receiving the message.");
+        log:print("Error occurred while receiving the message.");
         test:assertTrue(false);
     }
 }
 
 @test:Config {
-    dependsOn: ["testReceiveMessage"],
+    dependsOn: [testReceiveMessage],
     groups: ["group1"]
 }
 function testDeleteMessage() {
@@ -156,33 +160,33 @@ function testDeleteMessage() {
     boolean|error response = sqs->deleteMessage(fifoQueueResourcePath, receiptHandler);
     if (response is boolean) {
         if (response) {
-            log:printInfo("Successfully deleted the message from the queue.");
+            log:print("Successfully deleted the message from the queue.");
             test:assertTrue(true);
         } else {
-            log:printInfo("Error occurred while deleting the message.");
+            log:print("Error occurred while deleting the message.");
             test:assertTrue(false);
         }
     } else {
-        log:printInfo("Error occurred while deleting the message.");
+        log:print("Error occurred while deleting the message.");
         test:assertTrue(false);
     }
 }
 
 @test:Config {
-    dependsOn: ["testCreateStandardQueue"],
+    dependsOn: [testCreateStandardQueue],
     groups: ["group2"]
 }
 function testCRUDOperationsForMultipleMessages() {
-    log:printInfo("Test, testCRUDOperationsForMultipleMessages is started ...");
+    log:print("Test, testCRUDOperationsForMultipleMessages is started ...");
     int msgCnt = 0;
 
     // Send 2 messages to the queue
     while (msgCnt < 2) {
         string queueUrl = "";
-        log:printInfo("standardQueueResourcePath " + standardQueueResourcePath);
+        log:print("standardQueueResourcePath " + standardQueueResourcePath);
         OutboundMessage|error response1 = sqs->sendMessage("There is a tree", standardQueueResourcePath, {});
         if (response1 is OutboundMessage) {
-            log:printInfo("Sent an alert to the queue. MessageID: " + response1.messageId);
+            log:print("Sent an alert to the queue. MessageID: " + response1.messageId);
         } else {
             log:printError("Error occurred while trying to send an alert to the SQS queue!");
             test:assertTrue(false);
@@ -208,7 +212,7 @@ function testCRUDOperationsForMultipleMessages() {
                     if (deleteResponse is boolean && deleteResponse) {
                         if (deleteResponse) {
                             processesMsgCnt = processesMsgCnt + 1;
-                            log:printInfo("Deleted the fire alert \"" + eachResponse.body + "\" from the queue.");
+                            log:print("Deleted the fire alert \"" + eachResponse.body + "\" from the queue.");
                         }
                     } else {
                         log:printError("Error occurred while deleting a message.");
@@ -216,7 +220,7 @@ function testCRUDOperationsForMultipleMessages() {
                     }
                 }
             } else {
-                log:printInfo("Queue is empty. No messages to be deleted.");
+                log:print("Queue is empty. No messages to be deleted.");
             }
         } else {
             log:printError("Error occurred while receiving a message.");
@@ -225,25 +229,21 @@ function testCRUDOperationsForMultipleMessages() {
         msgCnt = msgCnt + 1;
     }
     if (processesMsgCnt == 2) {
-        log:printInfo("Successfully deleted all the messages from the queue!");
+        log:print("Successfully deleted all the messages from the queue!");
         test:assertTrue(true);
     } else {
-        log:printInfo("Error occurred while processing the messages.");
+        log:print("Error occurred while processing the messages.");
         test:assertTrue(false);
     }
 }
 
 isolated function genRandQueueName(boolean isFifo = false) returns string {
-    float ranNumFloat = math:random()*10000000;
-    anydata ranNumInt = math:round(ranNumFloat);
+    float ranNumFloat = random:createDecimal()*10000000;
+    anydata ranNumInt = <int> float:round(ranNumFloat);
     string queueName = "testQueue" + ranNumInt.toString();
     if (isFifo) {
         return queueName + ".fifo";
     } else {
         return queueName;
     }
-}
-
-isolated function getConfigValue(string key) returns string {
-    return (system:getEnv(key) != "") ? system:getEnv(key) : config:getAsString(key);
 }

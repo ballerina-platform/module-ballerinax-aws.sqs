@@ -5,13 +5,13 @@ AWS SQS Connector allows you to connect to the Amazon SQS service via REST API f
 
 ## Compatibility
 
-|                    |    Versions          |  
+|                    |       Versions       |  
 |:------------------:|:--------------------:|
-| Ballerina Language |   Swan Lake Preview5 |
-| Amazon SQS API     |   2012-11-05         |
+| Ballerina Language |   Swan Lake Alpha 2  |
+|  Amazon SQS API    |      2012-11-05      |
 
 
-## Sample
+## Quick Start
 
 First, import the `ballerinax/aws.sqs` module and other related modules into the Ballerina project and create a `main` method.
 
@@ -56,7 +56,7 @@ sqs:Configuration configuration = {
     accountNumber: "<ACCOUNT_NUMBER>"
 };
 
-sqs:Client sqsClient = new(configuration);
+sqs:Client sqsClient = check new (configuration);
 ```
 
 If you want to add your own key store to define the `secureSocketConfig`, change the SQS configuration as
@@ -143,7 +143,11 @@ if (response is boolean) {
     }
 }
 ```
-## Example 1
+
+# Sample
+Samples are available at : https://github.com/ballerina-platform/module-ballerinax-aws.sqs/tree/master/samples. To run a sample, create a new TOML file with name Config.toml in the same directory as the .bal file with above-mentioned configurable values.
+
+## Managing SQS Standard Queue
 
 This example describes how an SQS Standard Queue is created, a message is sent to it, received from the queue, and deleted from the queue.
 
@@ -151,14 +155,19 @@ This example describes how an SQS Standard Queue is created, a message is sent t
 import ballerina/log;
 import ballerinax/aws.sqs;
 
+configurable string accessKeyId = ?;
+configurable string secretAccessKey = ?;
+configurable string region = ?;
+configurable string accountNumber = ?;
+
 public function main(string... args) {
 
     // Add the SQS credentials as the Configuration
     sqs:Configuration configuration = {
-        accessKey: "<ACCESS_KEY>",
-        secretKey: "<SECRET_ACCESS>",
-        region: "<REGION>",
-        accountNumber: "<ACCOUNT_NUMBER>"
+        accessKey: accessKeyId,
+        secretKey: secretAccessKey,
+        region: region,
+        accountNumber: accountNumber
     };
 
     sqs:Client sqsClient = new(configuration);
@@ -219,7 +228,7 @@ public function main(string... args) {
 }
 ```
 
-## Example 2
+## Managing SQS FIFO Queue
 
 This example describes how a SQS FIFO Queue is created, a message is sent to it, received from the queue, and deleted from the queue. 
 
@@ -227,17 +236,22 @@ This example describes how a SQS FIFO Queue is created, a message is sent to it,
 import ballerina/log;
 import ballerinax/aws.sqs;
 
+configurable string accessKeyId = ?;
+configurable string secretAccessKey = ?;
+configurable string region = ?;
+configurable string accountNumber = ?;
+
 public function main(string... args) {
 
     // Add the SQS credentials as the Configuration
     sqs:Configuration configuration = {
-        accessKey: "<ACCESS_KEY>",
-        secretKey: "<SECRET_ACCESS>",
-        region: "<REGION>",
-        accountNumber: "<ACCOUNT_NUMBER>"
+        accessKey: accessKeyId,
+        secretKey: secretAccessKey,
+        region: region,
+        accountNumber: accountNumber
     };
 
-    sqs:Client sqsClient = new(configuration);
+    sqs:Client sqsClient = check new (configuration);
 
     // Declare common variables
     string queueResourcePath = "";

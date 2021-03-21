@@ -1,4 +1,4 @@
-// Copyright (c) 2019 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+// Copyright (c) 2021 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 //
 // WSO2 Inc. licenses this file to you under the Apache License,
 // Version 2.0 (the "License"); you may not use this file except
@@ -35,7 +35,7 @@ public client class Client {
     string acctNum;
     string host;
 
-    public function init(Configuration config) {
+    public function init(Configuration config) returns error? {
         self.accessKey = config.accessKey;
         self.secretKey = config.secretKey;
         self.acctNum = config.accountNumber;
@@ -43,9 +43,9 @@ public client class Client {
         self.host = SQS_SERVICE_NAME + "." + self.region + "." + AMAZON_HOST;
         http:ClientSecureSocket? clientSecureSocket = config?.secureSocketConfig;
         if (clientSecureSocket is http:ClientSecureSocket) {
-            self.clientEp = new("https://" + self.host, {secureSocket: clientSecureSocket});
+            self.clientEp = check new ("https://" + self.host, {secureSocket: clientSecureSocket});
         } else {
-            self.clientEp = new("https://" + self.host, {});
+            self.clientEp = check new ("https://" + self.host, {});
         }
     }
 
@@ -54,7 +54,7 @@ public client class Client {
     # + queueName - Name of the queue to be created 
     # + attributes - Other attribute parameters 
     # + return - If success, URL of the created queue, else returns error
-    public remote function createQueue(string queueName, map<string> attributes)
+    remote function createQueue(string queueName, map<string> attributes)
             returns @tainted string|OperationError{
         string amzTarget = AMAZON_SQS_API_VERSION + "." + ACTION_CREATE_QUEUE;
         string endpoint = "/";
@@ -69,7 +69,7 @@ public client class Client {
             parameters["Attribute." + attributeNumber.toString() + ".Value"] = value;
             attributeNumber = attributeNumber + 1;
         }
-        http:Request|GeneratePOSTRequestFailed request = self.generatePOSTRequest(amzTarget,
+        http:Request|error request = self.generatePOSTRequest(amzTarget,
             endpoint, self.buildPayload(parameters));
         if (request is http:Request) {
             var httpResponse = self.clientEp->post(endpoint, request);
@@ -77,10 +77,10 @@ public client class Client {
             if (response is xml){
                 return xmlToCreatedQueueUrl(response);
             } else {
-                 return OperationError(OPERATION_ERROR_MSG, response);
+                 return error OperationError(OPERATION_ERROR_MSG, response);
             }
         } else {
-            return OperationError(OPERATION_ERROR_MSG, request);
+            return error OperationError(OPERATION_ERROR_MSG, request);
         }
     }
 
@@ -90,7 +90,7 @@ public client class Client {
     # + queueResourcePath - Resource path to the queue from the host address. e.g.: /610968236798/myQueue.fifo
     # + attributes - Non-mandatory parameters for sending a message 
     # + return - If success, details of the sent message, else returns error
-    public remote function sendMessage(string messageBody, string queueResourcePath, map<string> attributes) 
+    remote function sendMessage(string messageBody, string queueResourcePath, map<string> attributes) 
             returns @tainted OutboundMessage|OperationError {
         string|error msgbody = encoding:encodeUriComponent(messageBody, UTF_8);
         if (msgbody is string) {
@@ -101,7 +101,7 @@ public client class Client {
             foreach var [key, value] in attributes.entries() {
                 parameters[key] = value;
             }
-            http:Request|GeneratePOSTRequestFailed request = self.generatePOSTRequest(amzTarget,
+            http:Request|error request = self.generatePOSTRequest(amzTarget,
                 queueResourcePath, self.buildPayload(parameters));
             if (request is http:Request) {
                 var httpResponse = self.clientEp->post(queueResourcePath, request);
@@ -111,16 +111,16 @@ public client class Client {
                     if (result is OutboundMessage) {
                         return result;
                     } else {
-                        return OperationError(OPERATION_ERROR_MSG, result);
+                        return error OperationError(OPERATION_ERROR_MSG, result);
                     }
                 } else {
-                    return OperationError(OPERATION_ERROR_MSG, response);
+                    return error OperationError(OPERATION_ERROR_MSG, response);
                 }
             } else {
-                return OperationError(OPERATION_ERROR_MSG, request);
+                return error OperationError(OPERATION_ERROR_MSG, request);
             }
         } else {
-            return OperationError(OPERATION_ERROR_MSG, msgbody);
+            return error OperationError(OPERATION_ERROR_MSG, msgbody);
         }
     }
 
@@ -129,7 +129,7 @@ public client class Client {
     # + queueResourcePath - Resource path to the queue from the host address. e.g.: /610968236798/myQueue.fifo 
     # + attributes - Non-mandatory parameters for receiving a message
     # + return - If success, details of the received message, else returns error
-    public remote function receiveMessage(string queueResourcePath, map<string> attributes) 
+    remote function receiveMessage(string queueResourcePath, map<string> attributes) 
             returns @tainted InboundMessage[]|OperationError {
         string amzTarget = AMAZON_SQS_API_VERSION + "." + ACTION_RECEIVE_MESSAGE;
         map<string> parameters = {};
@@ -137,7 +137,7 @@ public client class Client {
         foreach var [key, value] in attributes.entries() {
             parameters[key] = value;
         }
-        http:Request|GeneratePOSTRequestFailed request = self.generatePOSTRequest(amzTarget,
+        http:Request|error request = self.generatePOSTRequest(amzTarget,
             queueResourcePath, self.buildPayload(parameters));
         if (request is http:Request) {
             var httpResponse = self.clientEp->post(queueResourcePath, request);
@@ -147,13 +147,13 @@ public client class Client {
                 if (result is InboundMessage[]) {
                     return result;
                 } else {
-                    return OperationError(OPERATION_ERROR_MSG, result);
+                    return error OperationError(OPERATION_ERROR_MSG, result);
                 }
             } else {
-                return OperationError(OPERATION_ERROR_MSG, response);
+                return error OperationError(OPERATION_ERROR_MSG, response);
             }
         } else {
-            return OperationError(OPERATION_ERROR_MSG, request);
+            return error OperationError(OPERATION_ERROR_MSG, request);
         }
     }
 
@@ -162,7 +162,7 @@ public client class Client {
     # + queueResourcePath - Resource path to the queue from the host address. e.g.: /610968236798/myQueue.fifo
     # + receiptHandle - Receipt Handle parameter for the message(s) to be deleted
     # + return - Whether the message(s) were successfully deleted or whether an error occurred
-    public remote function deleteMessage(string queueResourcePath, string receiptHandle)
+    remote function deleteMessage(string queueResourcePath, string receiptHandle)
             returns @tainted boolean|OperationError {
         string amzTarget = AMAZON_SQS_API_VERSION + "." + ACTION_DELETE_MESSAGE;
         string|error receiptHandleEncoded = encoding:encodeUriComponent(receiptHandle, UTF_8);
@@ -170,20 +170,20 @@ public client class Client {
             map<string> parameters = {};
             parameters[PAYLOAD_PARAM_ACTION] = ACTION_DELETE_MESSAGE;
             parameters[PAYLOAD_PARAM_RECEIPT_HANDLE] = receiptHandleEncoded;
-            http:Request|GeneratePOSTRequestFailed request = self.generatePOSTRequest(amzTarget, queueResourcePath, self.buildPayload(parameters));
+            http:Request|error request = self.generatePOSTRequest(amzTarget, queueResourcePath, self.buildPayload(parameters));
             if (request is http:Request) {
                 var httpResponse = self.clientEp->post(queueResourcePath, request);
                 xml|ResponseHandleFailed response = handleResponse(httpResponse);
                 if (response is xml) {
                     return isXmlDeleteResponse(response);
                 } else {
-                    return OperationError(OPERATION_ERROR_MSG, response);
+                    return error OperationError(OPERATION_ERROR_MSG, response);
                 }
             } else {
-                return OperationError(OPERATION_ERROR_MSG, request);
+                return error OperationError(OPERATION_ERROR_MSG, request);
             }
         } else {
-            return OperationError(OPERATION_ERROR_MSG, receiptHandleEncoded);
+            return error OperationError(OPERATION_ERROR_MSG, receiptHandleEncoded);
         }
     }
 
@@ -201,7 +201,7 @@ public client class Client {
     }
 
     private isolated function generatePOSTRequest(string amzTarget, string canonicalUri, string payload)
-            returns http:Request|GeneratePOSTRequestFailed {
+            returns http:Request|error {
         time:Time|error time = time:toTimeZone(time:currentTime(), "GMT");
         string|error amzDate;
         string|error dateStamp;
@@ -222,8 +222,8 @@ public client class Client {
                 string credentialScope = dateStamp + "/" + self.region + "/" + SQS_SERVICE_NAME + "/" + "aws4_request";
                 string stringToSign = algorithm + "\n" +  amzDate + "\n" +  credentialScope + "\n"
                     +  array:toBase16(crypto:hashSha256(canonicalRequest.toBytes())).toLowerAscii();
-                byte[] signingKey = self.getSignatureKey(self.secretKey, dateStamp, self.region, SQS_SERVICE_NAME);
-                string signature = array:toBase16(crypto:hmacSha256(stringToSign
+                byte[] signingKey = check self.getSignatureKey(self.secretKey, dateStamp, self.region, SQS_SERVICE_NAME);
+                string signature = array:toBase16(check crypto:hmacSha256(stringToSign
                     .toBytes(), signingKey)).toLowerAscii();
                 string authorizationHeader = algorithm + " " + "Credential=" + self.accessKey + "/"
                     + credentialScope + ", " +  "SignedHeaders=" + signedHeaders + ", " + "Signature=" + signature;
@@ -243,29 +243,29 @@ public client class Client {
                 return request;
             } else {
                 if (amzDate is error) {
-                    return GeneratePOSTRequestFailed(GENERATE_POST_REQUEST_FAILED_MSG, amzDate);
+                    return error GeneratePOSTRequestFailed(GENERATE_POST_REQUEST_FAILED_MSG, amzDate);
                 } else if (dateStamp is error) {
-                    return GeneratePOSTRequestFailed(GENERATE_POST_REQUEST_FAILED_MSG, dateStamp);
+                    return error GeneratePOSTRequestFailed(GENERATE_POST_REQUEST_FAILED_MSG, dateStamp);
                 } else {
-                    return GeneratePOSTRequestFailed(GENERATE_POST_REQUEST_FAILED_MSG);
+                    return error GeneratePOSTRequestFailed(GENERATE_POST_REQUEST_FAILED_MSG);
                 }
             }
         } else {
-            return GeneratePOSTRequestFailed(GENERATE_POST_REQUEST_FAILED_MSG);
+            return error GeneratePOSTRequestFailed(GENERATE_POST_REQUEST_FAILED_MSG);
         }
 
     }
 
-    private isolated function sign(byte[] key, string msg) returns byte[] {
-        return crypto:hmacSha256(msg.toBytes(), key);
+    private isolated function sign(byte[] key, string msg) returns byte[]|error {
+        return check crypto:hmacSha256(msg.toBytes(), key);
     }
 
-    private isolated function getSignatureKey(string secretKey, string datestamp, string region, string serviceName)  returns byte[] {
+    private isolated function getSignatureKey(string secretKey, string datestamp, string region, string serviceName)  returns byte[]|error {
         string awskey = ("AWS4" + secretKey);
-        byte[] kDate = self.sign(awskey.toBytes(), datestamp);
-        byte[] kRegion = self.sign(kDate, region);
-        byte[] kService = self.sign(kRegion, serviceName);
-        byte[] kSigning = self.sign(kService, "aws4_request");
+        byte[] kDate = check self.sign(awskey.toBytes(), datestamp);
+        byte[] kRegion = check self.sign(kDate, region);
+        byte[] kService = check self.sign(kRegion, serviceName);
+        byte[] kSigning = check self.sign(kService, "aws4_request");
         return kSigning;
     }
 
