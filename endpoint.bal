@@ -26,6 +26,7 @@ import ballerina/time;
 # + secretKey - The Amazon API secret key
 # + region - The Amazon API Region
 # + acctNum - The account number of the SQS service
+@display {label: "Amazon SQS Client", iconPath: "AmazonSQSLogo.png"}
 public client class Client {
 
     http:Client clientEp;
@@ -54,8 +55,10 @@ public client class Client {
     # + queueName - Name of the queue to be created 
     # + attributes - Other attribute parameters 
     # + return - If success, URL of the created queue, else returns error
-    remote function createQueue(string queueName, map<string> attributes)
-            returns @tainted string|OperationError{
+    @display {label: "Create queue"}
+    remote function createQueue(@display {label: "Queue name"} string queueName, 
+                                @display {label: "Map of attributes"} map<string> attributes)
+                                returns @tainted @display {label: "Url of created queue"} string|OperationError{
         string amzTarget = AMAZON_SQS_API_VERSION + "." + ACTION_CREATE_QUEUE;
         string endpoint = "/";
         string payload;
@@ -90,8 +93,11 @@ public client class Client {
     # + queueResourcePath - Resource path to the queue from the host address. e.g.: /610968236798/myQueue.fifo
     # + attributes - Non-mandatory parameters for sending a message 
     # + return - If success, details of the sent message, else returns error
-    remote function sendMessage(string messageBody, string queueResourcePath, map<string> attributes) 
-            returns @tainted OutboundMessage|OperationError {
+    @display {label: "Send message in queue"}
+    remote function sendMessage(@display {label: "Message body to send"} string messageBody, 
+                                @display {label: "Resource path to queue"} string queueResourcePath, 
+                                @display {label: "Map of attributes"} map<string> attributes) 
+                                returns @tainted @display {label: "Message detail"} OutboundMessage|OperationError {
         string|error msgbody = encoding:encodeUriComponent(messageBody, UTF_8);
         if (msgbody is string) {
             string amzTarget = AMAZON_SQS_API_VERSION + "." + ACTION_SEND_MESSAGE;
@@ -129,8 +135,10 @@ public client class Client {
     # + queueResourcePath - Resource path to the queue from the host address. e.g.: /610968236798/myQueue.fifo 
     # + attributes - Non-mandatory parameters for receiving a message
     # + return - If success, details of the received message, else returns error
-    remote function receiveMessage(string queueResourcePath, map<string> attributes) 
-            returns @tainted InboundMessage[]|OperationError {
+    @display {label: "Receive message in queue"}
+    remote function receiveMessage(@display {label: "Resource path to queue"} string queueResourcePath, 
+                                  @display {label: "Map of attributes"} map<string> attributes) 
+                                  returns @tainted @display {label: "Message detail"} InboundMessage[]|OperationError {
         string amzTarget = AMAZON_SQS_API_VERSION + "." + ACTION_RECEIVE_MESSAGE;
         map<string> parameters = {};
         parameters[PAYLOAD_PARAM_ACTION] = ACTION_RECEIVE_MESSAGE;
@@ -162,8 +170,10 @@ public client class Client {
     # + queueResourcePath - Resource path to the queue from the host address. e.g.: /610968236798/myQueue.fifo
     # + receiptHandle - Receipt Handle parameter for the message(s) to be deleted
     # + return - Whether the message(s) were successfully deleted or whether an error occurred
-    remote function deleteMessage(string queueResourcePath, string receiptHandle)
-            returns @tainted boolean|OperationError {
+    @display {label: "Delete message in queue"}
+    remote function deleteMessage(@display {label: "Resource path to queue"} string queueResourcePath, 
+                                  @display {label: "Receipt handle parameter"} string receiptHandle)
+                                  returns @tainted @display {label: "Delete status"} boolean|OperationError {
         string amzTarget = AMAZON_SQS_API_VERSION + "." + ACTION_DELETE_MESSAGE;
         string|error receiptHandleEncoded = encoding:encodeUriComponent(receiptHandle, UTF_8);
         if (receiptHandleEncoded is string) {

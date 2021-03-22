@@ -18,6 +18,7 @@ import ballerina/test;
 import ballerina/log;
 import ballerina/random;
 import ballerina/lang.'float;
+import ballerina/os;
 
 configurable string accessKeyId = os:getEnv("ACCESS_KEY_ID");
 configurable string secretAccessKey = os:getEnv("SECRET_ACCESS_KEY");
