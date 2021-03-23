@@ -19,7 +19,6 @@ import ballerina/encoding;
 import ballerina/http;
 import ballerina/lang.array;
 import ballerina/time;
-import ballerina/io;
 
 # Object to initialize the connection with Amazon SQS.
 #
@@ -211,9 +210,7 @@ public client class Client {
         http:Request|error request = self.generatePOSTRequest(amzTarget, queueResourcePath, self.buildPayload(parameters));
         if (request is http:Request) {
             var httpResponse = self.clientEp->post(queueResourcePath, request);
-            io:println(httpResponse);
             xml|ResponseHandleFailed response = handleResponse(httpResponse);
-            io:println(response);
             if (response is xml) {
                 return isXmlDeleteQueueResponse(response);
             } else {

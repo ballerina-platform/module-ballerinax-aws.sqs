@@ -72,4 +72,9 @@ public function main(string... args) {
         log:printInfo("Successfully deleted the message from the queue.");
     }
 
+    // Delete the queue
+    boolean|error response5 = sqsClient->deleteQueue(queueResourcePath);
+    if (response is boolean && response5) {
+        log:printInfo("Successfully deleted the queue.");
+    }
 }

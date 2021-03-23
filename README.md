@@ -13,7 +13,7 @@ Amazon SQS Connector allows you to connect to the Amazon Simple Queue Service (S
 The Amazon SQS Connector allows you to access the Amazon SQS REST API through Ballerina. The following sections provide the details on client operations.
 
 **Client Operations**
-Connector contains operations that create queue, send messages, receive messages and delete messages in a queue.
+Connector contains operations that create and delete queue, send messages, receive messages and delete messages in a queue.
 
 
 ![image](docs/images/aws_sqs_connector.png)
@@ -177,6 +177,19 @@ if (response is boolean) {
 }
 ```
 
+## Deleting SQS Queue
+
+A queue should be deleted with the `deleteQueue` method. A successful delete operation returns a boolean value `true` and the error cases return a `false` value or an `error` object.
+
+```ballerina
+boolean|error response = sqsClient->deleteQueue("/123456789012/demo.fifo");
+if (response is boolean) {
+    if (response) {
+        log:printInfo("Successfully deleted the queue.");
+    }
+}
+```
+
 # Sample
 Samples are available at : https://github.com/ballerina-platform/module-ballerinax-aws.sqs/tree/master/samples. To run a sample, create a new TOML file with name Config.toml in the same directory as the .bal file with above-mentioned configurable values.
 
@@ -258,6 +271,11 @@ public function main(string... args) {
         }
     }
 
+    // Delete the queue
+    boolean|error response5 = sqsClient->deleteQueue(queueResourcePath);
+    if (response is boolean && response5) {
+        log:printInfo("Successfully deleted the queue.");
+    }
 }
 ```
 
@@ -340,6 +358,11 @@ public function main(string... args) {
         log:printInfo("Successfully deleted the message from the queue.");
     }
 
+    // Delete the queue
+    boolean|error response5 = sqsClient->deleteQueue(queueResourcePath);
+    if (response is boolean && response5) {
+        log:printInfo("Successfully deleted the queue.");
+    }
 }
 ```
 ### Pull the Module

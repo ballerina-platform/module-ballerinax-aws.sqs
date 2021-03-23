@@ -238,12 +238,9 @@ function testCRUDOperationsForMultipleMessages() {
     }
 }
 
-@test:Config {
-    dependsOn: [testDeleteMessage],
-    groups: ["group1"]
-}
-function testDeleteFIFOQueue() {
-    boolean|error response = sqs->deleteQueue(fifoQueueResourcePath);
+@test:AfterSuite {}
+function testDeleteStandardQueue() {
+    boolean|error response = sqs->deleteQueue(standardQueueResourcePath);
     if (response is boolean) {
         if (response) {
             log:print("Successfully deleted the queue.");
@@ -258,12 +255,9 @@ function testDeleteFIFOQueue() {
     }
 }
 
-@test:Config {
-    dependsOn: [testCRUDOperationsForMultipleMessages],
-    groups: ["group2"]
-}
-function testDeleteStandardQueue() {
-    boolean|error response = sqs->deleteQueue(standardQueueResourcePath);
+@test:AfterSuite {}
+function testDeleteFIFOQueue() {
+    boolean|error response = sqs->deleteQueue(fifoQueueResourcePath);
     if (response is boolean) {
         if (response) {
             log:print("Successfully deleted the queue.");

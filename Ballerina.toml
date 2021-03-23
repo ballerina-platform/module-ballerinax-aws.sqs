@@ -3,6 +3,6 @@ org = "ballerinax"
 name = "aws.sqs"
 license= ["Apache-2.0"]
 authors = ["Ballerina"]
-version= "0.99.3"
+version= "0.99.2"
 keywords = ["aws.sqs", "Amazon", "SQS", "Ballerina", "connector", "client"]
 repository = "https://github.com/ballerina-platform/module-ballerinax-aws.sqs"
