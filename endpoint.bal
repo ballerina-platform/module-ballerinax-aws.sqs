@@ -19,6 +19,7 @@ import ballerina/encoding;
 import ballerina/http;
 import ballerina/lang.array;
 import ballerina/time;
+import ballerina/io;
 
 # Object to initialize the connection with Amazon SQS.
 #
@@ -194,6 +195,32 @@ public client class Client {
             }
         } else {
             return error OperationError(OPERATION_ERROR_MSG, receiptHandleEncoded);
+        }
+    }
+
+    # Delete queue(s)
+    #
+    # + queueResourcePath - Resource path to the queue from the host address. e.g.: /610968236798/myQueue.fifo
+    # + return - Whether the queue(s) were successfully deleted or whether an error occurred
+    @display {label: "Delete the queue"}
+    remote function deleteQueue(@display {label: "Resource path to queue"} string queueResourcePath)
+                                  returns @tainted @display {label: "Delete status"} boolean|OperationError {
+        string amzTarget = AMAZON_SQS_API_VERSION + "." + ACTION_DELETE_QUEUE;
+        map<string> parameters = {};
+        parameters[PAYLOAD_PARAM_ACTION] = ACTION_DELETE_QUEUE;
+        http:Request|error request = self.generatePOSTRequest(amzTarget, queueResourcePath, self.buildPayload(parameters));
+        if (request is http:Request) {
+            var httpResponse = self.clientEp->post(queueResourcePath, request);
+            io:println(httpResponse);
+            xml|ResponseHandleFailed response = handleResponse(httpResponse);
+            io:println(response);
+            if (response is xml) {
+                return isXmlDeleteQueueResponse(response);
+            } else {
+                return error OperationError(OPERATION_ERROR_MSG, response);
+            }
+        } else {
+            return error OperationError(OPERATION_ERROR_MSG, request);
         }
     }
 

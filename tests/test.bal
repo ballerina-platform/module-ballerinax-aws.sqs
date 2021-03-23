@@ -238,6 +238,46 @@ function testCRUDOperationsForMultipleMessages() {
     }
 }
 
+@test:Config {
+    dependsOn: [testDeleteMessage],
+    groups: ["group1"]
+}
+function testDeleteFIFOQueue() {
+    boolean|error response = sqs->deleteQueue(fifoQueueResourcePath);
+    if (response is boolean) {
+        if (response) {
+            log:print("Successfully deleted the queue.");
+            test:assertTrue(true);
+        } else {
+            log:print("Error occurred while deleting the queue.");
+            test:assertTrue(false);
+        }
+    } else {
+        log:print("Error occurred while deleting the queue.");
+        test:assertTrue(false);
+    }
+}
+
+@test:Config {
+    dependsOn: [testCRUDOperationsForMultipleMessages],
+    groups: ["group2"]
+}
+function testDeleteStandardQueue() {
+    boolean|error response = sqs->deleteQueue(standardQueueResourcePath);
+    if (response is boolean) {
+        if (response) {
+            log:print("Successfully deleted the queue.");
+            test:assertTrue(true);
+        } else {
+            log:print("Error occurred while deleting the queue.");
+            test:assertTrue(false);
+        }
+    } else {
+        log:print("Error occurred while deleting the queue.");
+        test:assertTrue(false);
+    }
+}
+
 isolated function genRandQueueName(boolean isFifo = false) returns string {
     float ranNumFloat = random:createDecimal()*10000000;
     anydata ranNumInt = <int> float:round(ranNumFloat);

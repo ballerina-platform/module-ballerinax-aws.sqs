@@ -182,6 +182,16 @@ isolated function isXmlDeleteResponse(xml response) returns boolean {
     }
 }
 
+isolated function isXmlDeleteQueueResponse(xml response) returns boolean {
+    xmllib:Element topElement = <xmllib:Element> response;
+    string topElementName = topElement.getName();
+    if (topElementName.endsWith("DeleteQueueResponse")) {
+        return true ;
+    } else {
+        return false;
+    }
+}
+
 function read(string path) returns @tainted json|FileReadFailed {
     io:ReadableByteChannel|error readableByteChannel = io:openReadableFile(path);
     if (readableByteChannel is io:ReadableByteChannel) {

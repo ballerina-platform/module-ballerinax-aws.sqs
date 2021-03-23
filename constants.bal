@@ -56,6 +56,7 @@ const string ACTION_CREATE_QUEUE = "CreateQueue";
 const string ACTION_SEND_MESSAGE = "SendMessage";
 const string ACTION_RECEIVE_MESSAGE = "ReceiveMessage";
 const string ACTION_DELETE_MESSAGE = "DeleteMessage";
+const string ACTION_DELETE_QUEUE = "DeleteQueue";
 
 const string PAYLOAD_PARAM_ACTION = "Action";
 const string PAYLOAD_PARAM_VERSION = "Version";
