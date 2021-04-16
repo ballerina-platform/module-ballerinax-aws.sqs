@@ -1,4 +1,4 @@
-// Copyright (c) 2019 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+// Copyright (c) 2021 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 //
 // WSO2 Inc. licenses this file to you under the Apache License,
 // Version 2.0 (the "License"); you may not use this file except
@@ -57,4 +57,3 @@ const string ERROR_OCCURRED_WHILE_INVOKING_REST_API_MSG = "Error occurred while 
 const string OUTBOUND_MESSAGE_RESPONSE_EMPTY_MSG = "Outbound Message response is empty.";
 const string OPERATION_ERROR_MSG = "Error has occurred during an operation.";
 const string UNREACHABLE_STATE = "Response type cannot be http payload";
-
