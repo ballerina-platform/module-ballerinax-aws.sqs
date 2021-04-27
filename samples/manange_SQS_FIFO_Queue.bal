@@ -26,7 +26,6 @@ public function main(string... args) {
     map<string> attributes = {};
     attributes["VisibilityTimeout"] = "400";
     attributes["FifoQueue"] = "true";
-
     string|error response1 = sqsClient->createQueue("demo.fifo", attributes);
     if (response1 is string) {
         log:printInfo("Created queue URL: " + response1);
@@ -36,8 +35,6 @@ public function main(string... args) {
 
     // Send a message to the created queue
     attributes = {};
-    attributes["MessageDeduplicationId"] = "duplicationID1";
-    attributes["MessageGroupId"] = "groupID1";
     attributes["MessageAttribute.1.Name"] = "Name1";
     attributes["MessageAttribute.1.Value.StringValue"] = "Value1";
     attributes["MessageAttribute.1.Value.DataType"] = "String";
@@ -46,19 +43,15 @@ public function main(string... args) {
     attributes["MessageAttribute.2.Value.DataType"] = "String";
     string queueUrl = "";
     sqs:OutboundMessage|error response2 = sqsClient->sendMessage("Sample text message.", queueResourcePath,
-        attributes);
+        attributes, "grpID1", "dupID1");
     if (response2 is sqs:OutboundMessage) {
         log:printInfo("Sent message to SQS. MessageID: " + response2.messageId);
     }
 
     // Receive a message from the queue
-    attributes = {};
-    attributes["MaxNumberOfMessages"] = "1";
-    attributes["VisibilityTimeout"] = "600";
-    attributes["WaitTimeSeconds"] = "2";
-    attributes["AttributeName.1"] = "SenderId";
-    attributes["MessageAttributeName.1"] = "Name2";
-    sqs:InboundMessage[]|error response3 = sqsClient->receiveMessage(queueResourcePath, attributes);
+    string[] attributeNames = ["SenderId"];
+    string[] messageAttributeNames = ["Name1"];
+    sqs:InboundMessage[]|error response3 = sqsClient->receiveMessage(fifoQueueResourcePath, 1, 600, 2, attributeNames, messageAttributeNames);
     if (response3 is sqs:InboundMessage[] && response3.length() > 0) {
         log:printInfo("Successfully received the message. Message body: " + response3[0].body);
         log:printInfo("\nReceipt Handle: " + response3[0].receiptHandle);

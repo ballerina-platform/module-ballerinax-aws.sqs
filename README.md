@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/ballerina-platform/module-amazonsqs.svg?branch=master)](https://travis-ci.org/ballerina-platform/module-amazonsqs)
+[![Build Status](https://travis-ci.org/ballerina-platform/module-ballerinax-aws.sqs.svg?branch=master)](https://travis-ci.org/ballerina-platform/module-ballerinax-aws.sqs)
 
 # Ballerina Amazon SQS Connector
 
@@ -151,13 +151,9 @@ if (response is sqs:OutboundMessage) {
 A sent message can be received with `receiveMessage` method. The path to the queue from the AWS host address and appropriate attribute parameters should be used as the parameters for the operation. A successful receive operation returns an array of `InboundMessage` objects, each containing the message and the `receiptHandler`, while the error cases returns an `error` object.
 
 ```ballerina
-map<string> attributes = {};
-attributes["MaxNumberOfMessages"] = "1";
-attributes["VisibilityTimeout"] = "600";
-attributes["WaitTimeSeconds"] = "2";
-attributes["AttributeName.1"] = "SenderId";
-attributes["MessageAttributeName.1"] = "Name2";
-sqs:InboundMessage[]|error response = sqsClient->receiveMessage("/123456789012/demo.fifo", attributes);
+string[] attributeNames = ["SenderId"];
+string[] messageAttributeNames = ["Name2"];
+sqs:InboundMessage[]|error response = sqsClient->receiveMessage("/123456789012/demo.fifo", 1, 600, 2, attributeNames, messageAttributeNames);
 if (response is sqs:InboundMessage[]) {
     log:printInfo("Successfully received the message. Message body of the first message: " + response[0].body);
     log:printInfo("\nReceipt Handle: " + response[0].receiptHandle);
@@ -249,13 +245,9 @@ public function main(string... args) {
     }
 
     // Receive a message from the queue
-    attributes = {};
-    attributes["MaxNumberOfMessages"] = "1";
-    attributes["VisibilityTimeout"] = "600";
-    attributes["WaitTimeSeconds"] = "2";
-    attributes["AttributeName.1"] = "SenderId";
-    attributes["MessageAttributeName.1"] = "Name2";
-    sqs:InboundMessage[]|error response3 = sqsClient->receiveMessage(queueResourcePath, attributes);
+    string[] attributeNames = ["SenderId"];
+    string[] messageAttributeNames = ["Name2"];
+    sqs:InboundMessage[]|error response2 = sqs->receiveMessage(standardQueueResourcePath, 10, 2, 1);
     if (response3 is sqs:InboundMessage[] && response3.length() > 0) {
         log:printInfo("Successfully received the message. Message body: " + response3[0].body);
         log:printInfo("\nReceipt Handle: " + response3[0].receiptHandle);
@@ -322,8 +314,6 @@ public function main(string... args) {
 
     // Send a message to the created queue
     attributes = {};
-    attributes["MessageDeduplicationId"] = "duplicationID1";
-    attributes["MessageGroupId"] = "groupID1";
     attributes["MessageAttribute.1.Name"] = "Name1";
     attributes["MessageAttribute.1.Value.StringValue"] = "Value1";
     attributes["MessageAttribute.1.Value.DataType"] = "String";
@@ -332,19 +322,15 @@ public function main(string... args) {
     attributes["MessageAttribute.2.Value.DataType"] = "String";
     string queueUrl = "";
     sqs:OutboundMessage|error response2 = sqsClient->sendMessage("Sample text message.", queueResourcePath,
-        attributes);
+        attributes, "grpID1", "dupID1");
     if (response2 is sqs:OutboundMessage) {
         log:printInfo("Sent message to SQS. MessageID: " + response2.messageId);
     }
 
     // Receive a message from the queue
-    attributes = {};
-    attributes["MaxNumberOfMessages"] = "1";
-    attributes["VisibilityTimeout"] = "600";
-    attributes["WaitTimeSeconds"] = "2";
-    attributes["AttributeName.1"] = "SenderId";
-    attributes["MessageAttributeName.1"] = "Name2";
-    sqs:InboundMessage[]|error response3 = sqsClient->receiveMessage(queueResourcePath, attributes);
+    string[] attributeNames = ["SenderId"];
+    string[] messageAttributeNames = ["N1", "N2"];
+    sqs:InboundMessage[]|error response3 = sqs->receiveMessage(fifoQueueResourcePath, 1, 600, 2, attributeNames, messageAttributeNames);
     if (response3 is sqs:InboundMessage[] && response3.length() > 0) {
         log:printInfo("Successfully received the message. Message body: " + response3[0].body);
         log:printInfo("\nReceipt Handle: " + response3[0].receiptHandle);

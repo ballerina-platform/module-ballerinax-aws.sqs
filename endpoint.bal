@@ -19,6 +19,7 @@ import ballerina/url;
 import ballerina/http;
 import ballerina/jballerina.java;
 import ballerina/lang.array;
+import ballerina/log;
 import ballerina/time;
 
 # Object to initialize the connection with Amazon SQS.
@@ -55,11 +56,13 @@ public client class Client {
     #
     # + queueName - Name of the queue to be created 
     # + attributes - Other attribute parameters 
+    # + tags - Other tags parameters 
     # + return - If success, URL of the created queue, else returns error
     @display {label: "Create queue"}
     remote isolated function createQueue(@display {label: "Queue name"} string queueName, 
-                                @display {label: "Map of attributes"} map<string> attributes)
-                                returns @tainted @display {label: "Url of created queue"} string|OperationError{
+                                @display {label: "Attributes"} map<string>? attributes = (), 
+                                @display {label: "Tags"} map<string>? tags = ())
+                                returns @tainted @display {label: "Url of created queue"} string|OperationError {
         string amzTarget = AMAZON_SQS_API_VERSION + FULL_STOP + ACTION_CREATE_QUEUE;
         string endpoint = FORWARD_SLASH;
         string payload;
@@ -68,10 +71,20 @@ public client class Client {
         parameters[PAYLOAD_PARAM_VERSION] = SQS_VERSION;
         parameters[PAYLOAD_PARAM_QUEUE_NAME] = queueName;
         int attributeNumber = 1;
-        foreach var [key, value] in attributes.entries() {
-            parameters["Attribute." + attributeNumber.toString() + ".Name"] = key;
-            parameters["Attribute." + attributeNumber.toString() + ".Value"] = value;
-            attributeNumber = attributeNumber + 1;
+        if(attributes is map<string>){
+            foreach var [key, value] in attributes.entries() {
+                parameters["Attribute." + attributeNumber.toString() + ".Name"] = key;
+                parameters["Attribute." + attributeNumber.toString() + ".Value"] = value;
+                attributeNumber = attributeNumber + 1;
+            }
+        }
+        int tagNumber = 1;
+        if(tags is map<string>){
+            foreach var [key, value] in tags.entries() {
+                parameters["Tag." + tagNumber.toString() + ".Key"] = key;
+                parameters["Tag." + tagNumber.toString() + ".Value"] = value;
+                tagNumber = tagNumber + 1;
+            }
         }
         http:Request|error request = self.generatePOSTRequest(amzTarget, endpoint, 
                                      self.buildPayload(parameters));
@@ -92,28 +105,47 @@ public client class Client {
     #
     # + messageBody - Message body string to be sent 
     # + queueResourcePath - Resource path to the queue from the host address. e.g.: /610968236798/myQueue.fifo
-    # + attributes - Non-mandatory parameters for sending a message 
+    # + messageAttributes - Non-mandatory message attributes for sending a message 
+    # + messageGroupId -  Message group which a message belongs. only to FIFO queues
+    # + messageDeduplicationId - Message deduplicationId Id. only to FIFO queues
+    # + delaySeconds - Length of time for which to delay a specific message. On FIFO queue can't set for a message
     # + return - If success, details of the sent message, else returns error
     @display {label: "Send message in queue"}
     remote isolated function sendMessage(@display {label: "Message body to send"} string messageBody, 
-                                @display {label: "Resource path to queue"} string queueResourcePath, 
-                                @display {label: "Map of attributes"} map<string> attributes) 
-                                returns @tainted @display {label: "Message detail"} OutboundMessage|OperationError {
-        string|error msgbody = url:encode(messageBody, UTF_8);
-        if (msgbody is string) {
+                                         @display {label: "Resource path to queue"} string queueResourcePath, 
+                                         @display {label: "Message Attributes"} map<string>? messageAttributes = (),
+                                         @display {label: "Tag specifies message belongs to message group"} string? messageGroupId = (),
+                                         @display {label: "Message deduplicationId Id"} string? messageDeduplicationId = (),
+                                         @display {label: "Time to delay a specific message"} int? delaySeconds = ()) 
+                                         returns @tainted @display {label: "Message detail"} OutboundMessage|OperationError {
+            string|error msgbody = url:encode(messageBody, UTF_8);
+            if (msgbody is string) {
             string amzTarget = AMAZON_SQS_API_VERSION + FULL_STOP + ACTION_SEND_MESSAGE;
             map<string> parameters = {};
             parameters[PAYLOAD_PARAM_ACTION] = ACTION_SEND_MESSAGE;
             parameters[PAYLOAD_PARAM_MESSAGE_BODY] = msgbody;
-            foreach var [key, value] in attributes.entries() {
-                parameters[key] = value;
+            if(messageAttributes is map<string>){
+            foreach var [key, value] in messageAttributes.entries() {
+            parameters[key] = value;
             }
+            }
+            if(delaySeconds is int){
+            parameters["DelaySeconds"] = delaySeconds.toString();
+            }
+            if(messageGroupId is string){
+            parameters["MessageGroupId"] = messageGroupId;
+            }
+            if(messageDeduplicationId is string){
+            parameters["MessageDeduplicationId"] = messageDeduplicationId;
+            }
+            log:printInfo(parameters.toString());
             http:Request|error request = self.generatePOSTRequest(amzTarget, queueResourcePath, 
                                          self.buildPayload(parameters));
             if (request is http:Request) {
                 var httpResponse = self.clientEp->post(queueResourcePath, request);
                 xml|ResponseHandleFailed response = handleResponse(httpResponse);
                 if (response is xml){
+                                        log:printInfo(response.toString());
                     OutboundMessage|DataMappingError result = xmlToOutboundMessage(response);
                     if (result is OutboundMessage) {
                         return result;
@@ -134,17 +166,46 @@ public client class Client {
     # Receive message(s) from the queue
     #
     # + queueResourcePath - Resource path to the queue from the host address. e.g.: /610968236798/myQueue.fifo 
-    # + attributes - Non-mandatory parameters for receiving a message
+    # + maxNumberOfMessages - Maximum number of messages returned. Possible values are 1-10. Default is 1
+    # + visibilityTimeout - Duration (in seconds) that messages are hidden from subsequent requests
+    # + attributeNames - List of attributes that need to be returned along with each message
+    # + messageAttributeNames -  Name of the message attribute
+    # + receiveRequestAttemptId - Token used for deduplication of receive message calls. only to FIFO queues
     # + return - If success, details of the received message, else returns error
     @display {label: "Receive message in queue"}
     remote isolated function receiveMessage(@display {label: "Resource path to queue"} string queueResourcePath, 
-                                  @display {label: "Map of attributes"} map<string> attributes) 
+                                  @display {label: "Maximum number of messages"} int? maxNumberOfMessages = (),
+                                  @display {label: "Visibility timeout"} int? visibilityTimeout = (),
+                                  @display {label: "Wait time in seconds"} int? waitTimeSeconds = (),
+                                  @display {label: "Attribute names"} string[]? attributeNames = (),
+                                  @display {label: "Message attribute names"} string[]? messageAttributeNames = (),
+                                  @display {label: "Receive request attempt Id"} string? receiveRequestAttemptId = ()) 
                                   returns @tainted @display {label: "Message detail"} InboundMessage[]|OperationError {
         string amzTarget = AMAZON_SQS_API_VERSION + FULL_STOP + ACTION_RECEIVE_MESSAGE;
         map<string> parameters = {};
         parameters[PAYLOAD_PARAM_ACTION] = ACTION_RECEIVE_MESSAGE;
-        foreach var [key, value] in attributes.entries() {
-            parameters[key] = value;
+        if(maxNumberOfMessages is int){
+            parameters["MaxNumberOfMessages"] = maxNumberOfMessages.toString();
+        }
+        if(visibilityTimeout is int){
+            parameters["VisibilityTimeout"] = visibilityTimeout.toString();
+        }
+        if(waitTimeSeconds is int){
+            parameters["WaitTimeSeconds"] = waitTimeSeconds.toString();
+        }
+        int attributeNameNumber = 1;
+        if(attributeNames is string[]){
+            foreach var attributeName in attributeNames {
+                parameters["AttributeName." + attributeNameNumber.toString()] = attributeName;
+                attributeNameNumber = attributeNameNumber + 1;
+            }
+        }
+        int messageAttributeNameNumber = 1;
+        if(messageAttributeNames is string[]){
+            foreach var messageAttributeName in messageAttributeNames {
+                parameters["MessageAttributeName." + messageAttributeNameNumber.toString()] = messageAttributeName;
+                messageAttributeNameNumber = messageAttributeNameNumber + 1;
+            }
         }
         http:Request|error request = self.generatePOSTRequest(amzTarget, queueResourcePath,
                                      self.buildPayload(parameters));

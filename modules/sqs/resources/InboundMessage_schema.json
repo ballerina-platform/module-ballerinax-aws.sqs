@@ -1,0 +1,1 @@
+{"ballerinax/aws.sqs:0.99.2:InboundMessage":{"messageAttributes":"map<ballerinax/aws.sqs:0.99.2:MessageAttributeValue>","md5OfBody":"string","messageId":"string","receiptHandle":"string","attributes":"map<string>","body":"string","md5OfMessageAttributes":"string"}}

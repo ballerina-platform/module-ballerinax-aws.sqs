@@ -49,13 +49,9 @@ public function main(string... args) {
     }
 
     // Receive a message from the queue
-    attributes = {};
-    attributes["MaxNumberOfMessages"] = "1";
-    attributes["VisibilityTimeout"] = "600";
-    attributes["WaitTimeSeconds"] = "2";
-    attributes["AttributeName.1"] = "SenderId";
-    attributes["MessageAttributeName.1"] = "Name2";
-    sqs:InboundMessage[]|error response3 = sqsClient->receiveMessage(queueResourcePath, attributes);
+    string[] attributeNames = ["SenderId"];
+    string[] messageAttributeNames = ["Name2"];
+    sqs:InboundMessage[]|error response3 = sqsClient->receiveMessage(queueResourcePath, 1, 600, 2, attributeNames, messageAttributeNames);
     if (response3 is sqs:InboundMessage[] && response3.length() > 0) {
         log:printInfo("Successfully received the message. Message body: " + response3[0].body);
         log:printInfo("\nReceipt Handle: " + response3[0].receiptHandle);

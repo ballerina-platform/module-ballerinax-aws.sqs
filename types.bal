@@ -21,10 +21,10 @@
 # + messageId - Message ID for the message sent to sendMessage method
 # + sequenceNumber - Sequence number of the sent message
 public type OutboundMessage record {|
-    string md5OfMessageAttributes;
+    string md5OfMessageAttributes?;
     string md5OfMessageBody;
     string messageId;
-    string sequenceNumber;
+    string sequenceNumber?;
 |};
 
 # Response message for receiveMessage method
