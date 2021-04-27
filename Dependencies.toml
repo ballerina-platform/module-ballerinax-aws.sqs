@@ -42,3 +42,8 @@ version = "0.10.0-alpha7"
 org = "ballerina"
 name = "crypto"
 version = "1.1.0-alpha7"
+
+[[dependency]]
+org = "ballerina"
+name = "io"
+version = "1.1.0-alpha7"
