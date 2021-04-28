@@ -1,4 +1,4 @@
-// Copyright (c) 2019 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+// Copyright (c) 2021 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 //
 // WSO2 Inc. licenses this file to you under the Apache License,
 // Version 2.0 (the "License"); you may not use this file except
@@ -39,7 +39,7 @@ isolated function xmlToOutboundMessage(xml response) returns OutboundMessage|Dat
         };
         return sentMessage;
     } else {
-        return DataMappingError(OUTBOUND_MESSAGE_RESPONSE_EMPTY_MSG);
+        return error DataMappingError(OUTBOUND_MESSAGE_RESPONSE_EMPTY_MSG);
     }
 }
 
@@ -49,15 +49,13 @@ isolated function xmlToInboundMessages(xml response) returns InboundMessage[]|Da
     if (messages.elements().length() != 1) {
         int i = 0;
         foreach var b in messages.elements() {
-            if (b is xml) {
-                InboundMessage|DataMappingError receivedMsg = xmlToInboundMessage(b.elements());
-                if (receivedMsg is InboundMessage) {
-                    receivedMessages[i] = receivedMsg;
-                } else {
-                    return DataMappingError(CONVERT_XML_TO_INBOUND_MESSAGES_FAILED_MSG, receivedMsg);
-                }
-                i = i + 1;
+            InboundMessage|DataMappingError receivedMsg = xmlToInboundMessage(b.elements());
+            if (receivedMsg is InboundMessage) {
+                receivedMessages[i] = receivedMsg;
+            } else {
+                return error DataMappingError(CONVERT_XML_TO_INBOUND_MESSAGES_FAILED_MSG, receivedMsg);
             }
+            i = i + 1;
         }
         return receivedMessages;
     } else {
@@ -65,7 +63,7 @@ isolated function xmlToInboundMessages(xml response) returns InboundMessage[]|Da
         if (receivedMsg is InboundMessage) {
             return [receivedMsg]; 
         } else {
-            return DataMappingError(CONVERT_XML_TO_INBOUND_MESSAGES_FAILED_MSG, receivedMsg);
+            return error DataMappingError(CONVERT_XML_TO_INBOUND_MESSAGES_FAILED_MSG, receivedMsg);
         }
     }
 }
@@ -87,7 +85,7 @@ isolated function xmlToInboundMessage(xml message) returns InboundMessage|DataMa
         };
         return receivedMessage;
     } else {
-        return DataMappingError(CONVERT_XML_TO_INBOUND_MESSAGE_FAILED_MSG, messageAttributes);
+        return error DataMappingError(CONVERT_XML_TO_INBOUND_MESSAGE_FAILED_MSG, messageAttributes);
     }
 }
 
@@ -96,12 +94,10 @@ isolated function xmlToInboundMessageAttributes(xml attribute) returns map<strin
     if (attribute.elements().length() != 1) {
         int i = 0;
         foreach var b in attribute.elements() {
-            if (b is xml) {
-                string attName = (b/<ns:Name>/*).toString();
-                string attValue = (b/<ns:Value>/*).toString();
-                attributes[attName] = attValue;
-                i = i + 1;
-            }
+            string attName = (b/<ns:Name>/*).toString();
+            string attValue = (b/<ns:Value>/*).toString();
+            attributes[attName] = attValue;
+            i = i + 1;
         }
     } else {
         string attName = (attribute/<ns:Name>/*).toString();
@@ -119,24 +115,22 @@ isolated function xmlToInboundMessageMessageAttributes(xml msgAttributes)
     if (msgAttributes.elements().length() != 1) {
         int i = 0;
         foreach var b in msgAttributes.elements() {
-            if (b is xml) {
-                [string, MessageAttributeValue]|DataMappingError resXml =
-                    xmlToInboundMessageMessageAttribute(b.elements());
-                if (resXml is [string, MessageAttributeValue]) {
-                    [messageAttributeName, messageAttributeValue] = resXml;
-                } else {
-                    return DataMappingError(CONVERT_XML_TO_INBOUND_MESSAGE_MESSAGE_ATTRIBUTES_FAILED_MSG, resXml);
-                }
-                messageAttributes[messageAttributeName] = messageAttributeValue;
-                i = i + 1;
+            [string, MessageAttributeValue]|DataMappingError resXml =
+                xmlToInboundMessageMessageAttribute(b.elements());
+            if (resXml is [string, MessageAttributeValue]) {
+                [messageAttributeName, messageAttributeValue] = resXml;
+            } else {
+                return error DataMappingError(CONVERT_XML_TO_INBOUND_MESSAGE_MESSAGE_ATTRIBUTES_FAILED_MSG, resXml);
             }
+            messageAttributes[messageAttributeName] = messageAttributeValue;
+            i = i + 1;
         }
     } else {
         [string, MessageAttributeValue]|DataMappingError resXml = xmlToInboundMessageMessageAttribute(msgAttributes);
         if (resXml is [string, MessageAttributeValue]) {
             [messageAttributeName, messageAttributeValue] = resXml;
         } else {
-            return DataMappingError(CONVERT_XML_TO_INBOUND_MESSAGE_MESSAGE_ATTRIBUTES_FAILED_MSG, resXml);
+            return error DataMappingError(CONVERT_XML_TO_INBOUND_MESSAGE_MESSAGE_ATTRIBUTES_FAILED_MSG, resXml);
         }
         messageAttributes[messageAttributeName] = messageAttributeValue;
     }
@@ -161,7 +155,7 @@ isolated function xmlToInboundMessageMessageAttribute(xml msgAttribute)
         };
         return [msgAttributeName, messageAttributeValue];
     } else {
-        return DataMappingError(CONVERT_XML_TO_INBOUND_MESSAGE_MESSAGE_ATTRIBUTE_FAILED_MSG, strListVals);
+        return error DataMappingError(CONVERT_XML_TO_INBOUND_MESSAGE_MESSAGE_ATTRIBUTE_FAILED_MSG, strListVals);
     }
 }
 
@@ -188,30 +182,40 @@ isolated function isXmlDeleteResponse(xml response) returns boolean {
     }
 }
 
-function read(string path) returns @tainted json|FileReadFailed {
+isolated function isXmlDeleteQueueResponse(xml response) returns boolean {
+    xmllib:Element topElement = <xmllib:Element> response;
+    string topElementName = topElement.getName();
+    if (topElementName.endsWith("DeleteQueueResponse")) {
+        return true ;
+    } else {
+        return false;
+    }
+}
+
+isolated function read(string path) returns @tainted json|FileReadFailed {
     io:ReadableByteChannel|error readableByteChannel = io:openReadableFile(path);
     if (readableByteChannel is io:ReadableByteChannel) {
         io:ReadableCharacterChannel readableChannel = new(readableByteChannel, "UTF8");
         var result = readableChannel.readJson();
         if (result is error) {
             FileReadFailed? err = closeReadableChannel(readableChannel);
-            return FileReadFailed(FILE_READ_FAILED_MSG, result);
+            return error FileReadFailed(FILE_READ_FAILED_MSG, result);
         } else {
             FileReadFailed? err = closeReadableChannel(readableChannel);
             if (err is error) {
-                return FileReadFailed(FILE_READ_FAILED_MSG, err);
+                return error FileReadFailed(FILE_READ_FAILED_MSG, err);
             } else {
                 return result;
             }
         }
     } else {
-        return FileReadFailed(FILE_READ_FAILED_MSG, readableByteChannel);
+        return error FileReadFailed(FILE_READ_FAILED_MSG, readableByteChannel);
     }
 }
 
-function closeReadableChannel(io:ReadableCharacterChannel readableChannel) returns FileReadFailed? {
+isolated function closeReadableChannel(io:ReadableCharacterChannel readableChannel) returns FileReadFailed? {
     var result = readableChannel.close();
     if (result is error) {
-        return FileReadFailed(CLOSE_CHARACTER_STREAM_FAILED_MSG, result);
+        return error FileReadFailed(CLOSE_CHARACTER_STREAM_FAILED_MSG, result);
     }
 }

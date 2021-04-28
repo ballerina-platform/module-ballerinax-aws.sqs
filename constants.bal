@@ -1,4 +1,4 @@
-// Copyright (c) 2019 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+// Copyright (c) 2021 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 //
 // WSO2 Inc. licenses this file to you under the Apache License,
 // Version 2.0 (the "License"); you may not use this file except
@@ -43,12 +43,15 @@ const GET = "GET";
 
 const string STATUS_CODE = "status code";
 const string COLON_SYMBOL = ":";
+const string FULL_STOP = ".";
 const string SEMICOLON_SYMBOL = ";";
 const string WHITE_SPACE = " ";
+const string AMBERSAND = "&";
+const string EQUAL = "=";
+const string FORWARD_SLASH = "/";
 const string MESSAGE = "message";
 const string NEW_LINE = "\n";
 const string ERROR = "error";
-
 const string EMPTY_STRING = "";
 const string SQS_VERSION = "2012-11-05";
 const string AMAZON_SQS_API_VERSION = "AmazonSQSv20121105";
@@ -56,6 +59,7 @@ const string ACTION_CREATE_QUEUE = "CreateQueue";
 const string ACTION_SEND_MESSAGE = "SendMessage";
 const string ACTION_RECEIVE_MESSAGE = "ReceiveMessage";
 const string ACTION_DELETE_MESSAGE = "DeleteMessage";
+const string ACTION_DELETE_QUEUE = "DeleteQueue";
 
 const string PAYLOAD_PARAM_ACTION = "Action";
 const string PAYLOAD_PARAM_VERSION = "Version";

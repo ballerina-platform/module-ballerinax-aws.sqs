@@ -1,4 +1,4 @@
-// Copyright (c) 2019 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+// Copyright (c) 2021 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 //
 // WSO2 Inc. licenses this file to you under the Apache License,
 // Version 2.0 (the "License"); you may not use this file except
@@ -16,18 +16,23 @@
 
 import ballerina/test;
 import ballerina/log;
-import ballerina/math;
-import ballerina/system;
-import ballerina/config;
+import ballerina/random;
+import ballerina/lang.'float;
+import ballerina/os;
+
+configurable string accessKeyId = os:getEnv("ACCESS_KEY_ID");
+configurable string secretAccessKey = os:getEnv("SECRET_ACCESS_KEY");
+configurable string region = os:getEnv("REGION");
+configurable string accountNumber = os:getEnv("ACCOUNT_NUMBER");
 
 Configuration configuration = {
-    accessKey: getConfigValue("ACCESS_KEY_ID"),
-    secretKey: getConfigValue("SECRET_ACCESS_KEY"),
-    region: getConfigValue("REGION"),
-    accountNumber: getConfigValue("ACCOUNT_NUMBER")
+    accessKey: accessKeyId,
+    secretKey: secretAccessKey,
+    region: region,
+    accountNumber: accountNumber
 };
 
-Client sqs = new(configuration);
+Client sqs = check new (configuration);
 string fifoQueueResourcePath = "";
 string standardQueueResourcePath = "";
 string receivedReceiptHandler = "";
@@ -40,7 +45,9 @@ function testCreateFIFOQueue() {
     map<string> attributes = {};
     attributes["VisibilityTimeout"] = "400";
     attributes["FifoQueue"] = "true";
-    string|error response = sqs->createQueue(genRandQueueName(true), attributes);
+    map<string> tags = {};
+    tags["QueueType"] = "Production";
+    string|error response = sqs->createQueue(genRandQueueName(true), attributes, tags);
     if (response is string) {
         if (response.startsWith("https://sqs.")) {
             string|error queueResourcePathAny = splitString(response, AMAZON_HOST, 1);
@@ -66,7 +73,7 @@ function testCreateFIFOQueue() {
     groups: ["group2"]
 }
 function testCreateStandardQueue() {
-    string|error response = sqs->createQueue(genRandQueueName(false), {});
+    string|error response = sqs->createQueue(genRandQueueName(false));
     if (response is string) {
         if (response.startsWith("https://sqs.")) {
             string|error queueResourcePathAny = splitString(response, AMAZON_HOST, 1);
@@ -89,22 +96,20 @@ function testCreateStandardQueue() {
 }
 
 @test:Config {
-    dependsOn: ["testCreateFIFOQueue"],
+    dependsOn: [testCreateFIFOQueue],
     groups: ["group1"]
 }
 function testSendMessage() {
-    map<string> attributes = {};
-    attributes["MessageDeduplicationId"] = "dupID1";
-    attributes["MessageGroupId"] = "grpID1";
-    attributes["MessageAttribute.1.Name"] = "N1";
-    attributes["MessageAttribute.1.Value.StringValue"] = "V1";
-    attributes["MessageAttribute.1.Value.DataType"] = "String";
-    attributes["MessageAttribute.2.Name"] = "N2";
-    attributes["MessageAttribute.2.Value.StringValue"] = "V2";
-    attributes["MessageAttribute.2.Value.DataType"] = "String";
+    map<string> messageAttributes = {};
+    messageAttributes["MessageAttribute.1.Name"] = "N1";
+    messageAttributes["MessageAttribute.1.Value.StringValue"] = "V1";
+    messageAttributes["MessageAttribute.1.Value.DataType"] = "String";
+    messageAttributes["MessageAttribute.2.Name"] = "N2";
+    messageAttributes["MessageAttribute.2.Value.StringValue"] = "V2";
+    messageAttributes["MessageAttribute.2.Value.DataType"] = "String";
     string queueUrl = "";
     OutboundMessage|error response = sqs->sendMessage("New Message Text", fifoQueueResourcePath,
-        attributes);
+        messageAttributes, "grpID1", "dupID1");
     if (response is OutboundMessage) {
         if (response.messageId != "") {
             log:printInfo("Sent message to SQS. MessageID: " + response.messageId);
@@ -120,18 +125,13 @@ function testSendMessage() {
 }
 
 @test:Config {
-    dependsOn: ["testSendMessage"],
+    dependsOn: [testSendMessage],
     groups: ["group1"]
 }
 function testReceiveMessage() {
-    map<string> attributes = {};
-    attributes["MaxNumberOfMessages"] = "1";
-    attributes["VisibilityTimeout"] = "600";
-    attributes["WaitTimeSeconds"] = "2";
-    attributes["AttributeName.1"] = "SenderId";
-    attributes["MessageAttributeName.1"] = "N1";
-    attributes["MessageAttributeName.2"] = "N2";
-    InboundMessage[]|error response = sqs->receiveMessage(fifoQueueResourcePath, attributes);
+    string[] attributeNames = ["SenderId"];
+    string[] messageAttributeNames = ["N1", "N2"];
+    InboundMessage[]|error response = sqs->receiveMessage(fifoQueueResourcePath, 1, 600, 2, attributeNames, messageAttributeNames);
     if (response is InboundMessage[]) {
         if (response[0].receiptHandle != "") {
             receivedReceiptHandler = <@untainted>response[0].receiptHandle;
@@ -148,7 +148,7 @@ function testReceiveMessage() {
 }
 
 @test:Config {
-    dependsOn: ["testReceiveMessage"],
+    dependsOn: [testReceiveMessage],
     groups: ["group1"]
 }
 function testDeleteMessage() {
@@ -169,7 +169,7 @@ function testDeleteMessage() {
 }
 
 @test:Config {
-    dependsOn: ["testCreateStandardQueue"],
+    dependsOn: [testCreateStandardQueue],
     groups: ["group2"]
 }
 function testCRUDOperationsForMultipleMessages() {
@@ -180,7 +180,7 @@ function testCRUDOperationsForMultipleMessages() {
     while (msgCnt < 2) {
         string queueUrl = "";
         log:printInfo("standardQueueResourcePath " + standardQueueResourcePath);
-        OutboundMessage|error response1 = sqs->sendMessage("There is a tree", standardQueueResourcePath, {});
+        OutboundMessage|error response1 = sqs->sendMessage("There is a tree", standardQueueResourcePath);
         if (response1 is OutboundMessage) {
             log:printInfo("Sent an alert to the queue. MessageID: " + response1.messageId);
         } else {
@@ -192,13 +192,10 @@ function testCRUDOperationsForMultipleMessages() {
 
     // Receive and delete the 2 messages from the queue
     map<string> attributes = {};
-    attributes["MaxNumberOfMessages"] = "10";
-    attributes["VisibilityTimeout"] = "2";
-    attributes["WaitTimeSeconds"] = "1";
     msgCnt = 0;
     int processesMsgCnt = 0;
     while(msgCnt < 2) {
-        InboundMessage[]|error response2 = sqs->receiveMessage(standardQueueResourcePath, attributes);
+        InboundMessage[]|error response2 = sqs->receiveMessage(standardQueueResourcePath, 10, 2, 1);
         if (response2 is InboundMessage[]) {
             if (response2.length() > 0) {
                 int deleteMssageCount = response2.length();
@@ -233,17 +230,47 @@ function testCRUDOperationsForMultipleMessages() {
     }
 }
 
+@test:AfterSuite {}
+function testDeleteStandardQueue() {
+    boolean|error response = sqs->deleteQueue(standardQueueResourcePath);
+    if (response is boolean) {
+        if (response) {
+            log:printInfo("Successfully deleted the queue.");
+            test:assertTrue(true);
+        } else {
+            log:printInfo("Error occurred while deleting the queue.");
+            test:assertTrue(false);
+        }
+    } else {
+        log:printInfo("Error occurred while deleting the queue.");
+        test:assertTrue(false);
+    }
+}
+
+@test:AfterSuite {}
+function testDeleteFIFOQueue() {
+    boolean|error response = sqs->deleteQueue(fifoQueueResourcePath);
+    if (response is boolean) {
+        if (response) {
+            log:printInfo("Successfully deleted the queue.");
+            test:assertTrue(true);
+        } else {
+            log:printInfo("Error occurred while deleting the queue.");
+            test:assertTrue(false);
+        }
+    } else {
+        log:printInfo("Error occurred while deleting the queue.");
+        test:assertTrue(false);
+    }
+}
+
 isolated function genRandQueueName(boolean isFifo = false) returns string {
-    float ranNumFloat = math:random()*10000000;
-    anydata ranNumInt = math:round(ranNumFloat);
+    float ranNumFloat = random:createDecimal()*10000000;
+    anydata ranNumInt = <int> float:round(ranNumFloat);
     string queueName = "testQueue" + ranNumInt.toString();
     if (isFifo) {
         return queueName + ".fifo";
     } else {
         return queueName;
     }
-}
-
-isolated function getConfigValue(string key) returns string {
-    return (system:getEnv(key) != "") ? system:getEnv(key) : config:getAsString(key);
 }

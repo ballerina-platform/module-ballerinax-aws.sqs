@@ -1,4 +1,4 @@
-// Copyright (c) 2019 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+// Copyright (c) 2021 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 //
 // WSO2 Inc. licenses this file to you under the Apache License,
 // Version 2.0 (the "License"); you may not use this file except
@@ -21,10 +21,10 @@
 # + messageId - Message ID for the message sent to sendMessage method
 # + sequenceNumber - Sequence number of the sent message
 public type OutboundMessage record {|
-    string md5OfMessageAttributes;
+    string md5OfMessageAttributes?;
     string md5OfMessageBody;
     string messageId;
-    string sequenceNumber;
+    string sequenceNumber?;
 |};
 
 # Response message for receiveMessage method
