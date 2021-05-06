@@ -168,6 +168,7 @@ public client class Client {
     # + queueResourcePath - Resource path to the queue from the host address. e.g.: /610968236798/myQueue.fifo 
     # + maxNumberOfMessages - Maximum number of messages returned. Possible values are 1-10. Default is 1
     # + visibilityTimeout - Duration (in seconds) that messages are hidden from subsequent requests
+    # + waitTimeSeconds - Wait time in seconds
     # + attributeNames - List of attributes that need to be returned along with each message
     # + messageAttributeNames -  Name of the message attribute
     # + receiveRequestAttemptId - Token used for deduplication of receive message calls. only to FIFO queues
