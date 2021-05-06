@@ -46,3 +46,6 @@ target
 temp.bal.ballerina/
 target/
 .DS_Store
+Config.toml
+resources/Client_functions.json
+modules/sqs/resources
