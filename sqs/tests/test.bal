@@ -265,7 +265,7 @@ function testDeleteFIFOQueue() {
 }
 
 isolated function genRandQueueName(boolean isFifo = false) returns string {
-    float ranNumFloat = random:createDecimal()*10000000;
+    float ranNumFloat = random:createDecimal()*10000000.0;
     anydata ranNumInt = <int> float:round(ranNumFloat);
     string queueName = "testQueue" + ranNumInt.toString();
     if (isFifo) {
