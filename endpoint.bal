@@ -22,12 +22,12 @@ import ballerina/lang.array;
 import ballerina/log;
 import ballerina/time;
 
-# Object to initialize the connection with Amazon SQS.
+# Amazon SQS connector client endpoint.
 #
-# + accessKey - The Amazon API access key
-# + secretKey - The Amazon API secret key
-# + region - The Amazon API Region
-# + acctNum - The account number of the SQS service
+# + accessKey - Amazon API access key
+# + secretKey - Amazon API secret key
+# + region - Amazon API Region
+# + acctNum - Account number of the SQS service
 @display {label: "Amazon SQS Client", iconPath: "AmazonSQSLogo.png"}
 public client class Client {
 
@@ -38,6 +38,9 @@ public client class Client {
     string acctNum;
     string host;
 
+    # Initializes the Amazon SQS connector client endpoint.
+    #
+    # + config - Configurations required to initialize the `Client` endpoint
     public isolated function init(Configuration config) returns error? {
         self.accessKey = config.accessKey;
         self.secretKey = config.secretKey;
@@ -55,8 +58,8 @@ public client class Client {
     # Creates a new queue in SQS
     #
     # + queueName - Name of the queue to be created 
-    # + attributes - Other attribute parameters 
-    # + tags - Other tags parameters 
+    # + attributes - (optional) Queue related attribute parameters 
+    # + tags - (optional) Cost allocation tag parameters 
     # + return - If success, URL of the created queue, else returns error
     @display {label: "Create queue"}
     remote isolated function createQueue(@display {label: "Queue name"} string queueName, 
@@ -105,10 +108,10 @@ public client class Client {
     #
     # + messageBody - Message body string to be sent 
     # + queueResourcePath - Resource path to the queue from the host address. e.g.: /610968236798/myQueue.fifo
-    # + messageAttributes - Non-mandatory message attributes for sending a message 
-    # + messageGroupId -  Message group which a message belongs. only to FIFO queues
-    # + messageDeduplicationId - Message deduplicationId Id. only to FIFO queues
-    # + delaySeconds - Length of time for which to delay a specific message. On FIFO queue can't set for a message
+    # + messageAttributes - (optional) Message attributes for sending a message 
+    # + messageGroupId - (optional) Message group which a message belongs. only applicable to FIFO queues
+    # + messageDeduplicationId - (optional) Message deduplicationId Id. only applicable to FIFO queues
+    # + delaySeconds - (optional) Length of time for which to delay a specific message. On FIFO queue can't set for a message
     # + return - If success, details of the sent message, else returns error
     @display {label: "Send message in queue"}
     remote isolated function sendMessage(@display {label: "Message body to send"} string messageBody, 
@@ -166,12 +169,12 @@ public client class Client {
     # Receive message(s) from the queue
     #
     # + queueResourcePath - Resource path to the queue from the host address. e.g.: /610968236798/myQueue.fifo 
-    # + maxNumberOfMessages - Maximum number of messages returned. Possible values are 1-10. Default is 1
-    # + visibilityTimeout - Duration (in seconds) that messages are hidden from subsequent requests
-    # + waitTimeSeconds - Wait time in seconds
-    # + attributeNames - List of attributes that need to be returned along with each message
-    # + messageAttributeNames -  Name of the message attribute
-    # + receiveRequestAttemptId - Token used for deduplication of receive message calls. only to FIFO queues
+    # + maxNumberOfMessages - (optional) Maximum number of messages returned. Possible values are 1-10. Default is 1
+    # + visibilityTimeout - (optional) Duration (in seconds) that messages are hidden from subsequent requests
+    # + waitTimeSeconds - (optional) Wait time in seconds
+    # + attributeNames - (optional) List of attributes that need to be returned along with each message
+    # + messageAttributeNames - (optional) Name of the message attribute
+    # + receiveRequestAttemptId - (optional) Deduplication token of receive message calls. only applicable to FIFO queues
     # + return - If success, details of the received message, else returns error
     @display {label: "Receive message in queue"}
     remote isolated function receiveMessage(@display {label: "Resource path to queue"} string queueResourcePath, 
@@ -232,11 +235,11 @@ public client class Client {
     #
     # + queueResourcePath - Resource path to the queue from the host address. e.g.: /610968236798/myQueue.fifo
     # + receiptHandle - Receipt Handle parameter for the message(s) to be deleted
-    # + return - Whether the message(s) were successfully deleted or whether an error occurred
+    # + return - Null when the message(s) were successfully deleted or whether an error occurred
     @display {label: "Delete message in queue"}
     remote isolated function deleteMessage(@display {label: "Resource path to queue"} string queueResourcePath, 
                                   @display {label: "Receipt handle parameter"} string receiptHandle)
-                                  returns @tainted @display {label: "Delete status"} boolean|OperationError {
+                                  returns @tainted @display {label: "Delete status"} OperationError? {
         string amzTarget = AMAZON_SQS_API_VERSION + FULL_STOP + ACTION_DELETE_MESSAGE;
         string|error receiptHandleEncoded = url:encode(receiptHandle, UTF_8);
         if (receiptHandleEncoded is string) {
@@ -264,10 +267,10 @@ public client class Client {
     # Delete queue(s)
     #
     # + queueResourcePath - Resource path to the queue from the host address. e.g.: /610968236798/myQueue.fifo
-    # + return - Whether the queue(s) were successfully deleted or whether an error occurred
+    # + return - Null when the queue(s) were successfully deleted or whether an error occurred
     @display {label: "Delete the queue"}
     remote isolated function deleteQueue(@display {label: "Resource path to queue"} string queueResourcePath)
-                                  returns @tainted @display {label: "Delete status"} boolean|OperationError {
+                                  returns @tainted @display {label: "Delete status"} OperationError? {
         string amzTarget = AMAZON_SQS_API_VERSION + FULL_STOP + ACTION_DELETE_QUEUE;
         map<string> parameters = {};
         parameters[PAYLOAD_PARAM_ACTION] = ACTION_DELETE_QUEUE;
@@ -366,10 +369,10 @@ public client class Client {
 
 # Configuration provided for the client
 #
-# + accessKey - accessKey of Amazon Account 
-# + secretKey - secretKey of Amazon Account
-# + region - region of SQS Queue
-# + accountNumber - account number of the SQS queue
+# + accessKey - AccessKey of Amazon Account 
+# + secretKey - SecretKey of Amazon Account
+# + region - Region of SQS Queue
+# + accountNumber - Account number of the SQS queue
 # + secureSocketConfig - HTTP client configuration
 public type Configuration record {
     string accessKey;
