@@ -1,0 +1,24 @@
+[2021-05-31 03:05:49,843] SEVERE {b7a.log.crash} - ballerina/time/2_0_0-alpha9/$ConfigurationMapper 
+org.ballerinalang.test.runtime.exceptions.BallerinaTestException: ballerina/time/2_0_0-alpha9/$ConfigurationMapper
+	at org.ballerinalang.test.runtime.entity.TesterinaFunction.run(TesterinaFunction.java:97)
+	at org.ballerinalang.test.runtime.entity.TesterinaFunction.directInvoke(TesterinaFunction.java:68)
+	at org.ballerinalang.test.runtime.BTestRunner.startSuite(BTestRunner.java:536)
+	at org.ballerinalang.test.runtime.BTestRunner.execute(BTestRunner.java:264)
+	at org.ballerinalang.test.runtime.BTestRunner.runTest(BTestRunner.java:114)
+	at org.ballerinalang.test.runtime.util.TesterinaUtils.executeTests(TesterinaUtils.java:76)
+	at org.ballerinalang.test.runtime.Main.startTestSuit(Main.java:116)
+	at org.ballerinalang.test.runtime.Main.main(Main.java:97)
+Caused by: java.lang.NoClassDefFoundError: ballerina/time/2_0_0-alpha9/$ConfigurationMapper
+	at ballerinax.aws$0046sqs.0_99_3.$ConfigurationMapper.$configureInit(Unknown Source)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:566)
+	at org.ballerinalang.test.runtime.entity.TesterinaFunction.run(TesterinaFunction.java:91)
+	... 7 more
+Caused by: java.lang.ClassNotFoundException: ballerina.time.2_0_0-alpha9.$ConfigurationMapper
+	at java.base/java.net.URLClassLoader.findClass(URLClassLoader.java:471)
+	at java.base/java.lang.ClassLoader.loadClass(ClassLoader.java:589)
+	at java.base/java.lang.ClassLoader.loadClass(ClassLoader.java:522)
+	... 13 more
+ 

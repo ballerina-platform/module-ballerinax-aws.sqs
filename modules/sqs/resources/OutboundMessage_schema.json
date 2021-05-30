@@ -1,0 +1,1 @@
+{"ballerinax/aws.sqs:0.99.3:OutboundMessage":{"sequenceNumber":"string","messageId":"string","md5OfMessageAttributes":"string","md5OfMessageBody":"string"}}
