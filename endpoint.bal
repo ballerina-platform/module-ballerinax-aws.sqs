@@ -61,11 +61,11 @@ public client class Client {
     # + attributes - (optional) Queue related attribute parameters 
     # + tags - (optional) Cost allocation tag parameters 
     # + return - If success, URL of the created queue, else returns error
-    @display {label: "Create queue"}
-    remote isolated function createQueue(@display {label: "Queue name"} string queueName, 
+    @display {label: "Create Queue"}
+    remote isolated function createQueue(@display {label: "Queue Name"} string queueName, 
                                 @display {label: "Attributes"} map<string>? attributes = (), 
                                 @display {label: "Tags"} map<string>? tags = ())
-                                returns @tainted @display {label: "Url of created queue"} string|OperationError {
+                                returns @tainted @display {label: "Created Queue Url"} string|OperationError {
         string amzTarget = AMAZON_SQS_API_VERSION + FULL_STOP + ACTION_CREATE_QUEUE;
         string endpoint = FORWARD_SLASH;
         string payload;
@@ -113,14 +113,14 @@ public client class Client {
     # + messageDeduplicationId - (optional) Message deduplicationId Id. only applicable to FIFO queues
     # + delaySeconds - (optional) Length of time for which to delay a specific message. On FIFO queue can't set for a message
     # + return - If success, details of the sent message, else returns error
-    @display {label: "Send message in queue"}
-    remote isolated function sendMessage(@display {label: "Message body to send"} string messageBody, 
-                                         @display {label: "Resource path to queue"} string queueResourcePath, 
+    @display {label: "Send Message"}
+    remote isolated function sendMessage(@display {label: "Message Body"} string messageBody, 
+                                         @display {label: "Queue Resource Path"} string queueResourcePath, 
                                          @display {label: "Message Attributes"} map<string>? messageAttributes = (),
-                                         @display {label: "Tag specifies message belongs to message group"} string? messageGroupId = (),
-                                         @display {label: "Message deduplicationId Id"} string? messageDeduplicationId = (),
-                                         @display {label: "Time to delay a specific message"} int? delaySeconds = ()) 
-                                         returns @tainted @display {label: "Message detail"} OutboundMessage|OperationError {
+                                         @display {label: "Message Group Tag"} string? messageGroupId = (),
+                                         @display {label: "Message DeduplicationId Id"} string? messageDeduplicationId = (),
+                                         @display {label: "Time Delay For Message"} int? delaySeconds = ()) 
+                                         returns @tainted @display {label: "Message Detail"} OutboundMessage|OperationError {
             string|error msgbody = url:encode(messageBody, UTF_8);
             if (msgbody is string) {
             string amzTarget = AMAZON_SQS_API_VERSION + FULL_STOP + ACTION_SEND_MESSAGE;
@@ -176,15 +176,15 @@ public client class Client {
     # + messageAttributeNames - (optional) Name of the message attribute
     # + receiveRequestAttemptId - (optional) Deduplication token of receive message calls. only applicable to FIFO queues
     # + return - If success, details of the received message, else returns error
-    @display {label: "Receive message in queue"}
-    remote isolated function receiveMessage(@display {label: "Resource path to queue"} string queueResourcePath, 
-                                  @display {label: "Maximum number of messages"} int? maxNumberOfMessages = (),
-                                  @display {label: "Visibility timeout"} int? visibilityTimeout = (),
-                                  @display {label: "Wait time in seconds"} int? waitTimeSeconds = (),
-                                  @display {label: "Attribute names"} string[]? attributeNames = (),
-                                  @display {label: "Message attribute names"} string[]? messageAttributeNames = (),
-                                  @display {label: "Receive request attempt Id"} string? receiveRequestAttemptId = ()) 
-                                  returns @tainted @display {label: "Message detail"} InboundMessage[]|OperationError {
+    @display {label: "Receive Message"}
+    remote isolated function receiveMessage(@display {label: "Queue Resource Path"} string queueResourcePath, 
+                                  @display {label: "Maximum Number Of Messages"} int? maxNumberOfMessages = (),
+                                  @display {label: "Visibility Timeout"} int? visibilityTimeout = (),
+                                  @display {label: "Wait Time(s)"} int? waitTimeSeconds = (),
+                                  @display {label: "Attribute Names"} string[]? attributeNames = (),
+                                  @display {label: "Message Attribute Names"} string[]? messageAttributeNames = (),
+                                  @display {label: "Receive Request Attempt Id"} string? receiveRequestAttemptId = ()) 
+                                  returns @tainted @display {label: "Message Detail"} InboundMessage[]|OperationError {
         string amzTarget = AMAZON_SQS_API_VERSION + FULL_STOP + ACTION_RECEIVE_MESSAGE;
         map<string> parameters = {};
         parameters[PAYLOAD_PARAM_ACTION] = ACTION_RECEIVE_MESSAGE;
@@ -236,10 +236,10 @@ public client class Client {
     # + queueResourcePath - Resource path to the queue from the host address. e.g.: /610968236798/myQueue.fifo
     # + receiptHandle - Receipt Handle parameter for the message(s) to be deleted
     # + return - Null when the message(s) were successfully deleted or whether an error occurred
-    @display {label: "Delete message in queue"}
-    remote isolated function deleteMessage(@display {label: "Resource path to queue"} string queueResourcePath, 
-                                  @display {label: "Receipt handle parameter"} string receiptHandle)
-                                  returns @tainted @display {label: "Delete status"} OperationError? {
+    @display {label: "Delete Message"}
+    remote isolated function deleteMessage(@display {label: "Queue Resource Path"} string queueResourcePath, 
+                                  @display {label: "Receipt Handle Parameter"} string receiptHandle)
+                                  returns @tainted @display {label: "Delete Status"} OperationError? {
         string amzTarget = AMAZON_SQS_API_VERSION + FULL_STOP + ACTION_DELETE_MESSAGE;
         string|error receiptHandleEncoded = url:encode(receiptHandle, UTF_8);
         if (receiptHandleEncoded is string) {
@@ -268,9 +268,9 @@ public client class Client {
     #
     # + queueResourcePath - Resource path to the queue from the host address. e.g.: /610968236798/myQueue.fifo
     # + return - Null when the queue(s) were successfully deleted or whether an error occurred
-    @display {label: "Delete the queue"}
-    remote isolated function deleteQueue(@display {label: "Resource path to queue"} string queueResourcePath)
-                                  returns @tainted @display {label: "Delete status"} OperationError? {
+    @display {label: "Delete Queue"}
+    remote isolated function deleteQueue(@display {label: "Queue Resource Path"} string queueResourcePath)
+                                  returns @tainted @display {label: "Delete Status"} OperationError? {
         string amzTarget = AMAZON_SQS_API_VERSION + FULL_STOP + ACTION_DELETE_QUEUE;
         map<string> parameters = {};
         parameters[PAYLOAD_PARAM_ACTION] = ACTION_DELETE_QUEUE;
@@ -374,10 +374,15 @@ public client class Client {
 # + region - Region of SQS Queue
 # + accountNumber - Account number of the SQS queue
 # + secureSocketConfig - HTTP client configuration
+@display{label: "Connection Config"} 
 public type Configuration record {
+    @display{label: "Access Key"} 
     string accessKey;
+    @display{label: "Secret Key"} 
     string secretKey;
+    @display{label: "Region"} 
     string region;
+    @display{label: "Account Number"} 
     string accountNumber;
     http:ClientSecureSocket secureSocketConfig?;
 };
