@@ -92,7 +92,7 @@ public client class Client {
         http:Request|error request = self.generatePOSTRequest(amzTarget, endpoint, 
                                      self.buildPayload(parameters));
         if (request is http:Request) {
-            var httpResponse = self.clientEp->post(endpoint, request);
+            http:Response|error httpResponse = self.clientEp->post(endpoint, request);
             xml|ResponseHandleFailed response = handleResponse(httpResponse);
             if (response is xml){
                 return xmlToCreatedQueueUrl(response);
@@ -145,7 +145,7 @@ public client class Client {
             http:Request|error request = self.generatePOSTRequest(amzTarget, queueResourcePath, 
                                          self.buildPayload(parameters));
             if (request is http:Request) {
-                var httpResponse = self.clientEp->post(queueResourcePath, request);
+                http:Response|error httpResponse = self.clientEp->post(queueResourcePath, request);
                 xml|ResponseHandleFailed response = handleResponse(httpResponse);
                 if (response is xml){
                                         log:printInfo(response.toString());
@@ -214,7 +214,7 @@ public client class Client {
         http:Request|error request = self.generatePOSTRequest(amzTarget, queueResourcePath,
                                      self.buildPayload(parameters));
         if (request is http:Request) {
-            var httpResponse = self.clientEp->post(queueResourcePath, request);
+            http:Response|error httpResponse = self.clientEp->post(queueResourcePath, request);
             xml|ResponseHandleFailed response = handleResponse(httpResponse);
             if (response is xml){
                 InboundMessage[]|DataMappingError result = xmlToInboundMessages(response);
@@ -249,7 +249,7 @@ public client class Client {
             http:Request|error request = self.generatePOSTRequest(amzTarget, queueResourcePath, 
                                          self.buildPayload(parameters));
             if (request is http:Request) {
-                var httpResponse = self.clientEp->post(queueResourcePath, request);
+                http:Response|error httpResponse = self.clientEp->post(queueResourcePath, request);
                 xml|ResponseHandleFailed response = handleResponse(httpResponse);
                 if (response is xml) {
                     return isXmlDeleteResponse(response);
@@ -277,7 +277,7 @@ public client class Client {
         http:Request|error request = self.generatePOSTRequest(amzTarget, queueResourcePath, 
                                      self.buildPayload(parameters));
         if (request is http:Request) {
-            var httpResponse = self.clientEp->post(queueResourcePath, request);
+            http:Response|error httpResponse = self.clientEp->post(queueResourcePath, request);
             xml|ResponseHandleFailed response = handleResponse(httpResponse);
             if (response is xml) {
                 return isXmlDeleteQueueResponse(response);
@@ -389,7 +389,7 @@ public type Configuration record {
 
 isolated function utcToString(time:Utc utc, string pattern) returns string|error {
     [int, decimal][epochSeconds, lastSecondFraction] = utc;
-    int nanoAdjustments = <int>(lastSecondFraction * 1000000000);
+    int nanoAdjustments = (<int>lastSecondFraction * 1000000000);
     var instant = ofEpochSecond(epochSeconds, nanoAdjustments);
     var zoneId = getZoneId(java:fromString("Z"));
     var zonedDateTime = atZone(instant, zoneId);
