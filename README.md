@@ -165,11 +165,9 @@ if (response is sqs:InboundMessage[]) {
 A received message should be deleted with the `deleteMessage` method within `VisibilityTimeout` number of seconds, providing the received `receiptHandler` string. A successful delete operation returns a boolean value `true` and the error cases return a `false` value or an `error` object.
 
 ```ballerina
-boolean|error response = sqsClient->deleteMessage("/123456789012/demo.fifo", "AQEBnLBA/U5jSFADa0ZxCq2qCwpYE3biqcWOUrjzci0tB6LXG1Jyt4IZm8330mmghWuBeCovsXEiphTSXgkz2zNQFnnD/oSBnvAy8XTfA0hscepBMS2sdA81L/jNmR4mVl3dERQwwT1oJM4S2NwjXMGdjmERn/h8jok39ucnlSMJBfbPMUQ1VSHv7WCUheR/DHpVPhGlk2s5mUfAgmF5/srFsSr2NQmDG61wdNiU9LQgH3QR45c7KRtpepeyGAPKejqpKA0bPj6aw3oXSUOqNXAJmg==");
-if (response is boolean) {
-    if (response) {
-        log:printInfo("Successfully deleted the message from the queue.");
-    }
+error? response = sqsClient->deleteMessage("/123456789012/demo.fifo", "AQEBnLBA/U5jSFADa0ZxCq2qCwpYE3biqcWOUrjzci0tB6LXG1Jyt4IZm8330mmghWuBeCovsXEiphTSXgkz2zNQFnnD/oSBnvAy8XTfA0hscepBMS2sdA81L/jNmR4mVl3dERQwwT1oJM4S2NwjXMGdjmERn/h8jok39ucnlSMJBfbPMUQ1VSHv7WCUheR/DHpVPhGlk2s5mUfAgmF5/srFsSr2NQmDG61wdNiU9LQgH3QR45c7KRtpepeyGAPKejqpKA0bPj6aw3oXSUOqNXAJmg==");
+if (response is ()) {
+    log:printInfo("Successfully deleted the message from the queue.");
 }
 ```
 
@@ -178,11 +176,9 @@ if (response is boolean) {
 A queue should be deleted with the `deleteQueue` method. A successful delete operation returns a boolean value `true` and the error cases return a `false` value or an `error` object.
 
 ```ballerina
-boolean|error response = sqsClient->deleteQueue("/123456789012/demo.fifo");
-if (response is boolean) {
-    if (response) {
-        log:printInfo("Successfully deleted the queue.");
-    }
+error? response = sqsClient->deleteQueue("/123456789012/demo.fifo");
+if (response is ()) {
+    log:printInfo("Successfully deleted the queue.");
 }
 ```
 
@@ -256,16 +252,14 @@ public function main(string... args) {
     }
 
     // Delete the received the message from the queue
-    boolean|error response4 = sqsClient->deleteMessage(queueResourcePath, receivedReceiptHandler);
-    if (response4 is boolean && response4) {
-        if (response4) {
-            log:printInfo("Successfully deleted the message from the queue.");
-        }
+    error? response4 = sqsClient->deleteMessage(queueResourcePath, receivedReceiptHandler);
+    if (response4 is ()) {
+        log:printInfo("Successfully deleted the message from the queue.");
     }
 
     // Delete the queue
-    boolean|error response5 = sqsClient->deleteQueue(queueResourcePath);
-    if (response is boolean && response5) {
+    error? response5 = sqsClient->deleteQueue(queueResourcePath);
+    if (response is ()) {
         log:printInfo("Successfully deleted the queue.");
     }
 }
@@ -339,14 +333,14 @@ public function main(string... args) {
     }
 
     // Delete the received the message from the queue
-    boolean|error response4 = sqsClient->deleteMessage(queueResourcePath, receivedReceiptHandler);
-    if (response4 is boolean && response4) {
+    error? response4 = sqsClient->deleteMessage(queueResourcePath, receivedReceiptHandler);
+    if (response4 is ()) {
         log:printInfo("Successfully deleted the message from the queue.");
     }
 
     // Delete the queue
-    boolean|error response5 = sqsClient->deleteQueue(queueResourcePath);
-    if (response is boolean && response5) {
+    error? response5 = sqsClient->deleteQueue(queueResourcePath);
+    if (response is ()) {
         log:printInfo("Successfully deleted the queue.");
     }
 }
