@@ -172,23 +172,23 @@ isolated function xmlMessageAttributeValueToListValues(xml msgAttributeVal)
     return [binaryListValues, stringListValues];
 }
 
-isolated function isXmlDeleteResponse(xml response) returns boolean {
+isolated function isXmlDeleteResponse(xml response) returns OperationError? {
     xmllib:Element topElement = <xmllib:Element> response;
     string topElementName = topElement.getName();
     if (topElementName.endsWith("DeleteMessageResponse")) {
-        return true ;
+        return ();
     } else {
-        return false;
+        return error OperationError(OPERATION_ERROR_MSG);
     }
 }
 
-isolated function isXmlDeleteQueueResponse(xml response) returns boolean {
+isolated function isXmlDeleteQueueResponse(xml response) returns OperationError? {
     xmllib:Element topElement = <xmllib:Element> response;
     string topElementName = topElement.getName();
     if (topElementName.endsWith("DeleteQueueResponse")) {
-        return true ;
+        return ();
     } else {
-        return false;
+        return error OperationError(OPERATION_ERROR_MSG);
     }
 }
 

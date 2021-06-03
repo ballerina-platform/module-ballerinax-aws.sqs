@@ -60,16 +60,14 @@ public function main(string... args) {
     }
 
     // Delete the received the message from the queue
-    boolean|error response4 = sqsClient->deleteMessage(queueResourcePath, receivedReceiptHandler);
-    if (response4 is boolean && response4) {
-        if (response4) {
-            log:printInfo("Successfully deleted the message from the queue.");
-        }
+    error? response4 = sqsClient->deleteMessage(queueResourcePath, receivedReceiptHandler);
+    if (response4 is ()) {
+        log:printInfo("Successfully deleted the message from the queue.");
     }
 
     // Delete the queue
-    boolean|error response5 = sqsClient->deleteQueue(queueResourcePath);
-    if (response is boolean && response5) {
+    error? response5 = sqsClient->deleteQueue(queueResourcePath);
+    if (response5 is ()) {
         log:printInfo("Successfully deleted the queue.");
     }
 }
