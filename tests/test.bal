@@ -153,15 +153,10 @@ function testReceiveMessage() {
 }
 function testDeleteMessage() {
     string receiptHandler = receivedReceiptHandler;
-    boolean|error response = sqs->deleteMessage(fifoQueueResourcePath, receiptHandler);
-    if (response is boolean) {
-        if (response) {
-            log:printInfo("Successfully deleted the message from the queue.");
-            test:assertTrue(true);
-        } else {
-            log:printInfo("Error occurred while deleting the message.");
-            test:assertTrue(false);
-        }
+    error? response = sqs->deleteMessage(fifoQueueResourcePath, receiptHandler);
+    if (response is ()) {
+        log:printInfo("Successfully deleted the message from the queue.");
+        test:assertTrue(true);
     } else {
         log:printInfo("Error occurred while deleting the message.");
         test:assertTrue(false);
@@ -201,12 +196,10 @@ function testCRUDOperationsForMultipleMessages() {
                 int deleteMssageCount = response2.length();
                 foreach var eachResponse in response2 {
                     standardQueueReceivedReceiptHandler = <@untainted>eachResponse.receiptHandle;
-                    boolean|error deleteResponse = sqs->deleteMessage(standardQueueResourcePath, standardQueueReceivedReceiptHandler);
-                    if (deleteResponse is boolean && deleteResponse) {
-                        if (deleteResponse) {
-                            processesMsgCnt = processesMsgCnt + 1;
-                            log:printInfo("Deleted the fire alert \"" + eachResponse.body + "\" from the queue.");
-                        }
+                    error? deleteResponse = sqs->deleteMessage(standardQueueResourcePath, standardQueueReceivedReceiptHandler);
+                    if (deleteResponse is ()) {
+                        processesMsgCnt = processesMsgCnt + 1;
+                        log:printInfo("Deleted the fire alert \"" + eachResponse.body + "\" from the queue.");
                     } else {
                         log:printError("Error occurred while deleting a message.");
                         test:assertTrue(false);
@@ -232,15 +225,10 @@ function testCRUDOperationsForMultipleMessages() {
 
 @test:AfterSuite {}
 function testDeleteStandardQueue() {
-    boolean|error response = sqs->deleteQueue(standardQueueResourcePath);
-    if (response is boolean) {
-        if (response) {
-            log:printInfo("Successfully deleted the queue.");
-            test:assertTrue(true);
-        } else {
-            log:printInfo("Error occurred while deleting the queue.");
-            test:assertTrue(false);
-        }
+    error? response = sqs->deleteQueue(standardQueueResourcePath);
+    if (response is ()) {
+        log:printInfo("Successfully deleted the queue.");
+        test:assertTrue(true);
     } else {
         log:printInfo("Error occurred while deleting the queue.");
         test:assertTrue(false);
@@ -249,15 +237,10 @@ function testDeleteStandardQueue() {
 
 @test:AfterSuite {}
 function testDeleteFIFOQueue() {
-    boolean|error response = sqs->deleteQueue(fifoQueueResourcePath);
-    if (response is boolean) {
-        if (response) {
-            log:printInfo("Successfully deleted the queue.");
-            test:assertTrue(true);
-        } else {
-            log:printInfo("Error occurred while deleting the queue.");
-            test:assertTrue(false);
-        }
+    error? response = sqs->deleteQueue(fifoQueueResourcePath);
+    if (response is ()) {
+        log:printInfo("Successfully deleted the queue.");
+        test:assertTrue(true);
     } else {
         log:printInfo("Error occurred while deleting the queue.");
         test:assertTrue(false);
