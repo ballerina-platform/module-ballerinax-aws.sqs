@@ -58,8 +58,8 @@ public client class Client {
     # Creates a new queue in SQS
     #
     # + queueName - Name of the queue to be created 
-    # + attributes - (optional) Queue related attribute parameters 
-    # + tags - (optional) Cost allocation tag parameters 
+    # + attributes - Queue related attribute parameters 
+    # + tags - Cost allocation tag parameters 
     # + return - If success, URL of the created queue, else returns error
     @display {label: "Create Queue"}
     remote isolated function createQueue(@display {label: "Queue Name"} string queueName, 
@@ -108,10 +108,10 @@ public client class Client {
     #
     # + messageBody - Message body string to be sent 
     # + queueResourcePath - Resource path to the queue from the host address. e.g.: /610968236798/myQueue.fifo
-    # + messageAttributes - (optional) Message attributes for sending a message 
-    # + messageGroupId - (optional) Message group which a message belongs. only applicable to FIFO queues
-    # + messageDeduplicationId - (optional) Message deduplicationId Id. only applicable to FIFO queues
-    # + delaySeconds - (optional) Length of time for which to delay a specific message. On FIFO queue can't set for a message
+    # + messageAttributes - Message attributes for sending a message 
+    # + messageGroupId - Message group which a message belongs. only applicable to FIFO queues
+    # + messageDeduplicationId - Message deduplicationId Id. only applicable to FIFO queues
+    # + delaySeconds - Length of time for which to delay a specific message. On FIFO queue can't set for a message
     # + return - If success, details of the sent message, else returns error
     @display {label: "Send Message"}
     remote isolated function sendMessage(@display {label: "Message Body"} string messageBody, 
@@ -169,12 +169,12 @@ public client class Client {
     # Receive message(s) from the queue
     #
     # + queueResourcePath - Resource path to the queue from the host address. e.g.: /610968236798/myQueue.fifo 
-    # + maxNumberOfMessages - (optional) Maximum number of messages returned. Possible values are 1-10. Default is 1
-    # + visibilityTimeout - (optional) Duration (in seconds) that messages are hidden from subsequent requests
-    # + waitTimeSeconds - (optional) Wait time in seconds
-    # + attributeNames - (optional) List of attributes that need to be returned along with each message
-    # + messageAttributeNames - (optional) Name of the message attribute
-    # + receiveRequestAttemptId - (optional) Deduplication token of receive message calls. only applicable to FIFO queues
+    # + maxNumberOfMessages - Maximum number of messages returned. Possible values are 1-10. Default is 1
+    # + visibilityTimeout - Duration (in seconds) that messages are hidden from subsequent requests
+    # + waitTimeSeconds - Wait time in seconds
+    # + attributeNames - List of attributes that need to be returned along with each message
+    # + messageAttributeNames - Name of the message attribute
+    # + receiveRequestAttemptId - Deduplication token of receive message calls. only applicable to FIFO queues
     # + return - If success, details of the received message, else returns error
     @display {label: "Receive Message"}
     remote isolated function receiveMessage(@display {label: "Queue Resource Path"} string queueResourcePath, 
