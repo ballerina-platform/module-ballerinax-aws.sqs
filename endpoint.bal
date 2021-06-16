@@ -19,7 +19,6 @@ import ballerina/url;
 import ballerina/http;
 import ballerina/jballerina.java;
 import ballerina/lang.array;
-import ballerina/log;
 import ballerina/time;
 
 # Amazon SQS connector client endpoint.
@@ -65,7 +64,7 @@ public client class Client {
     remote isolated function createQueue(@display {label: "Queue Name"} string queueName, 
                                 @display {label: "Attributes"} map<string>? attributes = (), 
                                 @display {label: "Tags"} map<string>? tags = ())
-                                returns @tainted @display {label: "Created Queue Url"} string|OperationError {
+                                returns @tainted @display {label: "Created Queue URL"} string|OperationError {
         string amzTarget = AMAZON_SQS_API_VERSION + FULL_STOP + ACTION_CREATE_QUEUE;
         string endpoint = FORWARD_SLASH;
         string payload;
@@ -110,7 +109,7 @@ public client class Client {
     # + queueResourcePath - Resource path to the queue from the host address. e.g.: /610968236798/myQueue.fifo
     # + messageAttributes - Message attributes for sending a message 
     # + messageGroupId - Message group which a message belongs. only applicable to FIFO queues
-    # + messageDeduplicationId - Message deduplicationId Id. only applicable to FIFO queues
+    # + messageDeduplicationId - Message deduplicationId ID. only applicable to FIFO queues
     # + delaySeconds - Length of time for which to delay a specific message. On FIFO queue can't set for a message
     # + return - If success, details of the sent message, else returns error
     @display {label: "Send Message"}
@@ -118,7 +117,7 @@ public client class Client {
                                          @display {label: "Queue Resource Path"} string queueResourcePath, 
                                          @display {label: "Message Attributes"} map<string>? messageAttributes = (),
                                          @display {label: "Message Group Tag"} string? messageGroupId = (),
-                                         @display {label: "Message DeduplicationId Id"} string? messageDeduplicationId = (),
+                                         @display {label: "Message DeduplicationId ID"} string? messageDeduplicationId = (),
                                          @display {label: "Time Delay For Message"} int? delaySeconds = ()) 
                                          returns @tainted @display {label: "Message Detail"} OutboundMessage|OperationError {
             string|error msgbody = url:encode(messageBody, UTF_8);
@@ -141,14 +140,12 @@ public client class Client {
             if(messageDeduplicationId is string){
             parameters["MessageDeduplicationId"] = messageDeduplicationId;
             }
-            log:printInfo(parameters.toString());
-            http:Request|error request = self.generatePOSTRequest(amzTarget, queueResourcePath, 
+            http:Request|error request = self.generatePOSTRequest(amzTarget, queueResourcePath,
                                          self.buildPayload(parameters));
             if (request is http:Request) {
                 http:Response|error httpResponse = self.clientEp->post(queueResourcePath, request);
                 xml|ResponseHandleFailed response = handleResponse(httpResponse);
                 if (response is xml){
-                                        log:printInfo(response.toString());
                     OutboundMessage|DataMappingError result = xmlToOutboundMessage(response);
                     if (result is OutboundMessage) {
                         return result;
@@ -183,7 +180,7 @@ public client class Client {
                                   @display {label: "Wait Time(s)"} int? waitTimeSeconds = (),
                                   @display {label: "Attribute Names"} string[]? attributeNames = (),
                                   @display {label: "Message Attribute Names"} string[]? messageAttributeNames = (),
-                                  @display {label: "Receive Request Attempt Id"} string? receiveRequestAttemptId = ()) 
+                                  @display {label: "Receive Request Attempt ID"} string? receiveRequestAttemptId = ()) 
                                   returns @tainted @display {label: "Message Detail"} InboundMessage[]|OperationError {
         string amzTarget = AMAZON_SQS_API_VERSION + FULL_STOP + ACTION_RECEIVE_MESSAGE;
         map<string> parameters = {};
@@ -238,8 +235,8 @@ public client class Client {
     # + return - Null when the message(s) were successfully deleted or whether an error occurred
     @display {label: "Delete Message"}
     remote isolated function deleteMessage(@display {label: "Queue Resource Path"} string queueResourcePath, 
-                                  @display {label: "Receipt Handle Parameter"} string receiptHandle)
-                                  returns @tainted @display {label: "Delete Status"} OperationError? {
+                                           @display {label: "Receipt Handle Parameter"} string receiptHandle)
+                                           returns @tainted @display {label: "Delete Status"} OperationError? {
         string amzTarget = AMAZON_SQS_API_VERSION + FULL_STOP + ACTION_DELETE_MESSAGE;
         string|error receiptHandleEncoded = url:encode(receiptHandle, UTF_8);
         if (receiptHandleEncoded is string) {
@@ -270,7 +267,7 @@ public client class Client {
     # + return - Null when the queue(s) were successfully deleted or whether an error occurred
     @display {label: "Delete Queue"}
     remote isolated function deleteQueue(@display {label: "Queue Resource Path"} string queueResourcePath)
-                                  returns @tainted @display {label: "Delete Status"} OperationError? {
+                                         returns @tainted @display {label: "Delete Status"} OperationError? {
         string amzTarget = AMAZON_SQS_API_VERSION + FULL_STOP + ACTION_DELETE_QUEUE;
         map<string> parameters = {};
         parameters[PAYLOAD_PARAM_ACTION] = ACTION_DELETE_QUEUE;
@@ -356,7 +353,8 @@ public client class Client {
         return check crypto:hmacSha256(msg.toBytes(), key);
     }
 
-    private isolated function getSignatureKey(string secretKey, string datestamp, string region, string serviceName)  returns byte[]|error {
+    private isolated function getSignatureKey(string secretKey, string datestamp, string region, string serviceName)  
+                                              returns byte[]|error {
         string awskey = ("AWS4" + secretKey);
         byte[] kDate = check self.sign(awskey.toBytes(), datestamp);
         byte[] kRegion = check self.sign(kDate, region);
