@@ -8,19 +8,15 @@
 
 This connector provides operations for connecting and interacting with Amazon SQS endpoints over the network. 
 
-For more information about configuration and operations, go to the module(s). 
-- [`ballerinax/aws.sqs`](sqs/Module.md)
+For more information, go to the module(s).
+- [`aws.sqs`](sqs/Module.md)
 
 ## Building from the source
 ### Setting up the prerequisites
 
-1. Download and install Java SE Development Kit (JDK) version 11 (from one of the following locations).
+1. Download and install Java SE Development Kit (JDK) version 11. You can install either [OpenJDK](https://adoptopenjdk.net/) or [Oracle JDK](https://www.oracle.com/java/technologies/javase-jdk11-downloads.html).
 
-   * [Oracle](https://www.oracle.com/java/technologies/javase-jdk11-downloads.html)
-
-   * [OpenJDK](https://adoptopenjdk.net/)
-
-        > **Note:** Set the JAVA_HOME environment variable to the path name of the directory into which you installed JDK.
+    > **Note:** Set the JAVA_HOME environment variable to the path name of the directory into which you installed JDK.
 
 2. Download and install [Ballerina Swan Lake Beta2](https://ballerina.io/). 
 
@@ -31,7 +27,7 @@ Execute the following commands to build from the source:
     ```    
     bal build -c ./sqs
     ```
-* To run the without tests:
+* To build the package without tests:
     ```
     bal build -c --skip-tests ./sqs
     ```

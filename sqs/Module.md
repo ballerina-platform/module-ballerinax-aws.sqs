@@ -50,37 +50,4 @@ sqs:Client sqsClient = check new (configuration);
     ```
 2. Use `bal run` command to compile and run the Ballerina program. 
 
-## Quick reference
-The following code snippets shows how the connector operations can be used in different scenarios after initializing the client.
-* Create SQS Queue
-    ``` ballerina
-    map<string> attributes = {};
-    attributes["VisibilityTimeout"] = "400";
-    attributes["FifoQueue"] = "true";
-
-    string response = check sqsClient->createQueue("demo.fifo", attributes);
-    ```
-
-* Send message to a SQS Queue
-    ```ballerina
-    map<string> attributes = {};
-    attributes["MessageDeduplicationId"] = "duplicationID1";
-    attributes["MessageGroupId"] = "groupID1";
-    attributes["MessageAttribute.1.Name"] = "Name1";
-    attributes["MessageAttribute.1.Value.StringValue"] = "Value1";
-    attributes["MessageAttribute.1.Value.DataType"] = "String";
-    attributes["MessageAttribute.2.Name"] = "Name2";
-    attributes["MessageAttribute.2.Value.StringValue"] = "Value2";
-    attributes["MessageAttribute.2.Value.DataType"] = "String";
-    string queueUrl = "";
-
-    sqs:OutboundMessage response = check sqsClient->sendMessage("Sample text message.", "/123456789012/demo.fifo",
-        attributes);
-    ```
-
-* Delete SQS Queue
-    ```ballerina
-    error? response = sqsClient->deleteQueue("/123456789012/demo.fifo");
-    ```
-
 **[You can find more samples here](https://github.com/ballerina-platform/module-ballerinax-aws.sqs/tree/master/sqs/samples)**

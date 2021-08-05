@@ -6,10 +6,10 @@ The `ballerinax/aws.sqs` is a [Ballerina](https://ballerina.io/) connector for A
 This package provides the capability to access Amazon SQS and it provides capability to perform operations related to queues and messages.
 
 ### Compatibility
-|                    |         Version          |
-|:------------------:|:------------------------:|
-| Ballerina Language |     Swan Lake Beta2      |
-|   Amazon SQS API   |       2012-11-05         |
+|                    | Version         |
+|--------------------|-----------------|
+| Ballerina Language | Swan Lake Beta2 |
+| Amazon SQS API     | 2012-11-05      |
 
 ## Report issues
 
