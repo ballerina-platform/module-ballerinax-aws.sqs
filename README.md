@@ -8,7 +8,6 @@
 
 This connector provides operations for connecting and interacting with Amazon SQS endpoints over the network. 
 
-For more information, go to the module(s).
 - [`aws.sqs`](sqs/Module.md)
 
 ## Building from the source
@@ -16,7 +15,7 @@ For more information, go to the module(s).
 
 1. Download and install Java SE Development Kit (JDK) version 11. You can install either [OpenJDK](https://adoptopenjdk.net/) or [Oracle JDK](https://www.oracle.com/java/technologies/javase-jdk11-downloads.html).
 
-    > **Note:** Set the JAVA_HOME environment variable to the path name of the directory into which you installed JDK.
+    > **Note:** Set the JAVA_HOME environment variable to the path name of the directory in which you installed JDK.
 
 2. Download and install [Ballerina Swan Lake Beta2](https://ballerina.io/). 
 
