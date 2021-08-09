@@ -6,13 +6,11 @@ on:
 
 jobs:
     build:
-
         runs-on: ubuntu-latest
-
         steps:
             - uses: actions/checkout@v2
             - name: Ballerina Build
-              uses: ballerina-platform/ballerina-action/@master
+              uses: ballerina-platform/ballerina-action@slbeta2
               with:
                   args:
                       build -c --skip-tests ./sqs
@@ -22,9 +20,10 @@ jobs:
                   REGION: ${{ secrets.REGION }}
                   ACCOUNT_NUMBER: ${{ secrets.ACCOUNT_NUMBER }}
             - name: Ballerina Push
-              uses: ballerina-platform/ballerina-action/@master
+              uses: ballerina-platform/ballerina-action@slbeta2
               with:
                   args:
-                      push
+                      push 
               env:
+                  WORKING_DIR: ./sqs
                   BALLERINA_CENTRAL_ACCESS_TOKEN: ${{ secrets.BALLERINA_CENTRAL_ACCESS_TOKEN }}
