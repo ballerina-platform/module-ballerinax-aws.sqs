@@ -53,7 +53,7 @@ isolated function handleResponse(http:Response|http:PayloadType|error httpRespon
     }
 }
 
-public function splitString(string str, string delimeter, int arrIndex) returns string {
+public isolated function splitString(string str, string delimeter, int arrIndex) returns string {
     handle rec = java:fromString(str);
     handle del = java:fromString(delimeter);
     handle arr = split(rec, del);

@@ -21,25 +21,29 @@ import ballerina/jballerina.java;
 import ballerina/lang.array;
 import ballerina/time;
 
-# Amazon SQS connector client endpoint.
+# Ballerina Amazon SQS connector provides the capability to access Amazon SQS API.
+# This connector lets you to perform operations related to manage queues, send and receive messages. 
 #
+# + clientEp - Connector HTTP endpoint
 # + accessKey - Amazon API access key
 # + secretKey - Amazon API secret key
 # + region - Amazon API Region
 # + acctNum - Account number of the SQS service
 @display {label: "Amazon SQS Client", iconPath: "AmazonSQSLogo.png"}
-public client class Client {
+public isolated client class Client {
 
-    http:Client clientEp;
-    string accessKey;
-    string secretKey;
-    string region;
-    string acctNum;
-    string host;
+    final http:Client clientEp;
+    final string accessKey;
+    final string secretKey;
+    final string region;
+    final string acctNum;
+    final string host;
 
-    # Initializes the Amazon SQS connector client endpoint.
+    # Initializes the connector. During initialization you have to pass API credentials.
+    # Create a [AWS account](https://aws.amazon.com) and obtain tokens following [this guide](https://aws.amazon.com/premiumsupport/knowledge-center/create-and-activate-aws-account/). 
     #
-    # + config - Configurations required to initialize the `Client` endpoint
+    # + config - Configuration for the connector
+    # + return - `http:Error` in case of failure to initialize or `null` if successfully initialized  
     public isolated function init(Configuration config) returns error? {
         self.accessKey = config.accessKey;
         self.secretKey = config.secretKey;
@@ -54,7 +58,7 @@ public client class Client {
         }
     }
 
-    # Creates a new queue in SQS
+    # Creates a new queue in SQS.
     #
     # + queueName - Name of the queue to be created 
     # + attributes - Queue related attribute parameters 
@@ -103,7 +107,7 @@ public client class Client {
         }
     }
 
-    # Send a new message to a SQS queue
+    # Send a new message to a SQS queue.
     #
     # + messageBody - Message body string to be sent 
     # + queueResourcePath - Resource path to the queue from the host address. e.g.: /610968236798/myQueue.fifo
@@ -163,7 +167,7 @@ public client class Client {
         }
     }
 
-    # Receive message(s) from the queue
+    # Receive message(s) from the queue.
     #
     # + queueResourcePath - Resource path to the queue from the host address. e.g.: /610968236798/myQueue.fifo 
     # + maxNumberOfMessages - Maximum number of messages returned. Possible values are 1-10. Default is 1
@@ -228,7 +232,7 @@ public client class Client {
         }
     }
 
-    # Delete message(s) from the queue for a given receiptHandle
+    # Delete message(s) from the queue for a given receiptHandle.
     #
     # + queueResourcePath - Resource path to the queue from the host address. e.g.: /610968236798/myQueue.fifo
     # + receiptHandle - Receipt Handle parameter for the message(s) to be deleted
@@ -261,7 +265,7 @@ public client class Client {
         }
     }
 
-    # Delete queue(s)
+    # Delete queue(s).
     #
     # + queueResourcePath - Resource path to the queue from the host address. e.g.: /610968236798/myQueue.fifo
     # + return - Null when the queue(s) were successfully deleted or whether an error occurred
@@ -365,7 +369,7 @@ public client class Client {
 
 }
 
-# Configuration provided for the client
+# Configuration provided for the client.
 #
 # + accessKey - AccessKey of Amazon Account 
 # + secretKey - SecretKey of Amazon Account
