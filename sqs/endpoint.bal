@@ -29,7 +29,7 @@ import ballerina/time;
 # + secretKey - Amazon API secret key
 # + region - Amazon API Region
 # + acctNum - Account number of the SQS service
-@display {label: "Amazon SQS Client", iconPath: "AmazonSQSLogo.png"}
+@display {label: "Amazon SQS Client", iconPath: "resources/aws.sqs.svg"}
 public isolated client class Client {
 
     final http:Client clientEp;
@@ -43,19 +43,15 @@ public isolated client class Client {
     # Create a [AWS account](https://aws.amazon.com) and obtain tokens following [this guide](https://aws.amazon.com/premiumsupport/knowledge-center/create-and-activate-aws-account/). 
     #
     # + config - Configuration for the connector
+    # + httpClientConfig - HTTP Configuration
     # + return - `http:Error` in case of failure to initialize or `null` if successfully initialized  
-    public isolated function init(Configuration config) returns error? {
+    public isolated function init(ConnectionConfig config, http:ClientConfiguration httpClientConfig = {}) returns error? {
         self.accessKey = config.accessKey;
         self.secretKey = config.secretKey;
         self.acctNum = config.accountNumber;
         self.region = config.region;
         self.host = SQS_SERVICE_NAME + FULL_STOP + self.region + FULL_STOP + AMAZON_HOST;
-        http:ClientSecureSocket? clientSecureSocket = config?.secureSocketConfig;
-        if (clientSecureSocket is http:ClientSecureSocket) {
-            self.clientEp = check new ("https://" + self.host, {secureSocket: clientSecureSocket});
-        } else {
-            self.clientEp = check new ("https://" + self.host, {});
-        }
+        self.clientEp = check new ("https://" + self.host, httpClientConfig);
     }
 
     # Creates a new queue in SQS.
@@ -375,9 +371,8 @@ public isolated client class Client {
 # + secretKey - SecretKey of Amazon Account
 # + region - Region of SQS Queue
 # + accountNumber - Account number of the SQS queue
-# + secureSocketConfig - HTTP client configuration
 @display{label: "Connection Config"} 
-public type Configuration record {
+public type ConnectionConfig record {
     @display{label: "Access Key"} 
     string accessKey;
     @display{label: "Secret Key"} 
@@ -386,7 +381,6 @@ public type Configuration record {
     string region;
     @display{label: "Account Number"} 
     string accountNumber;
-    http:ClientSecureSocket secureSocketConfig?;
 };
 
 isolated function utcToString(time:Utc utc, string pattern) returns string|error {
