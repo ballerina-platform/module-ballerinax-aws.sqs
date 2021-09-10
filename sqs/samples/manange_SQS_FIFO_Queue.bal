@@ -9,7 +9,7 @@ configurable string accountNumber = ?;
 public function main(string... args) {
 
     // Add the SQS credentials as the Configuration
-    sqs:Configuration configuration = {
+    sqs:ConnectionConfig configuration = {
         accessKey: accessKeyId,
         secretKey: secretAccessKey,
         region: region,

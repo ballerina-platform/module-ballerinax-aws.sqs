@@ -25,7 +25,7 @@ configurable string secretAccessKey = os:getEnv("SECRET_ACCESS_KEY");
 configurable string region = os:getEnv("REGION");
 configurable string accountNumber = os:getEnv("ACCOUNT_NUMBER");
 
-Configuration configuration = {
+ConnectionConfig configuration = {
     accessKey: accessKeyId,
     secretKey: secretAccessKey,
     region: region,

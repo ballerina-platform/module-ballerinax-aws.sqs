@@ -12,8 +12,7 @@ This package provides the capability to access Amazon SQS and it provides capabi
 | Amazon SQS API     | 2012-11-05      |
 
 ## Report issues
-
-To report bugs, request new features, start new discussions, view project boards, etc., go to the [Ballerina Amazon SQS repository](https://github.com/ballerina-platform/module-ballerinax-aws.sqs)
+To report bugs, request new features, start new discussions, view project boards, etc., go to the [Ballerina Extended Library repository](https://github.com/ballerina-platform/ballerina-extended-library)
 
 ## Useful links
 - Discuss code changes of the Ballerina project via [ballerina-dev@googlegroups.com](mailto:ballerina-dev@googlegroups.com).

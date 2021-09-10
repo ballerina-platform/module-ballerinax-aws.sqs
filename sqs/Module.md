@@ -22,7 +22,7 @@ import ballerinax/aws.sqs;
 You can now enter the credentials in the SQS client configuration and create the SQS client by passing the configuration as follows.
 
 ```ballerina
-sqs:Configuration configuration = {
+sqs:ConnectionConfig configuration = {
     accessKey: "<ACCESS_KEY_ID>",
     secretKey: "<SECRET_ACCESS_KEY>",
     region: "<REGION>",
