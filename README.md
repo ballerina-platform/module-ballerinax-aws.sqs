@@ -21,7 +21,7 @@ Connector contains operations that create and delete queue, send messages, recei
 ## Compatibility
 | Ballerina Language Versions | Amazon SQS API version  |
 | --------------------------- | ----------------------  |
-|     Swan Lake Alpha 5       |        2012-11-05       |
+|     Swan Lake Beta 3        |        2012-11-05       |
 
 The following sections provide you with information on how to use the Ballerina Amazon SQS connector.
 
@@ -352,7 +352,7 @@ $ bal pull ballerinax/aws.sqs
 ```
 
 ### Building the Source
-Execute the commands below to build from the source after installing Ballerina SLAlpha5 version.
+Execute the commands below to build from the source after installing Ballerina SLBeta3 version.
 
 1. Clone this repository using the following command:
     ```shell
