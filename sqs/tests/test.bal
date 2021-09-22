@@ -23,13 +23,11 @@ import ballerina/os;
 configurable string accessKeyId = os:getEnv("ACCESS_KEY_ID");
 configurable string secretAccessKey = os:getEnv("SECRET_ACCESS_KEY");
 configurable string region = os:getEnv("REGION");
-configurable string accountNumber = os:getEnv("ACCOUNT_NUMBER");
 
 ConnectionConfig configuration = {
     accessKey: accessKeyId,
     secretKey: secretAccessKey,
-    region: region,
-    accountNumber: accountNumber
+    region: region
 };
 
 Client sqs = check new (configuration);
@@ -42,18 +40,20 @@ string standardQueueReceivedReceiptHandler = "";
     groups: ["group1"]
 }
 function testCreateFIFOQueue() {
-    map<string> attributes = {};
-    attributes["VisibilityTimeout"] = "400";
-    attributes["FifoQueue"] = "true";
+    QueueAttributes queueAttributes = {  
+        visibilityTimeout : 400,
+        fifoQueue : true
+    };
     map<string> tags = {};
     tags["QueueType"] = "Production";
-    string|error response = sqs->createQueue(genRandQueueName(true), attributes, tags);
-    if (response is string) {
-        if (response.startsWith("https://sqs.")) {
-            string|error queueResourcePathAny = splitString(response, AMAZON_HOST, 1);
+    CreateQueueResponse|error response = sqs->createQueue(genRandQueueName(true), queueAttributes, tags);
+    if (response is CreateQueueResponse) {
+        string queueResponse = response.createQueueResult.queueUrl;
+        if (queueResponse.startsWith("https://sqs.")) {
+            string|error queueResourcePathAny = splitString(queueResponse, AMAZON_HOST, 1);
             if (queueResourcePathAny is string) {
                 fifoQueueResourcePath = queueResourcePathAny;
-                log:printInfo("SQS queue was created. Queue URL: " + response);
+                log:printInfo("SQS queue was created. Queue URL: " + queueResponse);
                 test:assertTrue(true);
             } else {
                 log:printInfo("Queue URL is not Amazon!");
@@ -73,13 +73,14 @@ function testCreateFIFOQueue() {
     groups: ["group2"]
 }
 function testCreateStandardQueue() {
-    string|error response = sqs->createQueue(genRandQueueName(false));
-    if (response is string) {
-        if (response.startsWith("https://sqs.")) {
-            string|error queueResourcePathAny = splitString(response, AMAZON_HOST, 1);
+    CreateQueueResponse|error response = sqs->createQueue(genRandQueueName(false));
+    if (response is CreateQueueResponse) {
+        string queueResponse = response.createQueueResult.queueUrl;
+        if (queueResponse.startsWith("https://sqs.")) {
+            string|error queueResourcePathAny = splitString(queueResponse, AMAZON_HOST, 1);
             if (queueResourcePathAny is string) {
                 standardQueueResourcePath = queueResourcePathAny;
-                log:printInfo("SQS queue was created. Queue URL: " + response);
+                log:printInfo("SQS queue was created. Queue URL: " + queueResponse);
                 test:assertTrue(true);
             } else {
                 log:printInfo("Queue URL is not Amazon!");
@@ -100,19 +101,15 @@ function testCreateStandardQueue() {
     groups: ["group1"]
 }
 function testSendMessage() {
-    map<string> messageAttributes = {};
-    messageAttributes["MessageAttribute.1.Name"] = "N1";
-    messageAttributes["MessageAttribute.1.Value.StringValue"] = "V1";
-    messageAttributes["MessageAttribute.1.Value.DataType"] = "String";
-    messageAttributes["MessageAttribute.2.Name"] = "N2";
-    messageAttributes["MessageAttribute.2.Value.StringValue"] = "V2";
-    messageAttributes["MessageAttribute.2.Value.DataType"] = "String";
+    MessageAttribute[] messageAttributes = 
+        [{keyName : "N1", value : { stringValue : "V1", dataType : "String"}},
+        {keyName : "N2", value : { stringValue : "V2", dataType : "String"}}];
     string queueUrl = "";
-    OutboundMessage|error response = sqs->sendMessage("New Message Text", fifoQueueResourcePath,
+    SendMessageResponse|error response = sqs->sendMessage("New Message Text", fifoQueueResourcePath,
         messageAttributes, "grpID1", "dupID1");
-    if (response is OutboundMessage) {
-        if (response.messageId != "") {
-            log:printInfo("Sent message to SQS. MessageID: " + response.messageId);
+    if (response is SendMessageResponse) {
+        if (response.sendMessageResult.messageId != "") {
+            log:printInfo("Sent message to SQS. MessageID: " + response.sendMessageResult.messageId);
             test:assertTrue(true);
         } else {
             log:printInfo("Error while sending the message to the queue.");
@@ -131,11 +128,11 @@ function testSendMessage() {
 function testReceiveMessage() {
     string[] attributeNames = ["SenderId"];
     string[] messageAttributeNames = ["N1", "N2"];
-    InboundMessage[]|error response = sqs->receiveMessage(fifoQueueResourcePath, 1, 600, 2, attributeNames, messageAttributeNames);
-    if (response is InboundMessage[]) {
-        if (response[0].receiptHandle != "") {
-            receivedReceiptHandler = <@untainted>response[0].receiptHandle;
-            log:printInfo("Successfully received the message. Receipt Handle: " + response[0].receiptHandle);
+    ReceiveMessageResponse|error response = sqs->receiveMessage(fifoQueueResourcePath, 1, 600, 2, attributeNames, messageAttributeNames);
+    if (response is ReceiveMessageResponse) {
+        if ((response.receiveMessageResult.message)[0].receiptHandle != "") {
+            receivedReceiptHandler = <@untainted>(response.receiveMessageResult.message)[0].receiptHandle;
+            log:printInfo("Successfully received the message. Receipt Handle: " + (response.receiveMessageResult.message)[0].receiptHandle);
             test:assertTrue(true);
         } else {
             log:printInfo("Error occurred while receiving the message.");
@@ -153,8 +150,8 @@ function testReceiveMessage() {
 }
 function testDeleteMessage() {
     string receiptHandler = receivedReceiptHandler;
-    error? response = sqs->deleteMessage(fifoQueueResourcePath, receiptHandler);
-    if (response is ()) {
+    DeleteMessageResponse|error response = sqs->deleteMessage(fifoQueueResourcePath, receiptHandler);
+    if (response is DeleteMessageResponse) {
         log:printInfo("Successfully deleted the message from the queue.");
         test:assertTrue(true);
     } else {
@@ -175,9 +172,9 @@ function testCRUDOperationsForMultipleMessages() {
     while (msgCnt < 2) {
         string queueUrl = "";
         log:printInfo("standardQueueResourcePath " + standardQueueResourcePath);
-        OutboundMessage|error response1 = sqs->sendMessage("There is a tree", standardQueueResourcePath);
-        if (response1 is OutboundMessage) {
-            log:printInfo("Sent an alert to the queue. MessageID: " + response1.messageId);
+        SendMessageResponse|error response1 = sqs->sendMessage("There is a tree", standardQueueResourcePath);
+        if (response1 is SendMessageResponse) {
+            log:printInfo("Sent an alert to the queue. MessageID: " + response1.sendMessageResult.messageId);
         } else {
             log:printError("Error occurred while trying to send an alert to the SQS queue!");
             test:assertTrue(false);
@@ -190,14 +187,14 @@ function testCRUDOperationsForMultipleMessages() {
     msgCnt = 0;
     int processesMsgCnt = 0;
     while(msgCnt < 2) {
-        InboundMessage[]|error response2 = sqs->receiveMessage(standardQueueResourcePath, 10, 2, 1);
-        if (response2 is InboundMessage[]) {
-            if (response2.length() > 0) {
-                int deleteMssageCount = response2.length();
-                foreach var eachResponse in response2 {
+        ReceiveMessageResponse|error response2 = sqs->receiveMessage(standardQueueResourcePath, 10, 2, 1);
+        if (response2 is ReceiveMessageResponse) {
+            if ((response2.receiveMessageResult.message).length() > 0) {
+                int deleteMssageCount = (response2.receiveMessageResult.message).length();
+                foreach var eachResponse in (response2.receiveMessageResult.message) {
                     standardQueueReceivedReceiptHandler = <@untainted>eachResponse.receiptHandle;
-                    error? deleteResponse = sqs->deleteMessage(standardQueueResourcePath, standardQueueReceivedReceiptHandler);
-                    if (deleteResponse is ()) {
+                    DeleteMessageResponse|error deleteResponse = sqs->deleteMessage(standardQueueResourcePath, standardQueueReceivedReceiptHandler);
+                    if (deleteResponse is DeleteMessageResponse) {
                         processesMsgCnt = processesMsgCnt + 1;
                         log:printInfo("Deleted the fire alert \"" + eachResponse.body + "\" from the queue.");
                     } else {
@@ -225,8 +222,8 @@ function testCRUDOperationsForMultipleMessages() {
 
 @test:AfterSuite {}
 function testDeleteStandardQueue() {
-    error? response = sqs->deleteQueue(standardQueueResourcePath);
-    if (response is ()) {
+    DeleteQueueResponse|error response = sqs->deleteQueue(standardQueueResourcePath);
+    if (response is DeleteQueueResponse) {
         log:printInfo("Successfully deleted the queue.");
         test:assertTrue(true);
     } else {
@@ -237,8 +234,8 @@ function testDeleteStandardQueue() {
 
 @test:AfterSuite {}
 function testDeleteFIFOQueue() {
-    error? response = sqs->deleteQueue(fifoQueueResourcePath);
-    if (response is ()) {
+    DeleteQueueResponse|error response = sqs->deleteQueue(fifoQueueResourcePath);
+    if (response is DeleteQueueResponse) {
         log:printInfo("Successfully deleted the queue.");
         test:assertTrue(true);
     } else {

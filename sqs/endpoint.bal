@@ -28,7 +28,7 @@ import ballerina/time;
 # + accessKey - Amazon API access key
 # + secretKey - Amazon API secret key
 # + region - Amazon API Region
-# + acctNum - Account number of the SQS service
+# + host - Amazon host
 @display {label: "Amazon SQS Client", iconPath: "resources/aws.sqs.svg"}
 public isolated client class Client {
 
@@ -36,7 +36,6 @@ public isolated client class Client {
     final string accessKey;
     final string secretKey;
     final string region;
-    final string acctNum;
     final string host;
 
     # Initializes the connector. During initialization you have to pass API credentials.
@@ -48,7 +47,6 @@ public isolated client class Client {
     public isolated function init(ConnectionConfig config, http:ClientConfiguration httpClientConfig = {}) returns error? {
         self.accessKey = config.accessKey;
         self.secretKey = config.secretKey;
-        self.acctNum = config.accountNumber;
         self.region = config.region;
         self.host = SQS_SERVICE_NAME + FULL_STOP + self.region + FULL_STOP + AMAZON_HOST;
         self.clientEp = check new ("https://" + self.host, httpClientConfig);
@@ -62,9 +60,9 @@ public isolated client class Client {
     # + return - If success, URL of the created queue, else returns error
     @display {label: "Create Queue"}
     remote isolated function createQueue(@display {label: "Queue Name"} string queueName, 
-                                @display {label: "Attributes"} map<string>? attributes = (), 
+                                @display {label: "Attributes"} QueueAttributes? attributes = (), 
                                 @display {label: "Tags"} map<string>? tags = ())
-                                returns @tainted @display {label: "Created Queue URL"} string|OperationError {
+                                returns @tainted @display {label: "Created Queue URL"} CreateQueueResponse|error {
         string amzTarget = AMAZON_SQS_API_VERSION + FULL_STOP + ACTION_CREATE_QUEUE;
         string endpoint = FORWARD_SLASH;
         string payload;
@@ -72,29 +70,14 @@ public isolated client class Client {
         parameters[PAYLOAD_PARAM_ACTION] = ACTION_CREATE_QUEUE;
         parameters[PAYLOAD_PARAM_VERSION] = SQS_VERSION;
         parameters[PAYLOAD_PARAM_QUEUE_NAME] = queueName;
-        int attributeNumber = 1;
-        if(attributes is map<string>){
-            foreach var [key, value] in attributes.entries() {
-                parameters["Attribute." + attributeNumber.toString() + ".Name"] = key;
-                parameters["Attribute." + attributeNumber.toString() + ".Value"] = value;
-                attributeNumber = attributeNumber + 1;
-            }
-        }
-        int tagNumber = 1;
-        if(tags is map<string>){
-            foreach var [key, value] in tags.entries() {
-                parameters["Tag." + tagNumber.toString() + ".Key"] = key;
-                parameters["Tag." + tagNumber.toString() + ".Value"] = value;
-                tagNumber = tagNumber + 1;
-            }
-        }
+        parameters = check addQueueOptionalParameters(parameters, attributes, tags);
         http:Request|error request = self.generatePOSTRequest(amzTarget, endpoint, 
                                      self.buildPayload(parameters));
         if (request is http:Request) {
             http:Response|error httpResponse = self.clientEp->post(endpoint, request);
             xml|ResponseHandleFailed response = handleResponse(httpResponse);
             if (response is xml){
-                return xmlToCreatedQueueUrl(response);
+                return xmlToCreatedQueue(response);
             } else {
                  return error OperationError(OPERATION_ERROR_MSG, response);
             }
@@ -115,30 +98,28 @@ public isolated client class Client {
     @display {label: "Send Message"}
     remote isolated function sendMessage(@display {label: "Message Body"} string messageBody, 
                                          @display {label: "Queue Resource Path"} string queueResourcePath, 
-                                         @display {label: "Message Attributes"} map<string>? messageAttributes = (),
+                                         @display {label: "Message Attributes"} MessageAttribute[]? messageAttributes = (),
                                          @display {label: "Message Group Tag"} string? messageGroupId = (),
                                          @display {label: "Message DeduplicationId ID"} string? messageDeduplicationId = (),
                                          @display {label: "Time Delay For Message"} int? delaySeconds = ()) 
-                                         returns @tainted @display {label: "Message Detail"} OutboundMessage|OperationError {
+                                         returns @tainted @display {label: "Message Detail"} SendMessageResponse|error {
             string|error msgbody = url:encode(messageBody, UTF_8);
             if (msgbody is string) {
             string amzTarget = AMAZON_SQS_API_VERSION + FULL_STOP + ACTION_SEND_MESSAGE;
             map<string> parameters = {};
             parameters[PAYLOAD_PARAM_ACTION] = ACTION_SEND_MESSAGE;
             parameters[PAYLOAD_PARAM_MESSAGE_BODY] = msgbody;
-            if(messageAttributes is map<string>){
-            foreach var [key, value] in messageAttributes.entries() {
-            parameters[key] = value;
-            }
-            }
+            if(messageAttributes is MessageAttribute[]){
+                parameters = setMessageAttributes(parameters, messageAttributes);
+            }            
             if(delaySeconds is int){
-            parameters["DelaySeconds"] = delaySeconds.toString();
+                parameters["DelaySeconds"] = delaySeconds.toString();
             }
             if(messageGroupId is string){
-            parameters["MessageGroupId"] = messageGroupId;
+                parameters["MessageGroupId"] = messageGroupId;
             }
             if(messageDeduplicationId is string){
-            parameters["MessageDeduplicationId"] = messageDeduplicationId;
+                parameters["MessageDeduplicationId"] = messageDeduplicationId;
             }
             http:Request|error request = self.generatePOSTRequest(amzTarget, queueResourcePath,
                                          self.buildPayload(parameters));
@@ -146,8 +127,8 @@ public isolated client class Client {
                 http:Response|error httpResponse = self.clientEp->post(queueResourcePath, request);
                 xml|ResponseHandleFailed response = handleResponse(httpResponse);
                 if (response is xml){
-                    OutboundMessage|DataMappingError result = xmlToOutboundMessage(response);
-                    if (result is OutboundMessage) {
+                    SendMessageResponse|error result = xmlToSendMessageResponse(response);
+                    if (result is SendMessageResponse) {
                         return result;
                     } else {
                         return error OperationError(OPERATION_ERROR_MSG, result);
@@ -181,7 +162,7 @@ public isolated client class Client {
                                   @display {label: "Attribute Names"} string[]? attributeNames = (),
                                   @display {label: "Message Attribute Names"} string[]? messageAttributeNames = (),
                                   @display {label: "Receive Request Attempt ID"} string? receiveRequestAttemptId = ()) 
-                                  returns @tainted @display {label: "Message Detail"} InboundMessage[]|OperationError {
+                                  returns @tainted @display {label: "Message Detail"} ReceiveMessageResponse|OperationError {
         string amzTarget = AMAZON_SQS_API_VERSION + FULL_STOP + ACTION_RECEIVE_MESSAGE;
         map<string> parameters = {};
         parameters[PAYLOAD_PARAM_ACTION] = ACTION_RECEIVE_MESSAGE;
@@ -214,8 +195,8 @@ public isolated client class Client {
             http:Response|error httpResponse = self.clientEp->post(queueResourcePath, request);
             xml|ResponseHandleFailed response = handleResponse(httpResponse);
             if (response is xml){
-                InboundMessage[]|DataMappingError result = xmlToInboundMessages(response);
-                if (result is InboundMessage[]) {
+                ReceiveMessageResponse|error result = xmlToReceiveMessageResponse(response);
+                if (result is ReceiveMessageResponse) {
                     return result;
                 } else {
                     return error OperationError(OPERATION_ERROR_MSG, result);
@@ -232,11 +213,11 @@ public isolated client class Client {
     #
     # + queueResourcePath - Resource path to the queue from the host address. e.g.: /610968236798/myQueue.fifo
     # + receiptHandle - Receipt Handle parameter for the message(s) to be deleted
-    # + return - Null when the message(s) were successfully deleted or whether an error occurred
+    # + return - Details of the deleted message when the message(s) were successfully deleted or whether an error occurred
     @display {label: "Delete Message"}
     remote isolated function deleteMessage(@display {label: "Queue Resource Path"} string queueResourcePath, 
                                            @display {label: "Receipt Handle Parameter"} string receiptHandle)
-                                           returns @tainted @display {label: "Delete Status"} OperationError? {
+                                           returns @tainted @display {label: "Delete Status"} DeleteMessageResponse|error {
         string amzTarget = AMAZON_SQS_API_VERSION + FULL_STOP + ACTION_DELETE_MESSAGE;
         string|error receiptHandleEncoded = url:encode(receiptHandle, UTF_8);
         if (receiptHandleEncoded is string) {
@@ -249,7 +230,7 @@ public isolated client class Client {
                 http:Response|error httpResponse = self.clientEp->post(queueResourcePath, request);
                 xml|ResponseHandleFailed response = handleResponse(httpResponse);
                 if (response is xml) {
-                    return isXmlDeleteResponse(response);
+                    return xmlToDeleteMessageResponse(response);
                 } else {
                     return error OperationError(OPERATION_ERROR_MSG, response);
                 }
@@ -264,10 +245,10 @@ public isolated client class Client {
     # Delete queue(s).
     #
     # + queueResourcePath - Resource path to the queue from the host address. e.g.: /610968236798/myQueue.fifo
-    # + return - Null when the queue(s) were successfully deleted or whether an error occurred
+    # + return - Details of the deleted queue when the queue(s) were successfully deleted or whether an error occurred
     @display {label: "Delete Queue"}
     remote isolated function deleteQueue(@display {label: "Queue Resource Path"} string queueResourcePath)
-                                         returns @tainted @display {label: "Delete Status"} OperationError? {
+                                         returns @tainted @display {label: "Delete Status"} DeleteQueueResponse|error {
         string amzTarget = AMAZON_SQS_API_VERSION + FULL_STOP + ACTION_DELETE_QUEUE;
         map<string> parameters = {};
         parameters[PAYLOAD_PARAM_ACTION] = ACTION_DELETE_QUEUE;
@@ -277,7 +258,7 @@ public isolated client class Client {
             http:Response|error httpResponse = self.clientEp->post(queueResourcePath, request);
             xml|ResponseHandleFailed response = handleResponse(httpResponse);
             if (response is xml) {
-                return isXmlDeleteQueueResponse(response);
+                return xmlToDeleteQueueResponse(response);
             } else {
                 return error OperationError(OPERATION_ERROR_MSG, response);
             }
@@ -370,7 +351,6 @@ public isolated client class Client {
 # + accessKey - AccessKey of Amazon Account 
 # + secretKey - SecretKey of Amazon Account
 # + region - Region of SQS Queue
-# + accountNumber - Account number of the SQS queue
 @display{label: "Connection Config"} 
 public type ConnectionConfig record {
     @display{label: "Access Key"} 
@@ -379,8 +359,6 @@ public type ConnectionConfig record {
     string secretKey;
     @display{label: "Region"} 
     string region;
-    @display{label: "Account Number"} 
-    string accountNumber;
 };
 
 isolated function utcToString(time:Utc utc, string pattern) returns string|error {
