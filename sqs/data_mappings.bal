@@ -28,6 +28,98 @@ isolated function xmlToCreatedQueueUrl(xml response) returns string {
     }
 }
 
+isolated function xmlToCreatedQueue(xml response) returns CreateQueueResponse|error {
+    xml createdQueueResponse = response/<ns:CreateQueueResult>;
+    xml responseMeta = response/<ns:ResponseMetadata>;
+    if (createdQueueResponse.toString() != "") {
+        CreateQueueResult createQueue = {
+            queueUrl : (createdQueueResponse/<ns:QueueUrl>/*).toString()
+        };
+        ResponseMetadata responseMetadata = {
+            requestId: (responseMeta/<ns:RequestId>/*).toString()
+        };
+        CreateQueueResponse createQueueResponse = {
+            createQueueResult : createQueue,
+            responseMetadata : responseMetadata 
+        };
+        return createQueueResponse;
+    } else {
+        return error(response.toString());
+    }
+}
+
+isolated function xmlToSendMessageResponse(xml response) returns SendMessageResponse|error {
+    xml sentMessageResponse = response/<ns:SendMessageResult>;
+    xml responseMeta = response/<ns:ResponseMetadata>;
+    if (sentMessageResponse.toString() != "") {
+        SendMessageResult sendMessage = {
+            md5OfMessageAttributes: (sentMessageResponse/<ns:MD5OfMessageAttributes>/*).toString(),
+            md5OfMessageBody: (sentMessageResponse/<ns:MD5OfMessageBody>/*).toString(),
+            messageId: (sentMessageResponse/<ns:MessageId>/*).toString(),
+            sequenceNumber: (sentMessageResponse/<ns:SequenceNumber>/*).toString()
+        };
+        ResponseMetadata responseMetadata = {
+            requestId: (responseMeta/<ns:RequestId>/*).toString()
+        };
+        SendMessageResponse sendMessageResponse = {
+            sendMessageResult : sendMessage,
+            responseMetadata : responseMetadata 
+        };
+        return sendMessageResponse;
+    } else {
+        return error(response.toString());
+    }
+}
+
+isolated function xmlToReceiveMessageResponse(xml response) returns ReceiveMessageResponse|error {
+    xml responseMeta = response/<ns:ResponseMetadata>;
+    string requestId = (responseMeta/<ns:RequestId>/*).toString();
+    InboundMessage[]|DataMappingError receivedMessages = xmlToInboundMessages(response);
+    if (receivedMessages is InboundMessage[]) {
+        ReceiveMessageResponse receiveMessageResponse = {
+            receiveMessageResult : {
+                message : receivedMessages
+            },
+            responseMetadata : {
+                requestId: requestId
+            }
+        };
+        return receiveMessageResponse;
+    } else {
+        return error DataMappingError(CONVERT_XML_TO_INBOUND_MESSAGES_FAILED_MSG, receivedMessages);
+    }
+}
+
+isolated function xmlToDeleteMessageResponse(xml response) returns DeleteMessageResponse|error {
+    xml responseMeta = response/<ns:ResponseMetadata>;
+    if (responseMeta.toString() != "") {
+        ResponseMetadata responseMetadata = {
+            requestId: (responseMeta/<ns:RequestId>/*).toString()
+        };
+        DeleteMessageResponse deleteMessageResponse = {
+            responseMetadata : responseMetadata 
+        };
+        return deleteMessageResponse;
+    } else {
+        return error(response.toString());
+    }
+}
+
+isolated function xmlToDeleteQueueResponse(xml response) returns DeleteQueueResponse|error {
+    xml responseMeta = response/<ns:ResponseMetadata>;
+    if (responseMeta.toString() != "") {
+        ResponseMetadata responseMetadata = {
+            requestId: (responseMeta/<ns:RequestId>/*).toString()
+        };
+        DeleteQueueResponse deleteQueueResponse = {
+            responseMetadata : responseMetadata 
+        };
+        return deleteQueueResponse;
+    } else {
+        return error(response.toString());
+    }
+}
+
 isolated function xmlToOutboundMessage(xml response) returns OutboundMessage|DataMappingError {
     xml msgSource = response/<ns:SendMessageResult>;
     if (msgSource.toString() != "") {

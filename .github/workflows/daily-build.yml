@@ -46,7 +46,6 @@ jobs:
                 ACCESS_KEY_ID: ${{ secrets.ACCESS_KEY_ID }}
                 SECRET_ACCESS_KEY: ${{ secrets.SECRET_ACCESS_KEY }}
                 REGION: ${{ secrets.REGION }}
-                ACCOUNT_NUMBER: ${{ secrets.ACCOUNT_NUMBER }}
 
             # Send notification when build fails
             - name: Notify failure

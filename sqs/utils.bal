@@ -18,6 +18,29 @@ import ballerina/http;
 import ballerina/jballerina.java as java;
 import ballerina/jballerina.java.arrays as jarrays;
 
+isolated function addQueueOptionalParameters(map<string> parameterMap, QueueAttributes? attributes = (), map<string>? tags = ()) returns @tainted map<string>|error {
+    map<string> parameters = {};
+    if (attributes is QueueAttributes) {
+        parameters = setQueueAttributes(parameterMap, attributes);
+    }
+    if (tags is map<string>) {
+        parameters = setTags(parameterMap, tags);
+    }
+    return parameterMap;
+}
+
+isolated function setQueueAttributes(map<string> parameters, QueueAttributes attributes) returns map<string> {
+    int attributeNumber = 1;
+    map<anydata> attributeMap = <map<anydata>>attributes;
+    foreach var [key, value] in attributeMap.entries() {
+        string attributeName = getAttributeName(key);
+        parameters["Attribute." + attributeNumber.toString() + ".Name"] = attributeName.toString();
+        parameters["Attribute." + attributeNumber.toString() + ".Value"] = value.toString();
+        attributeNumber = attributeNumber + 1;
+    }
+    return parameters;
+}
+
 # Handles the HTTP response.
 #
 # + httpResponse - Http response or error
@@ -53,10 +76,53 @@ isolated function handleResponse(http:Response|http:PayloadType|error httpRespon
     }
 }
 
+# Set tags to a map of string to add as query parameters.
+#
+# + parameters - Parameter map
+# + tags - Tags to convert to a map of string
+# + return - If successful returns `map<string>` response. Else returns error
+isolated function setTags(map<string> parameters, map<string> tags) returns map<string> {
+    int tagNumber = 1;
+    foreach var [key, value] in tags.entries() {
+        parameters["Tag." + tagNumber.toString() + ".Key"] = key;
+        parameters["Tag." + tagNumber.toString() + ".Value"] = value;
+        tagNumber = tagNumber + 1;
+    }
+    return parameters;
+}
+
+# Set message attributes to a map of string to add as query parameters.
+#
+# + parameters - Parameter map
+# + attributes - MessageAttribute to convert to a map of string
+# + return - If successful returns `map<string>` response. Else returns error
+isolated function setMessageAttributes(map<string> parameters, MessageAttribute[] attributes) returns map<string> {
+    int attributeNumber = 1;
+    foreach var attribute in attributes {
+        parameters["MessageAttribute." + attributeNumber.toString() + ".Name"] = attribute.keyName.toString();
+        parameters["MessageAttribute." + attributeNumber.toString() + ".Value.StringValue"] = attribute.value.stringValue.toString();
+        parameters["MessageAttribute." + attributeNumber.toString() + ".Value.DataType"] = attribute.value.dataType.toString();
+        attributeNumber = attributeNumber + 1;
+    }
+    return parameters;
+}
+
+# Get attribute name from field of record.
+#
+# + attribute - Field name of record
+# + return - If successful returns attribute name string. Else returns error
+isolated function getAttributeName(string attribute) returns string {
+    string firstLetter = attribute.substring(0, 1);
+    string otherLetters = attribute.substring(1);
+    string upperCaseFirstLetter = firstLetter.toUpperAscii();
+    string attributeName = upperCaseFirstLetter + otherLetters;
+    return attributeName;
+}
+
 public isolated function splitString(string str, string delimeter, int arrIndex) returns string {
     handle rec = java:fromString(str);
     handle del = java:fromString(delimeter);
     handle arr = split(rec, del);
-    handle arrEle =  jarrays:get(arr, arrIndex);
+    handle arrEle = jarrays:get(arr, arrIndex);
     return arrEle.toString();
 }

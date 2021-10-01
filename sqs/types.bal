@@ -14,6 +14,98 @@
 // specific language governing permissions and limitations
 // under the License.
 
+# Queue attribute
+#
+# + delaySeconds - Delay seconds
+# + maximumMessageSize - Maximum message size
+# + messageRetentionPeriod - Time Amazon SQS retains a message
+# + policy - Valid AWS queue policy
+# + receiveMessageWaitTimeSeconds - Time receiveMessage action waits for a message to arrive
+# + visibilityTimeout - Visibility timeout for the queue
+# + contentBasedDeduplication - Enables content-based deduplication
+# + fifoQueue - Designates a queue as FIFO
+# + kmsMasterKeyId - ID of an AWS managed customer master key
+# + kmsDataKeyReusePeriodSeconds - Time that Amazon SQS can reuse a data key to encrypt or decrypt messages
+# + deduplicationScope - Specifies whether message deduplication occurs at the message group or queue level
+# + fifoThroughputLimit - Specifies whether the FIFO queue throughput quota applies to the entire queue or per message group
+# + redrivePolicy - Parameters for the dead-letter queue functionality of the source queue 
+# + redriveAllowPolicy - Permissions for the dead-letter queue redrive permission
+public type QueueAttributes record {
+    int delaySeconds?;
+    int maximumMessageSize?;
+    int messageRetentionPeriod?;
+    string policy?;
+    int receiveMessageWaitTimeSeconds?;    
+    int visibilityTimeout?;
+    boolean contentBasedDeduplication?;
+    boolean fifoQueue?;
+    string kmsMasterKeyId?;
+    int kmsDataKeyReusePeriodSeconds?;
+    string deduplicationScope?;
+    string fifoThroughputLimit?;
+    json redrivePolicy?;
+    json redriveAllowPolicy?;
+};
+
+# Create queue response
+#
+# + createQueueResult - Result of queue creation
+# + responseMetadata - Response metadata
+public type CreateQueueResponse record {
+    CreateQueueResult createQueueResult;
+    ResponseMetadata responseMetadata;
+};
+
+# Create queue result
+#
+# + queueUrl - Url of the queue
+public type CreateQueueResult record {
+    string queueUrl;
+};
+
+# Send message response
+#
+# + sendMessageResult - Result of send message
+# + responseMetadata - Response metadata
+public type SendMessageResponse record {
+    SendMessageResult sendMessageResult;
+    ResponseMetadata responseMetadata;
+};
+
+# Send message result
+#
+# + md5OfMessageAttributes - MD5 of message attributes sent to sendMessage method
+# + md5OfMessageBody - MD5 of message body sent to sendMessage method
+# + messageId - Message ID for the message sent to sendMessage method
+# + sequenceNumber - Sequence number of the sent message
+public type SendMessageResult record {
+    string md5OfMessageAttributes?;
+    string md5OfMessageBody;
+    string messageId;
+    string sequenceNumber?;
+};
+
+# Delete message response
+#
+# + responseMetadata - Response metadata
+public type DeleteMessageResponse record {
+    ResponseMetadata responseMetadata;
+};
+
+# Delete queue response
+#
+# + responseMetadata - Response metadata
+public type DeleteQueueResponse record {
+    ResponseMetadata responseMetadata;
+};
+
+# Response metadata
+#
+# + requestId - Request id of response
+public type ResponseMetadata record {
+    string requestId;
+};
+
 # Response message for sendMessage method
 #
 # + md5OfMessageAttributes - MD5 of message attributes sent to sendMessage method
@@ -44,6 +136,40 @@ public type InboundMessage record {
     map<MessageAttributeValue> messageAttributes;
     string messageId;
     string receiptHandle;
+};
+
+# Receive message response
+#
+# + receiveMessageResult - Result of receive message
+# + responseMetadata - Response metadata
+public type ReceiveMessageResponse record {
+    ReceiveMessageResult receiveMessageResult;
+    ResponseMetadata responseMetadata;
+};
+
+# Receive message result
+#
+# + message - Collection of received messages
+public type ReceiveMessageResult record {
+    InboundMessage[] message;
+};
+
+# Data defined in a message attribute
+#
+# + keyName - Key name
+# + value - Message attribute values
+public type MessageAttribute record {
+    string keyName;
+    MessageAttributeValues value;
+};
+
+# Data defined in a message attribute value
+#
+# + stringValue - String value
+# + dataType - Data type
+public type MessageAttributeValues record {
+    string stringValue;
+    string dataType;
 };
 
 # Data parameters defined in a MessageAttributeValue parameter

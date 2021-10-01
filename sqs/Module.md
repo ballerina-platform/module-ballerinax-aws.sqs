@@ -25,8 +25,7 @@ You can now enter the credentials in the SQS client configuration and create the
 sqs:ConnectionConfig configuration = {
     accessKey: "<ACCESS_KEY_ID>",
     secretKey: "<SECRET_ACCESS_KEY>",
-    region: "<REGION>",
-    accountNumber: "<ACCOUNT_NUMBER>"
+    region: "<REGION>"
 };
 
 sqs:Client sqsClient = check new (configuration);
@@ -37,13 +36,14 @@ sqs:Client sqsClient = check new (configuration);
 1. You can create a queue in SQS as follows with `createQueue` method for a preferred queue name and the required set of attributes.
 
     ```ballerina
-    map<string> attributes = {};
-    attributes["VisibilityTimeout"] = "400";
-    attributes["FifoQueue"] = "true";
-
-    string|error response = sqsClient->createQueue("demo.fifo", attributes);
-    if (response is string) {
-        log:printInfo("Created queue URL: " + response);
+    QueueAttributes queueAttributes = {  
+        visibilityTimeout : 400,
+        fifoQueue : true
+    };
+    CreateQueueResponse|error response = sqsClient->createQueue("demo.fifo", queueAttributes);
+    if (response is CreateQueueResponse) {
+        string queueResponse = response.createQueueResult.queueUrl;
+        log:printInfo("Created queue URL: " + queueResponse);
     }
     ```
 2. Use `bal run` command to compile and run the Ballerina program. 
