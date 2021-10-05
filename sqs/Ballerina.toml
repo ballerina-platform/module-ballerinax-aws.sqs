@@ -4,5 +4,5 @@ name = "aws.sqs"
 license= ["Apache-2.0"]
 authors = ["Ballerina"]
 version= "0.99.4-SNAPSHOT"
-keywords = ["dev tools/message brokers", "cost/freemium", "vendor/amazon"]
+keywords = ["it operations/message brokers", "cost/freemium", "vendor/amazon"]
 repository = "https://github.com/ballerina-platform/module-ballerinax-aws.sqs"
