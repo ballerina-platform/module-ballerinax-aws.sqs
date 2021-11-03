@@ -13,7 +13,12 @@ jobs:
               uses: ballerina-platform/ballerina-action/@nightly
               with:
                   args:
-                      build -c ./sqs
+                      pack ./sqs
+            - name: Ballerina Test
+              uses: ballerina-platform/ballerina-action/@nightly
+              with:
+                  args:
+                      test ./sqs
               env:
                   ACCESS_KEY_ID: ${{ secrets.ACCESS_KEY_ID }}
                   SECRET_ACCESS_KEY: ${{ secrets.SECRET_ACCESS_KEY }}
