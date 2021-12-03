@@ -5,4 +5,5 @@ license= ["Apache-2.0"]
 authors = ["Ballerina"]
 version= "2.0.0"
 keywords = ["IT Operations/Message Brokers", "Cost/Freemium", "Vendor/Amazon"]
+icon= "icon.png"
 repository = "https://github.com/ballerina-platform/module-ballerinax-aws.sqs"
