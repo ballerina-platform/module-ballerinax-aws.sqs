@@ -29,7 +29,7 @@ import ballerina/time;
 # + secretKey - Amazon API secret key
 # + region - Amazon API Region
 # + host - Amazon host
-@display {label: "Amazon SQS Client", iconPath: "resources/aws.sqs.svg"}
+@display {label: "Amazon SQS Client", iconPath: "icon.png"}
 public isolated client class Client {
 
     final http:Client clientEp;
