@@ -17,7 +17,7 @@ This connector provides operations for connecting and interacting with Amazon SQ
 
     > **Note:** Set the JAVA_HOME environment variable to the path name of the directory in which you installed JDK.
 
-2. Download and install [Ballerina Swan Lake Beta3](https://ballerina.io/). 
+2. Download and install [Ballerina Swan Lake](https://ballerina.io/). 
 
 ### Building the source
 Execute the following commands to build from the source:
