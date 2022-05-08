@@ -19,12 +19,11 @@ import ballerina/jballerina.java as java;
 import ballerina/jballerina.java.arrays as jarrays;
 
 isolated function addQueueOptionalParameters(map<string> parameterMap, QueueAttributes? attributes = (), map<string>? tags = ()) returns @tainted map<string>|error {
-    map<string> parameters = {};
     if (attributes is QueueAttributes) {
-        parameters = setQueueAttributes(parameterMap, attributes);
+        _ = setQueueAttributes(parameterMap, attributes);
     }
     if (tags is map<string>) {
-        parameters = setTags(parameterMap, tags);
+        _ = setTags(parameterMap, tags);
     }
     return parameterMap;
 }
