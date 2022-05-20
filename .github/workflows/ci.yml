@@ -36,5 +36,5 @@ jobs:
             - name: Code Coverage
               run: |
                 echo "Covered Code Lines : ${{fromJson(steps.test_results.outputs.testResultsJson).coveredLines}}"
-                echo "Missed Code Lines : ${{fromJson(steps.test_results.outputs.testResultsJson).missedLines}}"
+                echo "Total Code Lines : $(expr ${{fromJson(steps.test_results.outputs.testResultsJson).missedLines}} + ${{fromJson(steps.test_results.outputs.testResultsJson).coveredLines}})"
                 echo "Code Coverage Percentage : ${{fromJson(steps.test_results.outputs.testResultsJson).coveragePercentage}}"
