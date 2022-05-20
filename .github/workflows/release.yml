@@ -15,7 +15,7 @@ jobs:
               uses: ballerina-platform/ballerina-action/@master
               with:
                   args:
-                      pack ./sqs
+                      pack
               env:
                   ACCESS_KEY_ID: ${{ secrets.ACCESS_KEY_ID }}
                   SECRET_ACCESS_KEY: ${{ secrets.SECRET_ACCESS_KEY }}
@@ -26,5 +26,4 @@ jobs:
                   args:
                       push
               env:
-                  WORKING_DIR: ./sqs
                   BALLERINA_CENTRAL_ACCESS_TOKEN: ${{ secrets.BALLERINA_CENTRAL_ACCESS_TOKEN }}
