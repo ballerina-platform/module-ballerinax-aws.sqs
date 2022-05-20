@@ -65,25 +65,16 @@ public isolated client class Client {
                                 returns @tainted @display {label: "Created Queue URL"} CreateQueueResponse|error {
         string amzTarget = AMAZON_SQS_API_VERSION + FULL_STOP + ACTION_CREATE_QUEUE;
         string endpoint = FORWARD_SLASH;
-        string payload;
         map<string> parameters = {};
         parameters[PAYLOAD_PARAM_ACTION] = ACTION_CREATE_QUEUE;
         parameters[PAYLOAD_PARAM_VERSION] = SQS_VERSION;
         parameters[PAYLOAD_PARAM_QUEUE_NAME] = queueName;
         parameters = check addQueueOptionalParameters(parameters, attributes, tags);
-        http:Request|error request = self.generatePOSTRequest(amzTarget, endpoint, 
+        http:Request request = check self.generatePOSTRequest(amzTarget, endpoint, 
                                      self.buildPayload(parameters));
-        if (request is http:Request) {
-            http:Response|error httpResponse = self.clientEp->post(endpoint, request);
-            xml|ResponseHandleFailed response = handleResponse(httpResponse);
-            if (response is xml){
-                return xmlToCreatedQueue(response);
-            } else {
-                 return error OperationError(OPERATION_ERROR_MSG, response);
-            }
-        } else {
-            return error OperationError(OPERATION_ERROR_MSG, request);
-        }
+        http:Response httpResponse = check self.clientEp->post(endpoint, request);
+        xml response = check handleResponse(httpResponse);
+        return xmlToCreatedQueue(response);
     }
 
     # Send a new message to a SQS queue.
@@ -103,8 +94,8 @@ public isolated client class Client {
                                          @display {label: "Message DeduplicationId ID"} string? messageDeduplicationId = (),
                                          @display {label: "Time Delay For Message"} int? delaySeconds = ()) 
                                          returns @tainted @display {label: "Message Detail"} SendMessageResponse|error {
-            string|error msgbody = url:encode(messageBody, UTF_8);
-            if (msgbody is string) {
+        string|error msgbody = url:encode(messageBody, UTF_8);
+        if (msgbody is string) {
             string amzTarget = AMAZON_SQS_API_VERSION + FULL_STOP + ACTION_SEND_MESSAGE;
             map<string> parameters = {};
             parameters[PAYLOAD_PARAM_ACTION] = ACTION_SEND_MESSAGE;
@@ -121,24 +112,12 @@ public isolated client class Client {
             if(messageDeduplicationId is string){
                 parameters["MessageDeduplicationId"] = messageDeduplicationId;
             }
-            http:Request|error request = self.generatePOSTRequest(amzTarget, queueResourcePath,
+            http:Request request = check self.generatePOSTRequest(amzTarget, queueResourcePath,
                                          self.buildPayload(parameters));
-            if (request is http:Request) {
-                http:Response|error httpResponse = self.clientEp->post(queueResourcePath, request);
-                xml|ResponseHandleFailed response = handleResponse(httpResponse);
-                if (response is xml){
-                    SendMessageResponse|error result = xmlToSendMessageResponse(response);
-                    if (result is SendMessageResponse) {
-                        return result;
-                    } else {
-                        return error OperationError(OPERATION_ERROR_MSG, result);
-                    }
-                } else {
-                    return error OperationError(OPERATION_ERROR_MSG, response);
-                }
-            } else {
-                return error OperationError(OPERATION_ERROR_MSG, request);
-            }
+            http:Response httpResponse = check self.clientEp->post(queueResourcePath, request);
+            xml response = check handleResponse(httpResponse);
+            SendMessageResponse result = check xmlToSendMessageResponse(response);
+            return result;
         } else {
             return error OperationError(OPERATION_ERROR_MSG, msgbody);
         }
@@ -162,7 +141,7 @@ public isolated client class Client {
                                   @display {label: "Attribute Names"} string[]? attributeNames = (),
                                   @display {label: "Message Attribute Names"} string[]? messageAttributeNames = (),
                                   @display {label: "Receive Request Attempt ID"} string? receiveRequestAttemptId = ()) 
-                                  returns @tainted @display {label: "Message Detail"} ReceiveMessageResponse|OperationError {
+                                  returns @tainted @display {label: "Message Detail"} ReceiveMessageResponse|error {
         string amzTarget = AMAZON_SQS_API_VERSION + FULL_STOP + ACTION_RECEIVE_MESSAGE;
         map<string> parameters = {};
         parameters[PAYLOAD_PARAM_ACTION] = ACTION_RECEIVE_MESSAGE;
@@ -189,24 +168,12 @@ public isolated client class Client {
                 messageAttributeNameNumber = messageAttributeNameNumber + 1;
             }
         }
-        http:Request|error request = self.generatePOSTRequest(amzTarget, queueResourcePath,
+        http:Request request = check self.generatePOSTRequest(amzTarget, queueResourcePath,
                                      self.buildPayload(parameters));
-        if (request is http:Request) {
-            http:Response|error httpResponse = self.clientEp->post(queueResourcePath, request);
-            xml|ResponseHandleFailed response = handleResponse(httpResponse);
-            if (response is xml){
-                ReceiveMessageResponse|error result = xmlToReceiveMessageResponse(response);
-                if (result is ReceiveMessageResponse) {
-                    return result;
-                } else {
-                    return error OperationError(OPERATION_ERROR_MSG, result);
-                }
-            } else {
-                return error OperationError(OPERATION_ERROR_MSG, response);
-            }
-        } else {
-            return error OperationError(OPERATION_ERROR_MSG, request);
-        }
+        http:Response httpResponse =  check self.clientEp->post(queueResourcePath, request);
+        xml response = check handleResponse(httpResponse);
+        ReceiveMessageResponse result = check xmlToReceiveMessageResponse(response);
+        return result;
     }
 
     # Delete message(s) from the queue for a given receiptHandle.
@@ -224,19 +191,11 @@ public isolated client class Client {
             map<string> parameters = {};
             parameters[PAYLOAD_PARAM_ACTION] = ACTION_DELETE_MESSAGE;
             parameters[PAYLOAD_PARAM_RECEIPT_HANDLE] = receiptHandleEncoded;
-            http:Request|error request = self.generatePOSTRequest(amzTarget, queueResourcePath, 
+            http:Request request = check self.generatePOSTRequest(amzTarget, queueResourcePath, 
                                          self.buildPayload(parameters));
-            if (request is http:Request) {
-                http:Response|error httpResponse = self.clientEp->post(queueResourcePath, request);
-                xml|ResponseHandleFailed response = handleResponse(httpResponse);
-                if (response is xml) {
-                    return xmlToDeleteMessageResponse(response);
-                } else {
-                    return error OperationError(OPERATION_ERROR_MSG, response);
-                }
-            } else {
-                return error OperationError(OPERATION_ERROR_MSG, request);
-            }
+            http:Response httpResponse = check self.clientEp->post(queueResourcePath, request);
+            xml response = check handleResponse(httpResponse);
+            return xmlToDeleteMessageResponse(response);
         } else {
             return error OperationError(OPERATION_ERROR_MSG, receiptHandleEncoded);
         }
@@ -252,19 +211,11 @@ public isolated client class Client {
         string amzTarget = AMAZON_SQS_API_VERSION + FULL_STOP + ACTION_DELETE_QUEUE;
         map<string> parameters = {};
         parameters[PAYLOAD_PARAM_ACTION] = ACTION_DELETE_QUEUE;
-        http:Request|error request = self.generatePOSTRequest(amzTarget, queueResourcePath, 
+        http:Request request = check self.generatePOSTRequest(amzTarget, queueResourcePath, 
                                      self.buildPayload(parameters));
-        if (request is http:Request) {
-            http:Response|error httpResponse = self.clientEp->post(queueResourcePath, request);
-            xml|ResponseHandleFailed response = handleResponse(httpResponse);
-            if (response is xml) {
-                return xmlToDeleteQueueResponse(response);
-            } else {
-                return error OperationError(OPERATION_ERROR_MSG, response);
-            }
-        } else {
-            return error OperationError(OPERATION_ERROR_MSG, request);
-        }
+        http:Response httpResponse = check self.clientEp->post(queueResourcePath, request);
+        xml response = check handleResponse(httpResponse);
+        return xmlToDeleteQueueResponse(response);
     }
 
     private isolated function buildPayload(map<string> parameters) returns string {

@@ -104,7 +104,6 @@ function testSendMessage() {
     MessageAttribute[] messageAttributes = 
         [{keyName : "N1", value : { stringValue : "V1", dataType : "String"}},
         {keyName : "N2", value : { stringValue : "V2", dataType : "String"}}];
-    string queueUrl = "";
     SendMessageResponse|error response = sqs->sendMessage("New Message Text", fifoQueueResourcePath,
         messageAttributes, "grpID1", "dupID1");
     if (response is SendMessageResponse) {
@@ -170,7 +169,6 @@ function testCRUDOperationsForMultipleMessages() {
 
     // Send 2 messages to the queue
     while (msgCnt < 2) {
-        string queueUrl = "";
         log:printInfo("standardQueueResourcePath " + standardQueueResourcePath);
         SendMessageResponse|error response1 = sqs->sendMessage("There is a tree", standardQueueResourcePath);
         if (response1 is SendMessageResponse) {
@@ -183,14 +181,12 @@ function testCRUDOperationsForMultipleMessages() {
     }
 
     // Receive and delete the 2 messages from the queue
-    map<string> attributes = {};
     msgCnt = 0;
     int processesMsgCnt = 0;
     while(msgCnt < 2) {
         ReceiveMessageResponse|error response2 = sqs->receiveMessage(standardQueueResourcePath, 10, 2, 1);
         if (response2 is ReceiveMessageResponse) {
             if ((response2.receiveMessageResult.message).length() > 0) {
-                int deleteMssageCount = (response2.receiveMessageResult.message).length();
                 foreach var eachResponse in (response2.receiveMessageResult.message) {
                     standardQueueReceivedReceiptHandler = <@untainted>eachResponse.receiptHandle;
                     DeleteMessageResponse|error deleteResponse = sqs->deleteMessage(standardQueueResourcePath, standardQueueReceivedReceiptHandler);
