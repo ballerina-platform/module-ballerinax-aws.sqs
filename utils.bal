@@ -44,7 +44,7 @@ isolated function setQueueAttributes(map<string> parameters, QueueAttributes att
 #
 # + httpResponse - Http response or error
 # + return - If successful returns `json` response. Else returns error.
-isolated function handleResponse(http:Response|http:PayloadType|error httpResponse) returns @untainted xml|ResponseHandleFailed {
+isolated function handleResponse(http:Response|error httpResponse) returns @untainted xml|ResponseHandleFailed {
     if (httpResponse is http:Response) {
         if (httpResponse.statusCode == http:STATUS_NO_CONTENT){
             //If status 204, then no response body. So returns json boolean true.
@@ -68,8 +68,6 @@ isolated function handleResponse(http:Response|http:PayloadType|error httpRespon
         } else {
                 return error ResponseHandleFailed(RESPONSE_PAYLOAD_IS_NOT_XML_MSG);
         }
-    } else if (httpResponse is http:PayloadType) {
-        return error ResponseHandleFailed(UNREACHABLE_STATE);
     } else {
         return error ResponseHandleFailed(ERROR_OCCURRED_WHILE_INVOKING_REST_API_MSG, httpResponse);
     }
