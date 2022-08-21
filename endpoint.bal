@@ -42,12 +42,27 @@ public isolated client class Client {
     # Create a [AWS account](https://aws.amazon.com) and obtain tokens following [this guide](https://aws.amazon.com/premiumsupport/knowledge-center/create-and-activate-aws-account/). 
     #
     # + config - Configuration for the connector
-    # + httpClientConfig - HTTP Configuration
     # + return - `http:Error` in case of failure to initialize or `null` if successfully initialized  
-    public isolated function init(ConnectionConfig config, http:ClientConfiguration httpClientConfig = {}) returns error? {
+    public isolated function init(ConnectionConfig config) returns error? {
         self.accessKey = config.accessKey;
         self.secretKey = config.secretKey;
         self.region = config.region;
+        http:ClientConfiguration httpClientConfig = {
+            httpVersion: config.httpVersion,
+            http1Settings: config.http1Settings,
+            http2Settings: config.http2Settings,
+            timeout: config.timeout,
+            forwarded: config.forwarded,
+            poolConfig: config.poolConfig,
+            cache: config.cache,
+            compression: config.compression,
+            circuitBreaker: config.circuitBreaker,
+            retryConfig: config.retryConfig,
+            responseLimits: config.responseLimits,
+            secureSocket: config.secureSocket,
+            proxy: config.proxy,
+            validation: config.validation
+        };
         self.host = SQS_SERVICE_NAME + FULL_STOP + self.region + FULL_STOP + AMAZON_HOST;
         self.clientEp = check new ("https://" + self.host, httpClientConfig);
     }
@@ -294,23 +309,7 @@ public isolated client class Client {
         byte[] kSigning = check self.sign(kService, "aws4_request");
         return kSigning;
     }
-
 }
-
-# Configuration provided for the client.
-#
-# + accessKey - AccessKey of Amazon Account 
-# + secretKey - SecretKey of Amazon Account
-# + region - Region of SQS Queue
-@display{label: "Connection Config"} 
-public type ConnectionConfig record {
-    @display{label: "Access Key"} 
-    string accessKey;
-    @display{label: "Secret Key"} 
-    string secretKey;
-    @display{label: "Region"} 
-    string region;
-};
 
 isolated function utcToString(time:Utc utc, string pattern) returns string|error {
     [int, decimal][epochSeconds, lastSecondFraction] = utc;
