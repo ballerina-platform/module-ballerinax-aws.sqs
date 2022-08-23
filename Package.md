@@ -8,7 +8,7 @@ This package provides the capability to access Amazon SQS and it provides capabi
 ### Compatibility
 |                    | Version            |
 |--------------------|--------------------|
-| Ballerina Language | Swan Lake 2201.1.1 |
+| Ballerina Language | Swan Lake 2201.2.0 |
 | Amazon SQS API     | 2012-11-05         |
 
 ## Report issues

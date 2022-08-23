@@ -290,7 +290,6 @@ isolated function read(string path) returns @tainted json|FileReadFailed {
         io:ReadableCharacterChannel readableChannel = new(readableByteChannel, "UTF8");
         var result = readableChannel.readJson();
         if (result is error) {
-            FileReadFailed? err = closeReadableChannel(readableChannel);
             return error FileReadFailed(FILE_READ_FAILED_MSG, result);
         } else {
             FileReadFailed? err = closeReadableChannel(readableChannel);
