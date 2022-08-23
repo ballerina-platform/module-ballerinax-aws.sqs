@@ -18,10 +18,13 @@
 @display {label: "Connection Config"}
 public type ConnectionConfig record {|
     # AccessKey of Amazon Account 
+    @display{label: "Access Key"} 
     string accessKey;
     # SecretKey of Amazon Account
+    @display{label: "Secret Key"} 
     string secretKey;
     # Region of SQS Queue
+    @display{label: "Region"} 
     string region;
     # The HTTP version understood by the client
     HttpVersion httpVersion = HTTP_V2_0;
