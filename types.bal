@@ -14,6 +14,26 @@
 // specific language governing permissions and limitations
 // under the License.
 
+import ballerinax/'client.config;
+
+# Represents the AWS SQS Connector configurations.
+#
+@display {label: "Connection Config"}
+public type ConnectionConfig record {|
+    *config:ConnectionConfig;
+    never auth?;
+    # AccessKey of Amazon Account
+    string accessKey;
+    # SecretKey of Amazon Account
+    @display{
+        label: "",
+        kind: "password"
+    } 
+    string secretKey;
+    # Region of SQS Queue
+    string region;
+|};
+
 # Queue attribute
 #
 # + delaySeconds - Delay seconds
