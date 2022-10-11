@@ -20,6 +20,7 @@ import ballerina/http;
 import ballerina/jballerina.java;
 import ballerina/lang.array;
 import ballerina/time;
+import ballerinax/'client.config;
 
 # Ballerina Amazon SQS connector provides the capability to access Amazon SQS API.
 # This connector lets you to perform operations related to manage queues, send and receive messages. 
@@ -47,22 +48,7 @@ public isolated client class Client {
         self.accessKey = config.accessKey;
         self.secretKey = config.secretKey;
         self.region = config.region;
-        http:ClientConfiguration httpClientConfig = {
-            httpVersion: config.httpVersion,
-            http1Settings: {...config.http1Settings},
-            http2Settings: config.http2Settings,
-            timeout: config.timeout,
-            forwarded: config.forwarded,
-            poolConfig: config.poolConfig,
-            cache: config.cache,
-            compression: config.compression,
-            circuitBreaker: config.circuitBreaker,
-            retryConfig: config.retryConfig,
-            responseLimits: config.responseLimits,
-            secureSocket: config.secureSocket,
-            proxy: config.proxy,
-            validation: config.validation
-        };
+        http:ClientConfiguration httpClientConfig = check config:constructHTTPClientConfig(config);
         self.host = SQS_SERVICE_NAME + FULL_STOP + self.region + FULL_STOP + AMAZON_HOST;
         self.clientEp = check new ("https://" + self.host, httpClientConfig);
     }
