@@ -12,7 +12,7 @@ jobs:
         steps:
             - uses: actions/checkout@v2
             - name: Ballerina Build
-              uses: ballerina-platform/ballerina-action/@2201.2.1
+              uses: ballerina-platform/ballerina-action/@2201.4.1
               with:
                   args:
                       pack
@@ -21,7 +21,7 @@ jobs:
                   SECRET_ACCESS_KEY: ${{ secrets.SECRET_ACCESS_KEY }}
                   REGION: ${{ secrets.REGION }}
             - name: Ballerina Push
-              uses: ballerina-platform/ballerina-action/@2201.2.1
+              uses: ballerina-platform/ballerina-action/@2201.4.1
               with:
                   args:
                       push
