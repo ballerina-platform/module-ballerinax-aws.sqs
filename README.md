@@ -2,6 +2,7 @@
 
 [![Build Status](https://travis-ci.org/ballerina-platform/module-ballerinax-aws.sqs.svg?branch=master)](https://travis-ci.org/ballerina-platform/module-ballerinax-aws.sqs)
 [![GitHub Last Commit](https://img.shields.io/github/last-commit/ballerina-platform/module-ballerinax-aws.sqs.svg)](https://github.com/ballerina-platform/module-ballerinax-aws.sqs/commits/master)
+[![GraalVM Check](https://github.com/ballerina-platform/module-ballerinax-aws.sqs/actions/workflows/build-with-bal-test-native.yml/badge.svg)](https://github.com/ballerina-platform/module-ballerinax-aws.sqs/actions/workflows/build-with-bal-test-native.yml)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 [Amazon SQS](https://aws.amazon.com/sqs/) is a message queuing service developed by Amazon.
