@@ -32,7 +32,7 @@ jobs:
                 version: latest
 
             - name: Run Ballerina tests using the native executable
-              run: bal test --native
+              run: bal test --graalvm
               env:
                 ACCESS_KEY_ID: ${{ secrets.ACCESS_KEY_ID }}
                 SECRET_ACCESS_KEY: ${{ secrets.SECRET_ACCESS_KEY }}
