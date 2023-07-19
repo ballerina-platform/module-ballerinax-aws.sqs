@@ -18,8 +18,10 @@ jobs:
         with:
           version: latest
       - name: Ballerina Test
-        run: bal test
+        run: bal test --test-report --code-coverage --coverage-format=xml
         env:
           ACCESS_KEY_ID: ${{ secrets.ACCESS_KEY_ID }}
           SECRET_ACCESS_KEY: ${{ secrets.SECRET_ACCESS_KEY }}
           REGION: ${{ secrets.REGION }}
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v3
