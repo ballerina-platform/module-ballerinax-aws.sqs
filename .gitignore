@@ -19,7 +19,6 @@ Ballerina.lock
 
 # Package Files #
 *.jar
-*.jar
 *.war
 *.nar
 *.ear

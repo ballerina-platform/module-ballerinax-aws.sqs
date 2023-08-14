@@ -26,7 +26,7 @@ Execute the following commands to build from the source:
 
 * To build the package:
     ```    
-    bal pack ./ballerina
+    bal build ./ballerina
     ```
 * To run the package after build:
     ```
