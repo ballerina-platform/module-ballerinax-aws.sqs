@@ -22,9 +22,9 @@ public function main(string... args) {
     string receivedReceiptHandler = "";
 
     // Create a new SQS FIFO queue named "demo.fifo"
-    QueueAttributes queueAttributes = {  
-        visibilityTimeout : 400,
-        fifoQueue : true
+    QueueAttributes queueAttributes = {
+        visibilityTimeout: 400,
+        fifoQueue: true
     };
     CreateQueueResponse|error response1 = sqsClient->createQueue("demo.fifo", queueAttributes);
     if (response1 is CreateQueueResponse) {
@@ -35,9 +35,11 @@ public function main(string... args) {
     }
 
     // Send a message to the created queue
-    MessageAttribute[] messageAttributes = 
-        [{keyName : "N1", value : { stringValue : "V1", dataType : "String"}},
-        {keyName : "N2", value : { stringValue : "V2", dataType : "String"}}];
+    MessageAttribute[] messageAttributes =
+        [
+        {keyName: "N1", value: {stringValue: "V1", dataType: "String"}},
+        {keyName: "N2", value: {stringValue: "V2", dataType: "String"}}
+    ];
     string queueUrl = "";
     sqs:SendMessageResponse|error response2 = sqsClient->sendMessage("Sample text message.", queueResourcePath,
         messageAttributes);

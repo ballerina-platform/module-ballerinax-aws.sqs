@@ -15,7 +15,7 @@ public function main(string... args) {
         region: region
     };
 
-    sqs:Client sqsClient = new(configuration);
+    sqs:Client sqsClient = new (configuration);
 
     // Declare common variables
     string queueResourcePath = "";
@@ -33,9 +33,11 @@ public function main(string... args) {
     }
 
     // Send a message to the created queue
-    MessageAttribute[] messageAttributes = 
-        [{keyName : "N1", value : { stringValue : "V1", dataType : "String"}},
-        {keyName : "N2", value : { stringValue : "V2", dataType : "String"}}];
+    MessageAttribute[] messageAttributes =
+        [
+        {keyName: "N1", value: {stringValue: "V1", dataType: "String"}},
+        {keyName: "N2", value: {stringValue: "V2", dataType: "String"}}
+    ];
     string queueUrl = "";
     sqs:SendMessageResponse|error response2 = sqsClient->sendMessage("Sample text message.", queueResourcePath,
         messageAttributes);
