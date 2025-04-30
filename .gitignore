@@ -70,3 +70,6 @@ Config.toml
 
 # .ballerina files
 *.ballerina
+
+# gradle
+.gradle

@@ -207,3 +207,29 @@ public type MessageAttributeValue record {
     string[] stringListValues;
     string stringValue;
 };
+
+
+# Represents an SQS message received from the queue.
+#
+# + body - The message body
+# + messageId - The message ID
+# + receiptHandle - The receipt handle used to delete the message
+# + md5OfBody - An MD5 digest of the message body
+# + attributes - Optional message system attributes
+# + messageAttributes - Optional message attributes added by the sender
+public type SqsMessage record {|
+    string body;
+    string messageId;
+    string receiptHandle;
+    string md5OfBody;
+    map<string> attributes?;
+    map<string> messageAttributes?;
+|};
+
+# The service type for SQS message listener.
+public type Service service object {
+    # Resource function triggered when a new SQS message is received.
+    # 
+    # + message - The SQS message received from the queue
+    remote function onMessage(SqsMessage message) returns error?;
+};
