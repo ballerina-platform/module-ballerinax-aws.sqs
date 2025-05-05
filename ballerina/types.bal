@@ -21,6 +21,7 @@ import ballerinax/'client.config;
 @display {label: "Connection Config"}
 public type ConnectionConfig record {|
     *config:ConnectionConfig;
+    # Authentication mechanism (not used in this configuration)
     never auth?;
     # AccessKey of Amazon Account
     string accessKey;
