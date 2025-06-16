@@ -1,6 +1,6 @@
 [package]
 org = "hansika"
-name = "ballerina"
+name = "aws.sqs"
 version = "0.1.0"
 distribution = "2201.12.6"
 
