@@ -6,3 +6,51 @@ build
 
 # Ignore vscode workspace settings
 .vscode/
+
+
+
+# Compiled class file
+*.class
+
+# Log file
+*.log
+
+# BlueJ files
+*.ctxt
+
+# Mobile Tools for Java (J2ME)
+.mtj.tmp/
+
+# Package Files #
+*.jar
+!gradle-wrapper/*.jar
+*.war
+*.ear
+*.zip
+*.tar.gz
+*.rar
+*.deb
+
+# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
+hs_err_pid*
+
+# mac
+.DS_Store
+
+.classpath
+.project
+.settings
+.vscode
+
+target
+.idea
+*.iml
+*.ipr
+*.iws
+.gradle
+build
+
+# Environment files
+*.env
+Config.toml
+examples/**/Dependencies.toml

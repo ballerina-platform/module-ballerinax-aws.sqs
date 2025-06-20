@@ -68,6 +68,7 @@ dependencies {
     externalJars(group: 'software.amazon.awssdk', name: 'http-auth-aws', version: "${awsJavaSdkVersion}") {
     transitive = false
 }
+    externalJars(group: 'software.amazon.awssdk', name: 'bom', version: "${awsJavaSdkVersion}")
 
 }
 
@@ -83,14 +84,14 @@ task updateTomlFiles {
 
 task commitTomlFiles {
     doLast {
-       project.exec {
-           ignoreExitValue true
-           if (Os.isFamily(Os.FAMILY_WINDOWS)) {
-               commandLine 'cmd', '/c', "git commit -m \"[Automated] Update the toml files\" Ballerina.toml Dependencies.toml"
-           } else {
-               commandLine 'sh', '-c', "git commit -m '[Automated] Update the toml files' Ballerina.toml Dependencies.toml"
-           }
-       }
+    //    project.exec {
+    //        ignoreExitValue true
+    //        if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+    //            commandLine 'cmd', '/c', "git commit -m \"[Automated] Update the toml files\" Ballerina.toml Dependencies.toml"
+    //        } else {
+    //            commandLine 'sh', '-c', "git commit -m '[Automated] Update the toml files' Ballerina.toml Dependencies.toml"
+    //        }
+    //    }
     }
 }
 
