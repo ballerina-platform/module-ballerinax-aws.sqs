@@ -28,7 +28,7 @@ def packageName = "aws.sqs"
 def packageOrg = "ballerinax"
 def tomlVersion = stripBallerinaExtensionVersion("${project.version}")
 def ballerinaTomlFilePlaceHolder = new File("${project.rootDir}/build-config/resources/Ballerina.toml")
-def ballerinaTomlFIle = new File("${project.projectDir}/Ballerina.toml")
+def ballerinaTomlFile = new File("$project.projectDir/Ballerina.toml")
 
 def stripBallerinaExtensionVersion(String extVersion) {
     if (extVersion.matches(project.ext.timestampedVersionRegex)) {
@@ -59,26 +59,93 @@ dependencies {
     externalJars(group: 'software.amazon.awssdk', name: 'sqs', version: "${awsJavaSdkVersion}") {
     transitive = false
 }
+     externalJars(group: 'software.amazon.awssdk', name: 'apache-client', version: "${awsJavaSdkVersion}") {
+        transitive = false
+    }
+    externalJars(group: 'software.amazon.awssdk', name: 'auth', version: "${awsJavaSdkVersion}") {
+        transitive = false
+    }
+    externalJars(group: 'software.amazon.awssdk', name: 'aws-core', version: "${awsJavaSdkVersion}") {
+        transitive = false
+    }
     externalJars(group: 'software.amazon.awssdk', name: 'aws-json-protocol', version: "${awsJavaSdkVersion}") {
-    transitive = false
-}
-    externalJars(group: 'software.amazon.awssdk', name: 'protocol-core', version: "${awsJavaSdkVersion}") {
-    transitive = false
-}
+        transitive = false
+    }
+    externalJars(group: 'software.amazon.awssdk', name: 'checksums', version: "${awsJavaSdkVersion}") {
+        transitive = false
+    }
+    externalJars(group: 'software.amazon.awssdk', name: 'checksums-spi', version: "${awsJavaSdkVersion}") {
+        transitive = false
+    }
+    externalJars(group: 'software.amazon.awssdk', name: 'endpoints-spi', version: "${awsJavaSdkVersion}") {
+        transitive = false
+    }
+    externalJars(group: 'software.amazon.awssdk', name: 'http-auth', version: "${awsJavaSdkVersion}") {
+        transitive = false
+    }
     externalJars(group: 'software.amazon.awssdk', name: 'http-auth-aws', version: "${awsJavaSdkVersion}") {
-    transitive = false
-}
-    externalJars(group: 'software.amazon.awssdk', name: 'bom', version: "${awsJavaSdkVersion}")
-
+        transitive = false
+    }
+    externalJars(group: 'software.amazon.awssdk', name: 'http-auth-spi', version: "${awsJavaSdkVersion}") {
+        transitive = false
+    }
+    externalJars(group: 'software.amazon.awssdk', name: 'http-client-spi', version: "${awsJavaSdkVersion}") {
+        transitive = false
+    }
+    externalJars(group: 'software.amazon.awssdk', name: 'identity-spi', version: "${awsJavaSdkVersion}") {
+        transitive = false
+    }
+    externalJars(group: 'software.amazon.awssdk', name: 'json-utils', version: "${awsJavaSdkVersion}") {
+        transitive = false
+    }
+    externalJars(group: 'software.amazon.awssdk', name: 'metrics-spi', version: "${awsJavaSdkVersion}") {
+        transitive = false
+    }
+    externalJars(group: 'software.amazon.awssdk', name: 'profiles', version: "${awsJavaSdkVersion}") {
+        transitive = false
+    }
+    externalJars(group: 'software.amazon.awssdk', name: 'protocol-core', version: "${awsJavaSdkVersion}") {
+        transitive = false
+    }
+    externalJars(group: 'software.amazon.awssdk', name: 'regions', version: "${awsJavaSdkVersion}") {
+        transitive = false
+    }
+    externalJars(group: 'software.amazon.awssdk', name: 'retries', version: "${awsJavaSdkVersion}") {
+        transitive = false
+    }
+    externalJars(group: 'software.amazon.awssdk', name: 'retries-spi', version: "${awsJavaSdkVersion}") {
+        transitive = false
+    }
+    externalJars(group: 'software.amazon.awssdk', name: 'sdk-core', version: "${awsJavaSdkVersion}") {
+        transitive = false
+    }
+    externalJars(group: 'software.amazon.awssdk', name: 'third-party-jackson-core', version: "${awsJavaSdkVersion}") {
+        transitive = false
+    }
+    externalJars(group: 'software.amazon.awssdk', name: 'utils', version: "${awsJavaSdkVersion}") {
+        transitive = false
+    }
+    externalJars(group: 'org.apache.httpcomponents', name: 'httpcore', version: "${apacheHttpCoreVersion}") {
+        transitive = false
+    }
+    externalJars(group: 'org.apache.httpcomponents', name: 'httpclient', version: "${apacheHttpClientVersion}") {
+        transitive = false
+    }
+    externalJars(group: 'org.reactivestreams', name: 'reactive-streams', version: "${reactiveStreamsVersion}") {
+        transitive = false
+    }
 }
 
 
 task updateTomlFiles {
     doLast {
         def newConfig = ballerinaTomlFilePlaceHolder.text.replace('@project.version@', project.version.toString())
-        newConfig = newConfig.replace('@toml.version@', tomlVersion)
-        newConfig = newConfig.replace('@sql.native.version@', project.stdlibSqlVersion)
-                ballerinaTomlFile.text = newConfig
+        //newConfig = newConfig.replace('@toml.version@', tomlVersion)
+        newConfig = newConfig.replace("@aws.sdk.version@", project.awsJavaSdkVersion)
+        newConfig = newConfig.replace("@apache.httpcore.version@", project.apacheHttpCoreVersion)
+        newConfig = newConfig.replace("@apache.httpclient.version@", project.apacheHttpClientVersion)
+        newConfig = newConfig.replace("@reactivestreams.version@", project.reactiveStreamsVersion)
+        ballerinaTomlFile.text = newConfig
     }
 }
 
