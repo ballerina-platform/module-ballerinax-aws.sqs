@@ -22,6 +22,11 @@ import io.ballerina.runtime.api.creators.ErrorCreator;
 import io.ballerina.runtime.api.utils.StringUtils;
 import io.ballerina.runtime.api.values.BError;
 
+
+ /**
+ * {@code CommonUtils} contains the common utility functions for the Ballerina AWS SQS Client.
+ */
+
 public final class CommonUtils {
 
     private CommonUtils() {

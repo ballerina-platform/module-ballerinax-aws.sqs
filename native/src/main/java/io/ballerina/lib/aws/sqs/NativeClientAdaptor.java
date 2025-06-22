@@ -31,6 +31,10 @@ import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.profiles.ProfileFile;
 import software.amazon.awssdk.services.sqs.SqsClient;
 
+/**
+ * Representation of {@link software.amazon.awssdk.services.sqs.SqsClient} with
+ * utility methods to invoke as inter-op functions.
+ */
 
 public class NativeClientAdaptor {
      static final String NATIVE_CLIENT = "nativeCLient";

@@ -21,6 +21,10 @@ package io.ballerina.lib.aws.sqs;
 import io.ballerina.runtime.api.Environment;
 import io.ballerina.runtime.api.Module;
 
+/**
+ * Module utils for the Ballerina AWS SQS Client to obtain the module info in the init.
+ */
+
 /*
  * Module utils for the Ballerina AWS SQS API Client to obtain the module info in the init.
  */
