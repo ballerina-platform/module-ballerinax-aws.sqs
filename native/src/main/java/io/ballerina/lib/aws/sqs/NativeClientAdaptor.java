@@ -82,6 +82,18 @@ public class NativeClientAdaptor {
         return instanceCredentialBuilder.build();
     }
 
+     public static Object close(BObject bClient) {
+        SqsClient nativeClient = (SqsClient) bClient.getNativeData(NATIVE_CLIENT);
+        try {
+            nativeClient.close();
+        } catch (Exception e) {
+            String errorMsg = String.format("Error occurred while closing the SQS client: %s",
+                    Objects.requireNonNullElse(e.getMessage(), "Unknown error"));
+            return CommonUtils.createError(errorMsg, e);
+        }
+        return null;
+    }
+
      
 
 

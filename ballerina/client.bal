@@ -37,5 +37,13 @@ public isolated client class Client {
         name: "init",
         'class: "io.ballerina.lib.aws.sqs.NativeClientAdaptor"
     } external;
+
+    # Gracefully closes AWS SQS API client resources.
+    #     
+    #
+    # + return - An `Error` if there is an error while closing the client resources or else nil
+    remote isolated function close() returns Error? = @java:Method {
+        'class: "io.ballerina.lib.aws.sqs.NativeClientAdaptor"
+    } external;
 }
 
