@@ -56,10 +56,11 @@ public isolated client class Client {
         'class: "io.ballerina.lib.aws.sqs.NativeClientAdaptor"
     }external;
 
-    # Retrieves one or more messages from the specified queue.
-    # + queueUrl - The URL of the Amazon SQS queue from which messages are received.
-    # + receiveMessageConfig - Optional parameters for receiving messages.
-    # + return - An array of `Message` records or an `Error`.
+    # Retrieves one or more messages from the specified queue
+    # 
+    # + queueUrl - The URL of the Amazon SQS queue from which messages are received
+    # + receiveMessageConfig - Optional parameters for receiving messages
+    # + return - An array of `Message` records or an `Error`
     remote isolated function receiveMessage(string queueUrl, *ReceiveMessageConfig receiveMessageConfig)
         returns Message[]|Error {
         return self.externReceiveMessage(queueUrl, receiveMessageConfig);
@@ -71,8 +72,7 @@ public isolated client class Client {
         'class: "io.ballerina.lib.aws.sqs.NativeClientAdaptor"
     } external;
 
-    # Gracefully closes AWS SQS API client resources.
-    #     
+    # Gracefully closes AWS SQS API client resources
     #
     # + return - An `Error` if there is an error while closing the client resources or else nil
     remote isolated function close() returns Error? = @java:Method {

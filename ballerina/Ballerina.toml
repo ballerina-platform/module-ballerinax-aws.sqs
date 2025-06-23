@@ -9,11 +9,13 @@ icon="icon.png"
 license=["Apache-2.0"]
 distribution = "2201.11.0"
 
+
 [[platform.java21.dependency]]
 groupId = "io.ballerina.lib"
 artifactId = "aws.sqs-native"
 version = "0.1.0-SNAPSHOT"
 path = "../native/build/libs/aws.sqs-native-0.1.0-SNAPSHOT.jar"
+
 
 [[platform.java21.dependency]]
 groupId = "software.amazon.awssdk"
@@ -170,4 +172,3 @@ groupId = "org.reactivestreams"
 artifactId = "reactive-streams"
 version = "1.0.4"
 path = "./lib/reactive-streams-1.0.4.jar"
-
