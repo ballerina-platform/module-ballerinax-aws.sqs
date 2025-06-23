@@ -126,7 +126,7 @@ public type SendMessageResponse record {|
 # + messageDeduplicationId - A token used for deduplicating sent messages. Applies only to FIFO queues.
 # + messageGroupId - A tag that specifies the message group it belongs to. Applies only to FIFO queues.
 public type SendMessageConfig record {|
-   DelaySeconds delaySeconds?;
+   int delaySeconds?;
    map<MessageAttributeValue> messageAttributes?;
    string awsTraceHeader?; 
    string messageDeduplicationId?;

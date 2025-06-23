@@ -46,9 +46,7 @@ public isolated client class Client {
     # + return - A `SendMessageResponse` record on success, or an `Error` on failure.
     remote isolated function sendMessage(QueueUrl queueUrl, string messageBody, *SendMessageConfig sendMessageConfig)
     returns SendMessageResponse|Error {
-        if queueUrl == "" || messageBody == "" {
-            return error Error ("Queue URL and message body must not be empty.");
-        }
+        
         return self.externSendMessage(queueUrl, messageBody, sendMessageConfig);
     }
 
