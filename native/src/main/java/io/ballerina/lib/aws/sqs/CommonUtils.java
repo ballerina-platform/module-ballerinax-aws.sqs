@@ -18,9 +18,23 @@
 
 package io.ballerina.lib.aws.sqs;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+
 import io.ballerina.runtime.api.creators.ErrorCreator;
+import io.ballerina.runtime.api.creators.ValueCreator;
 import io.ballerina.runtime.api.utils.StringUtils;
 import io.ballerina.runtime.api.values.BError;
+import io.ballerina.runtime.api.values.BMap;
+import io.ballerina.runtime.api.values.BString;
+
+import software.amazon.awssdk.awscore.exception.AwsErrorDetails;
+import software.amazon.awssdk.awscore.exception.AwsServiceException;
+import software.amazon.awssdk.http.SdkHttpResponse;
+import software.amazon.awssdk.services.sqs.model.MessageAttributeValue;
+import software.amazon.awssdk.services.sqs.model.SendMessageRequest;
+import software.amazon.awssdk.services.sqs.model.SendMessageResponse;
 
 
  /**
@@ -29,12 +43,119 @@ import io.ballerina.runtime.api.values.BError;
 
 public final class CommonUtils {
 
+    // Constants related to `Error`
+    private static final String ERROR = "Error";
+    private static final String ERROR_DETAILS = "ErrorDetails";
+    private static final BString ERROR_DETAILS_HTTP_STATUS_CODE = StringUtils.fromString("httpStatusCode");
+    private static final BString ERROR_DETAILS_HTTP_STATUS_TEXT = StringUtils.fromString("httpStatusText");
+    private static final BString ERROR_DETAILS_ERROR_CODE = StringUtils.fromString("errorCode");
+    private static final BString ERROR_DETAILS_ERROR_MESSAGE = StringUtils.fromString("errorMessage");
+
+    //Constants related to `SendmessageResponse`
+    private static final String SEND_MESSAGE_RESPONSE = "SendMessageResponse";
+    private static final BString MESSAGE_ID = StringUtils.fromString("messageId");
+    private static final BString MD5_OF_BODY = StringUtils.fromString("md5OfMessageBody");
+    private static final BString MD5_OF_ATTRIBUTES = StringUtils.fromString("md5OfMessageAttributes");
+    private static final BString MD5_OF_SYS_ATTRIBUTES = StringUtils.fromString("md5OfMessageSystemAttributes");
+    private static final BString SEQUENCE_NUMBER = StringUtils.fromString("sequenceNumber");
+
+    // Constants related to `SendmessageConfig`
+    private static final BString DELAY_SECONDS = StringUtils.fromString("delaySeconds");
+    private static final BString MESSAGE_ATTRIBUTES = StringUtils.fromString("messageAttributes");
+    private static final BString AWS_TRACE_HEADER = StringUtils.fromString("awsTraceHeader");
+    private static final BString MESSAGE_DEDUPLICATION_ID = StringUtils.fromString("messageDeduplicationId");
+    private static final BString MESSAGE_GROUP_ID = StringUtils.fromString("messageGroupId");
+
+
+
     private CommonUtils() {
     }
 
+    @SuppressWarnings("unchecked")
     public static BError createError(String message, Throwable exception) {
-        return ErrorCreator.createError(ModuleUtils.getModule(), "Error",
-                StringUtils.fromString(message), null, null);
+        BError cause = ErrorCreator.createError(exception);
+        BMap<BString, Object> errorDetails = ValueCreator.createRecordValue(
+                ModuleUtils.getModule(), ERROR_DETAILS);
+        if (exception instanceof AwsServiceException awsServiceException &&
+                Objects.nonNull(awsServiceException.awsErrorDetails())) {
+            AwsErrorDetails awsErrorDetails = awsServiceException.awsErrorDetails();
+            SdkHttpResponse sdkResponse = awsErrorDetails.sdkHttpResponse();
+            if (Objects.nonNull(sdkResponse)) {
+                errorDetails.put(ERROR_DETAILS_HTTP_STATUS_CODE, sdkResponse.statusCode());
+                sdkResponse.statusText().ifPresent(httpStatusTxt -> errorDetails.put(
+                        ERROR_DETAILS_HTTP_STATUS_TEXT, StringUtils.fromString(httpStatusTxt)));
+            }
+            errorDetails.put(ERROR_DETAILS_ERROR_CODE, StringUtils.fromString(awsErrorDetails.errorCode()));
+            errorDetails.put(ERROR_DETAILS_ERROR_MESSAGE, StringUtils.fromString(awsErrorDetails.errorMessage()));
+        }
+        return ErrorCreator.createError(
+                ModuleUtils.getModule(), ERROR, StringUtils.fromString(message), cause, errorDetails);
     }
+
+    @SuppressWarnings("unchecked")
+    public static SendMessageRequest getNativeSendMessageRequest(BString queueUrl, BString messageBody, 
+        BMap<BString, Object> sendMessageConfig) throws Exception {
+
+    SendMessageRequest.Builder builder = SendMessageRequest.builder()
+            .queueUrl(queueUrl.getValue())
+            .messageBody(messageBody.getValue());
+    
+    if (sendMessageConfig.containsKey(DELAY_SECONDS)) {
+            builder.delaySeconds(((Long) sendMessageConfig.get(DELAY_SECONDS)).intValue());
+        }
+    if (sendMessageConfig.containsKey(MESSAGE_DEDUPLICATION_ID)) {
+            builder.messageDeduplicationId(sendMessageConfig.getStringValue(MESSAGE_DEDUPLICATION_ID).getValue());
+        }
+    if (sendMessageConfig.containsKey(MESSAGE_GROUP_ID)) {
+            builder.messageGroupId(sendMessageConfig.getStringValue(MESSAGE_GROUP_ID).getValue());
+        }
+    if (sendMessageConfig.containsKey(AWS_TRACE_HEADER)) {
+            builder.messageAttributes(Map.of("AWSTraceHeader",
+                    MessageAttributeValue.builder()
+                            .dataType("String")
+                            .stringValue(sendMessageConfig.getStringValue(AWS_TRACE_HEADER).getValue())
+                            .build()));
+        }
+    if (sendMessageConfig.containsKey(MESSAGE_ATTRIBUTES)) {
+            BMap<BString, Object> attrs = (BMap<BString, Object>) sendMessageConfig.get(MESSAGE_ATTRIBUTES);
+            Map<String, MessageAttributeValue> attrMap = new HashMap<>();
+            for (Object key : attrs.getKeys()) {
+                BString attrKey = (BString) key;
+                BMap<BString, Object> attrVal = (BMap<BString, Object>) attrs.get(attrKey);
+                MessageAttributeValue mav = MessageAttributeValue.builder()
+                        .dataType(attrVal.getStringValue(StringUtils.fromString("dataType")).getValue())
+                        .stringValue(attrVal.getStringValue(StringUtils.fromString("stringValue")).getValue())
+                        .build();
+                attrMap.put(attrKey.getValue(), mav);
+            }
+            builder.messageAttributes(attrMap);
+        }
+        return builder.build();
+    
+}
+
+
+ public static BMap<BString, Object> getNativeSendMessageResponse(SendMessageResponse response) {
+        BMap<BString, Object> result = ValueCreator.createRecordValue(
+                ModuleUtils.getModule(), SEND_MESSAGE_RESPONSE);
+        result.put(MESSAGE_ID, StringUtils.fromString(response.messageId()));
+        result.put(MD5_OF_BODY, StringUtils.fromString(response.md5OfMessageBody()));
+        if (response.md5OfMessageAttributes() != null) {
+            result.put(MD5_OF_ATTRIBUTES, StringUtils.fromString(response.md5OfMessageAttributes()));
+        }
+        if (response.md5OfMessageSystemAttributes() != null) {
+            result.put(MD5_OF_SYS_ATTRIBUTES, StringUtils.fromString(response.md5OfMessageSystemAttributes()));
+        }
+        if (response.sequenceNumber() != null) {
+            result.put(SEQUENCE_NUMBER, StringUtils.fromString(response.sequenceNumber()));
+        }
+        return result;
+    }
+
+
+
+
+
+
 }
 

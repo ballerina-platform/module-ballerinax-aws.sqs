@@ -28,15 +28,6 @@ dependencies {
     implementation group: 'org.ballerinalang', name: 'ballerina-runtime', version: "${ballerinaLangVersion}"
     implementation group: 'software.amazon.awssdk', name: 'sqs', version: "${awsJavaSdkVersion}"
     
-    
-    // AWS SDK dependencies
-    implementation platform("software.amazon.awssdk:bom:${awsJavaSdkVersion}")
-    implementation 'software.amazon.awssdk:sqs'
-    implementation 'software.amazon.awssdk:auth'
-    implementation 'software.amazon.awssdk:netty-nio-client'
-    implementation 'software.amazon.awssdk:regions'
-
-    
 }
 
 tasks.withType(JavaCompile) {    

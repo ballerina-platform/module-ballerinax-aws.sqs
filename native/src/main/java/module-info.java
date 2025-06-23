@@ -17,13 +17,14 @@
  */
 
 module io.ballerina.stdlib.java.aws.sqs {
-    requires software.amazon.awssdk.services.sqs;
+    requires transitive software.amazon.awssdk.services.sqs;
     requires software.amazon.awssdk.auth;
     requires software.amazon.awssdk.http;
     requires software.amazon.awssdk.regions;
     requires software.amazon.awssdk.awscore;
-    requires io.ballerina.runtime;
+    requires transitive io.ballerina.runtime;
     requires software.amazon.awssdk.profiles;
+    requires software.amazon.awssdk.core;
 
     exports io.ballerina.lib.aws.sqs;
 }

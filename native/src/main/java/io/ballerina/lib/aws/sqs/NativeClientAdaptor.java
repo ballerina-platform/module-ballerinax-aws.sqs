@@ -19,6 +19,7 @@ package io.ballerina.lib.aws.sqs;
 import java.nio.file.Path;
 import java.util.Objects;
 
+import io.ballerina.runtime.api.Environment;
 import io.ballerina.runtime.api.values.BMap;
 import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.api.values.BString;
@@ -30,6 +31,8 @@ import software.amazon.awssdk.auth.credentials.InstanceProfileCredentialsProvide
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.profiles.ProfileFile;
 import software.amazon.awssdk.services.sqs.SqsClient;
+import software.amazon.awssdk.services.sqs.model.SendMessageRequest;
+import software.amazon.awssdk.services.sqs.model.SendMessageResponse;
 
 /**
  * Representation of {@link software.amazon.awssdk.services.sqs.SqsClient} with
@@ -37,7 +40,7 @@ import software.amazon.awssdk.services.sqs.SqsClient;
  */
 
 public class NativeClientAdaptor {
-     static final String NATIVE_CLIENT = "nativeCLient";
+     static final String NATIVE_SQS_CLIENT = "nativeCLient";
 
      private NativeClientAdaptor() {
      }
@@ -50,7 +53,7 @@ public class NativeClientAdaptor {
                 .region(connectionConfig.region())
                 .credentialsProvider(credentialsProvider)
                 .build();
-            bClient.addNativeData(NATIVE_CLIENT, nativeClient);
+            bClient.addNativeData(NATIVE_SQS_CLIENT, nativeClient);
         } catch (Exception e) {
             String errorMsg = String.format("Error occurred while initializing the SQS client: %s",
                     e.getMessage());
@@ -81,9 +84,28 @@ public class NativeClientAdaptor {
         }
         return instanceCredentialBuilder.build();
     }
+    
+    public static Object sendMessage(Environment env, BObject bClient, BString queueUrl, BString messageBody, BMap<BString, Object> bConfig) {
+        SqsClient sqsClient = (SqsClient) bClient.getNativeData(NATIVE_SQS_CLIENT);
+
+        return env.yieldAndRun(() -> {
+            try {
+                SendMessageRequest request = CommonUtils.getNativeSendMessageRequest(queueUrl, messageBody, bConfig);
+                SendMessageResponse response = sqsClient.sendMessage(request);
+                return CommonUtils.getNativeSendMessageResponse(response);
+            } catch (Exception e) {
+                String msg = "Failed to send message: " + Objects.requireNonNullElse(e.getMessage(), "Unknown error");
+                return CommonUtils.createError(msg, e);
+            }
+        });
+    }
+
+
+
+
 
      public static Object close(BObject bClient) {
-        SqsClient nativeClient = (SqsClient) bClient.getNativeData(NATIVE_CLIENT);
+        SqsClient nativeClient = (SqsClient) bClient.getNativeData(NATIVE_SQS_CLIENT);
         try {
             nativeClient.close();
         } catch (Exception e) {

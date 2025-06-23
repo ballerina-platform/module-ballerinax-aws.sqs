@@ -37,6 +37,26 @@ public isolated client class Client {
         name: "init",
         'class: "io.ballerina.lib.aws.sqs.NativeClientAdaptor"
     } external;
+        
+    # Delivers a message to the specified SQS queue.
+    # 
+    # + queueUrl - The URL of the Amazon SQS queue to which the message is sent. Queue URLs and names are case-sensitive.
+    # + messageBody - The message to send.The minimum message size is 1 byte (1 character). The maximum is 262,144 bytes (256 KiB).
+    # + sendMessageConfig - Optional parameters such as `delaySeconds`, `messageAttributes`, `messageSystemAttributes`, `messageDeduplicationId`and `messageGroupId`.
+    # + return - A `SendMessageResponse` record on success, or an `Error` on failure.
+    remote isolated function sendMessage(QueueUrl queueUrl, string messageBody, *SendMessageConfig sendMessageConfig)
+    returns SendMessageResponse|Error {
+        if queueUrl == "" || messageBody == "" {
+            return error Error ("Queue URL and message body must not be empty.");
+        }
+        return self.externSendMessage(queueUrl, messageBody, sendMessageConfig);
+    }
+
+    isolated function externSendMessage(string queueUrl, string messageBody, *SendMessageConfig sendMessageConfig)
+    returns SendMessageResponse|Error = @java:Method {
+        name: "sendMessage",
+        'class: "io.ballerina.lib.aws.sqs.NativeClientAdaptor"
+    }external;
 
     # Gracefully closes AWS SQS API client resources.
     #     
