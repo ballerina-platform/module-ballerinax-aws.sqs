@@ -31,6 +31,7 @@ import software.amazon.awssdk.auth.credentials.InstanceProfileCredentialsProvide
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.profiles.ProfileFile;
 import software.amazon.awssdk.services.sqs.SqsClient;
+import software.amazon.awssdk.services.sqs.model.DeleteMessageRequest;
 import software.amazon.awssdk.services.sqs.model.ReceiveMessageRequest;
 import software.amazon.awssdk.services.sqs.model.ReceiveMessageResponse;
 import software.amazon.awssdk.services.sqs.model.SendMessageRequest;
@@ -116,6 +117,25 @@ public class NativeClientAdaptor {
             }
         });
     }
+
+    public static Object deleteMessage(Environment env, BObject bClient, BString queueUrl, BString receiptHandle) {
+    SqsClient sqsClient = (SqsClient) bClient.getNativeData(NATIVE_SQS_CLIENT);
+
+    return env.yieldAndRun(() -> {
+        try {
+            DeleteMessageRequest request = DeleteMessageRequest.builder()
+                .queueUrl(queueUrl.getValue())
+                .receiptHandle(receiptHandle.getValue())
+                .build();
+            sqsClient.deleteMessage(request);
+            return null;
+            } catch (Exception e) {
+                return CommonUtils.createError("Failed to delete message: " + e.getMessage(), e);
+            }
+         });
+    }
+
+
 
 
      public static Object close(BObject bClient) {
