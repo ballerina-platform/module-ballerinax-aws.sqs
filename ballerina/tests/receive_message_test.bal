@@ -1,19 +1,43 @@
 import ballerina/test;
+import ballerina/io;
 
 @test:Config {
     groups: ["receiveMessage"]
 }
-isolated function testReceiveMessageDefaultConfig() returns error? {
+isolated function testBasicReceiveMessage() returns error? {
     string queueUrl = "https://sqs.eu-north-1.amazonaws.com/284495578152/TestQueue";
     Message[]|Error result = sqsClient->receiveMessage(queueUrl);
-
     if result is error {
         test:assertFail("Expected to receive messages or empty array, but got error: " + result.toString());
     } else {
         test:assertNotEquals(result, (), msg = "Expected an array (maybe empty), got ()");
         test:assertTrue(result.length() >= 0, msg = "Expected 0 or more messages");
+        foreach Message msg in result {
+            io:println("Received message receiptHandle: ", msg.receiptHandle);
+        }
     }
 }
+
+@test:Config {
+    groups: ["receiveMessage"]
+}
+isolated function testReceiveMessageWithMultiplemessages() returns error? {
+    string queueUrl = "https://sqs.eu-north-1.amazonaws.com/284495578152/TestQueue";
+    ReceiveMessageConfig config = {
+        maxNumberOfMessages: 5
+    };
+    Message[]|Error result = sqsClient->receiveMessage(queueUrl, config);
+    if result is error {
+        test:assertFail("Expected to receive messages or empty array, but got error: " + result.toString());
+    } else {
+        test:assertNotEquals(result, (), msg = "Expected an array (maybe empty), got ()");
+        test:assertTrue(result.length() >= 0, msg = "Expected 0 or more messages");
+        foreach Message msg in result {
+            io:println("Received message receiptHandle: ", msg.receiptHandle);
+        }
+    }
+}
+
 
 @test:Config {
     groups: ["receiveMessage"]
