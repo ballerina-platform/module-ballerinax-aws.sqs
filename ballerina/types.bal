@@ -13,7 +13,6 @@
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-import ballerina/constraint;
 
 # Represents the connection configuration for the Amazon SQS client
 #
@@ -144,23 +143,87 @@ public type MessageAttributeValue record {|
    byte[] binaryValue?;
 |};
 
+# Configuration options for receiving messages from an AWS SQS queue.
+# 
+# + waitTimeSeconds - The duration (in seconds) for which the call waits for a message to arrive before returning. Enables long polling when set to greater than 0.
+# + visibilityTimeout - The duration (in seconds) that the received messages are hidden from subsequent retrieve requests. 
+# + maxNumberOfMessages - The maximum number of messages to return. Valid values: 1 to 10. Default is 1.
+# + receiveRequestAttemptId - A token used for deduplication of `ReceiveMessage` calls. Applies only to FIFO queues. If a networking issue occurs after a ReceiveMessage action, and instead of a response you receive a generic error, it is possible to retry the same action with an identical `receiveRequestAttemptId` to retrieve the same set of messages, even if their visibility timeout has not yet expired. 
+# + messageAttributeNames - A list of message attribute names to return. Use `All` to receive all message attributes.
+# + messageSystemAttributeNames - A list of system attribute names to return. Use `All` to receive all system attributes.
+public type ReceiveMessageConfig record {|
+   int waitTimeSeconds?;
+   int visibilityTimeout?;
+   int maxNumberOfMessages?;
+   string receiveRequestAttemptId?;
+   string[] messageAttributeNames?;
+   MessageSystemAttributeName[] messageSystemAttributeNames?;
+|};
 
-@constraint:String {
-       pattern: {
-           value: re `^https:\\/\\/sqs\.[a-z0-9-]+\\.amazonaws\\.com\\/[0-9]{12}\\/[a-zA-Z0-9_-]{1,80}(\\.fifo)?$`,
-           message: "Invalid SQS queue URL format"
-       }
-   }
-public type QueueUrl string;
+# Possible values for the `messageAttributeNames` parameter in the `receiveMessage` API.
+public enum MessageSystemAttributeName {
+   ALL = "All",
+   SENDER_ID = "SenderId",
+   SENT_TIMESTAMP = "SentTimestamp",
+   APPROXIMATE_RECEIVE_COUNT = "ApproximateReceiveCount",
+   APPROXIMATE_FIRST_RECEIVE_TIMESTAMP = "ApproximateFirstReceiveTimestamp",
+   SEQUENCE_NUMBER = "SequenceNumber",
+   MESSAGE_DEDUPLICATION_ID = "MessageDeduplicationId",
+   MESSAGE_GROUP_ID = "MessageGroupId",
+   AWS_TRACE_HEADER = "AWSTraceHeader",
+   DEAD_LETTER_QUEUE_SOURCE_ARN = "DeadLetterQueueSourceArn",
+   SQS_MANAGED_SSE_ENABLED = "SqsManagedSseEnabled"
+}
 
-@constraint:Int {
-       minValue: {
-           value: 0,
-           message: "Delay must be at least 0 seconds"
-       },
-       maxValue: {
-           value: 900,
-           message: "Delay cannot exceed 900 seconds.(15 minutes)"
-       }
-   }
-public type DelaySeconds int;
+# Represents a single SQS message returned by the `receiveMessage` API.
+#
+# + messageSystemAttributes - A map of the message system attributes requested in ReceiveMessage to their respective values. Supported attributes are:
+#   - ApproximateReceiveCount
+#   - ApproximateFirstReceiveTimestamp
+#   - AWSTraceHeader
+#   - MessageDeduplicationId
+#   - MessageGroupId
+#   - SenderId
+#   - SentTimestamp
+#   - SequenceNumber
+# ApproximateFirstReceiveTimestamp and SentTimestamp are each returned as an integer representing the epoch time in milliseconds.
+# + body - The content of the message(not URL-encoded). 
+# + md5OfBody - An MD5 digest of the non-URL-encoded message body string. 
+# + md5OfMessageAttributes - An MD5 digest of the non-URL-encoded message attribute string.  
+# + messageAttributes - Each message attribute consists of a Name, Type, and Value. 
+# + messageId - A unique identifier for the message. A MessageId is considered unique across all AWS accounts for an extended period of time.
+# + receiptHandle - An identifier associated with the act of receiving the message. A new receipt handle is returned every time you receive a message. When deleting a message, you provide the last received receipt handle to delete the message.
+public type Message record {|
+   MessageAttributes messageSystemAttributes?;
+   string body?;
+   string md5OfBody?; 
+   string md5OfMessageAttributes?;
+   map<MessageAttributeValue> messageAttributes?;
+   string messageId?;
+   string receiptHandle?;
+|};
+
+# Represents the attributes of an SQS message.
+#
+# + approximateReceiveCount - The number of times a message has been received across all queues. This value is incremented each time a message is received from the queue, including when it is received by the same consumer.
+# + approximateFirstReceiveTimestamp -  The approximate time, in milliseconds since the epoch, when the message was first received from the queue. This value is returned as an integer representing the epoch time in milliseconds. 
+# + awsTraceHeader - The AWS X-Ray trace header string.
+# + messageDeduplicationId - The token used for deduplication of messages within a 5-minute minimum deduplication interval. If a message with a particular MessageDeduplicationId is sent successfully, subsequent messages with the same MessageDeduplicationId are accepted successfully but aren't delivered.
+#  This parameter applies only to FIFO (first-in-first-out) queues. 
+# + messageGroupId -  The tag that specifies that a message belongs to a specific message group. Messages that belong to the same message group are processed in a FIFO manner (however, messages in different message groups might be processed out of order). To interleave multiple ordered streams within a single queue, use MessageGroupId values (for example, session data for multiple users).
+# This parameter applies only to FIFO (first-in-first-out) queues. 
+# + senderId - The AWS account number of the sender. This is the same as the AWS account number that you use to sign in to the AWS Management Console.
+# + sentTimeStamp - The approximate time, in milliseconds since the epoch, when the message was sent to the queue. This value is returned as an integer representing the epoch time in milliseconds.
+# + sequenceNumber - The large, non-consecutive number that Amazon SQS assigns to each message. The length of SequenceNumber is 128 bits. SequenceNumber continues to increase for a particular MessageGroupId. 
+# + deadLetterQueueSourceArn -  The Amazon Resource Name (ARN) of the dead-letter queue that the message was moved to after the value of `maxReceiveCount` was exceeded. This attribute is returned only for messages that are moved to a dead-letter queue.
+public type MessageAttributes record {|
+   int approximateReceiveCount?;
+   int approximateFirstReceiveTimestamp?;
+   string awsTraceHeader?;
+   string messageDeduplicationId?;
+   string messageGroupId?;
+   string senderId?;
+   int sentTimeStamp?;
+   string sequenceNumber?;
+   string deadLetterQueueSourceArn?;
+|};

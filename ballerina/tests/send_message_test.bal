@@ -96,7 +96,7 @@ isolated function testSendMessageWithDeduplicationAndGroupId() returns error? {
     groups: ["sendMessage"]
 }
 isolated function testSendMessageToNonexistentQueue() returns error? {
-    QueueUrl queueUrl = "https://sqs.eu-north-1.amazonaws.com/284495578152/InvalidQueue"; 
+    string queueUrl = "https://sqs.eu-north-1.amazonaws.com/284495578152/InvalidQueue"; 
     string message = "Hello, queue!";
     SendMessageConfig sendMessageConfig = {};
 

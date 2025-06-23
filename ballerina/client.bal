@@ -44,7 +44,7 @@ public isolated client class Client {
     # + messageBody - The message to send.The minimum message size is 1 byte (1 character). The maximum is 262,144 bytes (256 KiB).
     # + sendMessageConfig - Optional parameters such as `delaySeconds`, `messageAttributes`, `messageSystemAttributes`, `messageDeduplicationId`and `messageGroupId`.
     # + return - A `SendMessageResponse` record on success, or an `Error` on failure.
-    remote isolated function sendMessage(QueueUrl queueUrl, string messageBody, *SendMessageConfig sendMessageConfig)
+    remote isolated function sendMessage(string queueUrl, string messageBody, *SendMessageConfig sendMessageConfig)
     returns SendMessageResponse|Error {
         
         return self.externSendMessage(queueUrl, messageBody, sendMessageConfig);

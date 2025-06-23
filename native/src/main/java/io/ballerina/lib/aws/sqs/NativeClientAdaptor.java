@@ -101,9 +101,6 @@ public class NativeClientAdaptor {
     }
 
 
-
-
-
      public static Object close(BObject bClient) {
         SqsClient nativeClient = (SqsClient) bClient.getNativeData(NATIVE_SQS_CLIENT);
         try {
