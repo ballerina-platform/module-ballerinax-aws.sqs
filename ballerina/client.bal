@@ -72,6 +72,22 @@ public isolated client class Client {
         'class: "io.ballerina.lib.aws.sqs.NativeClientAdaptor"
     } external;
 
+    # Deletes a specified message from an Amazon SQS queue using the given receipt handle
+    # 
+    # + queueUrl - The URL of the Amazon SQS queue from which messages are deleted
+    # + receiptHandle - The receipt handle associated with the message to delete
+    # + return - `Error` on failure
+    remote isolated function deleteMessage(string queueUrl, string receiptHandle) returns Error? {
+        return self.externDeleteMessage(queueUrl, receiptHandle);
+    }
+
+    isolated function externDeleteMessage(string queueUrl, string receiptHandle) returns Error? = @java:Method {
+        'class: "io.ballerina.lib.aws.sqs.NativeClientAdaptor",
+        name: "deleteMessage"
+    } external;
+
+
+
     # Gracefully closes AWS SQS API client resources
     #
     # + return - An `Error` if there is an error while closing the client resources or else nil
