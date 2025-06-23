@@ -56,6 +56,21 @@ public isolated client class Client {
         'class: "io.ballerina.lib.aws.sqs.NativeClientAdaptor"
     }external;
 
+    # Retrieves one or more messages from the specified queue.
+    # + queueUrl - The URL of the Amazon SQS queue from which messages are received.
+    # + receiveMessageConfig - Optional parameters for receiving messages.
+    # + return - An array of `Message` records or an `Error`.
+    remote isolated function receiveMessage(string queueUrl, *ReceiveMessageConfig receiveMessageConfig)
+        returns Message[]|Error {
+        return self.externReceiveMessage(queueUrl, receiveMessageConfig);
+    }
+
+    isolated function externReceiveMessage(string queueUrl, *ReceiveMessageConfig receiveMessageConfig)
+        returns Message[]|Error = @java:Method {
+        name: "receiveMessage",
+        'class: "io.ballerina.lib.aws.sqs.NativeClientAdaptor"
+    } external;
+
     # Gracefully closes AWS SQS API client resources.
     #     
     #

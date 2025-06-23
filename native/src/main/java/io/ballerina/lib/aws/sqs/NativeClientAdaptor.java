@@ -31,6 +31,8 @@ import software.amazon.awssdk.auth.credentials.InstanceProfileCredentialsProvide
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.profiles.ProfileFile;
 import software.amazon.awssdk.services.sqs.SqsClient;
+import software.amazon.awssdk.services.sqs.model.ReceiveMessageRequest;
+import software.amazon.awssdk.services.sqs.model.ReceiveMessageResponse;
 import software.amazon.awssdk.services.sqs.model.SendMessageRequest;
 import software.amazon.awssdk.services.sqs.model.SendMessageResponse;
 
@@ -95,6 +97,21 @@ public class NativeClientAdaptor {
                 return CommonUtils.getNativeSendMessageResponse(response);
             } catch (Exception e) {
                 String msg = "Failed to send message: " + Objects.requireNonNullElse(e.getMessage(), "Unknown error");
+                return CommonUtils.createError(msg, e);
+            }
+        });
+    }
+
+    public static Object receiveMessage(Environment env, BObject bClient, BString queueUrl, BMap<BString, Object> bConfig) {
+        SqsClient sqsClient = (SqsClient) bClient.getNativeData(NATIVE_SQS_CLIENT);
+
+        return env.yieldAndRun(() -> {
+            try {
+                ReceiveMessageRequest request = CommonUtils.getNativeReceiveMessageRequest(queueUrl, bConfig);
+                ReceiveMessageResponse response = sqsClient.receiveMessage(request);
+                return CommonUtils.getNativeReceiveMessageResponse(response);
+            } catch (Exception e) {
+                String msg = "Failed to receive message: " + Objects.requireNonNullElse(e.getMessage(), "Unknown error");
                 return CommonUtils.createError(msg, e);
             }
         });
