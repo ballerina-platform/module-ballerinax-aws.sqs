@@ -71,7 +71,7 @@ public final class CommonUtils {
     private CommonUtils() {
     }
 
-    @SuppressWarnings("unchecked")
+    
     public static BError createError(String message, Throwable exception) {
         BError cause = ErrorCreator.createError(exception);
         BMap<BString, Object> errorDetails = ValueCreator.createRecordValue(

@@ -6,8 +6,7 @@ import ballerina/test;
 isolated function testBasicSendMessage() returns error? {
     string queueUrl = "https://sqs.eu-north-1.amazonaws.com/284495578152/TestQueue";
     string message = "Hello from Ballerina SQS test!";
-    SendMessageConfig sendMessageConfig = {};
-    SendMessageResponse|Error result = sqsClient->sendMessage(queueUrl, message, sendMessageConfig);
+    SendMessageResponse|Error result = sqsClient->sendMessage(queueUrl, message);
     if result is SendMessageResponse {
         test:assertNotEquals(result.messageId, "", msg = "MessageId should not be empty");
     } else {
