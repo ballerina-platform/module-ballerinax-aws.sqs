@@ -230,11 +230,11 @@ public type MessageAttributes record {|
 
 # A single message entry in a SendMessageBatch request.
 #
-# + messageId - An identifier for a message in this batch used to communicate the result. The Ids of a batch request need to be unique within a request. This identifier can have up to 80 characters.
+# + id - An identifier for a message in this batch used to communicate the result. The Ids of a batch request need to be unique within a request. This identifier can have up to 80 characters.
 # The following characters are accepted: alphanumeric characters, hyphens(-), and underscores (_). 
 # + body - The body of the message.
 public type SendMessageBatchEntry record {|
-  string messageId;
+  string id;
   string body;
   *SendMessageConfig;
 |};
