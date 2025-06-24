@@ -49,6 +49,10 @@ public class ReceiveMessageMapper {
     private static final BString MESSAGE_ID = StringUtils.fromString("messageId");
     private static final BString MD5_OF_BODY = StringUtils.fromString("md5OfMessageBody");
 
+    private ReceiveMessageMapper() {
+        
+    }
+
     public static ReceiveMessageRequest getNativeReceiveMessageRequest(BString queueUrl, BMap<BString, Object> receiveMessageConfig) {
     ReceiveMessageRequest.Builder builder = ReceiveMessageRequest.builder()
             .queueUrl(queueUrl.getValue());

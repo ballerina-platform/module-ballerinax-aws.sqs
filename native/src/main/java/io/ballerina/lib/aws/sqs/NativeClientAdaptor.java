@@ -32,6 +32,8 @@ import software.amazon.awssdk.auth.credentials.InstanceProfileCredentialsProvide
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.profiles.ProfileFile;
 import software.amazon.awssdk.services.sqs.SqsClient;
+import software.amazon.awssdk.services.sqs.model.DeleteMessageBatchRequest;
+import software.amazon.awssdk.services.sqs.model.DeleteMessageBatchResponse;
 import software.amazon.awssdk.services.sqs.model.DeleteMessageRequest;
 import software.amazon.awssdk.services.sqs.model.ReceiveMessageRequest;
 import software.amazon.awssdk.services.sqs.model.ReceiveMessageResponse;
@@ -152,6 +154,24 @@ public class NativeClientAdaptor {
             }
         });
     }
+
+    public static Object deleteMessageBatch(Environment env, BObject bClient, BString queueUrl, BArray bEntries) {
+        SqsClient sqsClient = (SqsClient) bClient.getNativeData(NATIVE_SQS_CLIENT);
+
+        return env.yieldAndRun(() -> {
+            try {
+                DeleteMessageBatchRequest request = DeleteMessageBatchMapper.getNativeDeleteMessageBatchRequest(queueUrl, bEntries);
+                DeleteMessageBatchResponse response = sqsClient.deleteMessageBatch(request);
+                return DeleteMessageBatchMapper.getnativeDeleteMessageBatchResponse(response);
+            } catch (Exception e) {
+                String msg = "Failed to delete batch message" + Objects.requireNonNullElse(e.getMessage(), "Unknown Error");
+                return CommonUtils.createError(msg, e);
+            }
+        });
+    }
+
+
+
 
     public static Object close(BObject bClient) {
         SqsClient nativeClient = (SqsClient) bClient.getNativeData(NATIVE_SQS_CLIENT);

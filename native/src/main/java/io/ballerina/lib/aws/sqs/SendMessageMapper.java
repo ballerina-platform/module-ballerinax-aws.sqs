@@ -45,8 +45,12 @@ public final class SendMessageMapper {
     private static final BString AWS_TRACE_HEADER = StringUtils.fromString("awsTraceHeader");
     private static final BString MESSAGE_DEDUPLICATION_ID = StringUtils.fromString("messageDeduplicationId");
     private static final BString MESSAGE_GROUP_ID = StringUtils.fromString("messageGroupId");
+
+   private SendMessageMapper() {
+
+   }
  
-        @SuppressWarnings("unchecked")
+    @SuppressWarnings("unchecked")
     public static SendMessageRequest getNativeSendMessageRequest(BString queueUrl, BString messageBody, 
         BMap<BString, Object> sendMessageConfig) throws Exception {
 
