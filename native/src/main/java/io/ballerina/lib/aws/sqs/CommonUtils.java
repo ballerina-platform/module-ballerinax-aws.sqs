@@ -129,66 +129,6 @@ public final class CommonUtils {
                 ModuleUtils.getModule(), ERROR, StringUtils.fromString(message), cause, errorDetails);
     }
 
-    @SuppressWarnings("unchecked")
-    public static SendMessageRequest getNativeSendMessageRequest(BString queueUrl, BString messageBody, 
-        BMap<BString, Object> sendMessageConfig) throws Exception {
-
-    SendMessageRequest.Builder builder = SendMessageRequest.builder()
-            .queueUrl(queueUrl.getValue())
-            .messageBody(messageBody.getValue());
-    
-    if (sendMessageConfig.containsKey(DELAY_SECONDS)) {
-            builder.delaySeconds(((Long) sendMessageConfig.get(DELAY_SECONDS)).intValue());
-        }
-    if (sendMessageConfig.containsKey(MESSAGE_DEDUPLICATION_ID)) {
-            builder.messageDeduplicationId(sendMessageConfig.getStringValue(MESSAGE_DEDUPLICATION_ID).getValue());
-        }
-    if (sendMessageConfig.containsKey(MESSAGE_GROUP_ID)) {
-            builder.messageGroupId(sendMessageConfig.getStringValue(MESSAGE_GROUP_ID).getValue());
-        }
-    if (sendMessageConfig.containsKey(AWS_TRACE_HEADER)) {
-            builder.messageAttributes(Map.of("AWSTraceHeader",
-                    MessageAttributeValue.builder()
-                            .dataType("String")
-                            .stringValue(sendMessageConfig.getStringValue(AWS_TRACE_HEADER).getValue())
-                            .build()));
-        }
-    if (sendMessageConfig.containsKey(MESSAGE_ATTRIBUTES)) {
-            BMap<BString, Object> attrs = (BMap<BString, Object>) sendMessageConfig.get(MESSAGE_ATTRIBUTES);
-            Map<String, MessageAttributeValue> attrMap = new HashMap<>();
-            for (Object key : attrs.getKeys()) {
-                BString attrKey = (BString) key;
-                BMap<BString, Object> attrVal = (BMap<BString, Object>) attrs.get(attrKey);
-                MessageAttributeValue mav = MessageAttributeValue.builder()
-                        .dataType(attrVal.getStringValue(StringUtils.fromString("dataType")).getValue())
-                        .stringValue(attrVal.getStringValue(StringUtils.fromString("stringValue")).getValue())
-                        .build();
-                attrMap.put(attrKey.getValue(), mav);
-            }
-            builder.messageAttributes(attrMap);
-        }
-        return builder.build();
-    
-}
-
-
-public static BMap<BString, Object> getNativeSendMessageResponse(SendMessageResponse response) {
-        BMap<BString, Object> result = ValueCreator.createRecordValue(
-                ModuleUtils.getModule(), SEND_MESSAGE_RESPONSE);
-        result.put(MESSAGE_ID, StringUtils.fromString(response.messageId()));
-        result.put(MD5_OF_BODY, StringUtils.fromString(response.md5OfMessageBody()));
-        if (response.md5OfMessageAttributes() != null) {
-            result.put(MD5_OF_ATTRIBUTES, StringUtils.fromString(response.md5OfMessageAttributes()));
-        }
-        if (response.md5OfMessageSystemAttributes() != null) {
-            result.put(MD5_OF_SYS_ATTRIBUTES, StringUtils.fromString(response.md5OfMessageSystemAttributes()));
-        }
-        if (response.sequenceNumber() != null) {
-            result.put(SEQUENCE_NUMBER, StringUtils.fromString(response.sequenceNumber()));
-        }
-        return result;
-    }
-
     public static ReceiveMessageRequest getNativeReceiveMessageRequest(BString queueUrl, BMap<BString, Object> receiveMessageConfig) {
     ReceiveMessageRequest.Builder builder = ReceiveMessageRequest.builder()
             .queueUrl(queueUrl.getValue());

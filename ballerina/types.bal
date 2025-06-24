@@ -239,10 +239,10 @@ public type SendMessageBatchEntry record {|
   *SendMessageConfig;
 |};
 
-# The full response of the SendMessageBatch operation.
+# The full response of the `SendMessageBatch` operation.
 #
-# + successful - A list of SendMessageBatchResultEntry items.
-# + failed - A list of BatchResultErrorEntry items with Error details about each message that can't be enqueued.
+# + successful - A list of `SendMessageBatchResultEntry` items.
+# + failed - A list of `BatchResultErrorEntry` items with Error details about each message that can't be enqueued.
 public type SendMessageBatchResponse record {|
    SendMessageBatchResultEntry[] successful;
    BatchResultErrorEntry[] failed;
@@ -276,4 +276,29 @@ public type BatchResultErrorEntry record {|
    string code;
    boolean senderFault;
    string message?;
+|};
+
+# A single message entry in a DeleteMessageBatch request.
+#
+# + id - The identifier for a particular receipt handle. This is used to communicate the result. The Ids of a batch request need to be unique within a request. This identifier can have up to 80 characters. 
+# + receiptHandle - A receipt handle.
+public type DeleteMessageBatchEntry record {|
+   string id;
+   string receiptHandle;
+|};
+
+# The full response of the `DeleteMessageBatch` operation
+#
+# + successful - A list of `DeleteMessageBatchResultEntry` items
+# + failed - A list of `BatchResultErrorEntry` items with Error details about each message that can't be dequeued
+public type DeleteMessageBatchResponse record {|
+   DeleteMessageBatchResultEntry[] successful;
+   BatchResultErrorEntry[] failed;
+|};
+
+# A successful result entry from a DeleteMessageBatch response
+#
+# + id - the Id of a successfully deleted message
+public type DeleteMessageBatchResultEntry record {|
+   string id;
 |};

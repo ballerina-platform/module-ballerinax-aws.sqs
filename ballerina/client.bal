@@ -102,6 +102,23 @@ public isolated client class Client {
         'class: "io.ballerina.lib.aws.sqs.NativeClientAdaptor"
     } external;
 
+    # Deletes up to ten messages from the specified queue. This is a batch version of `DeleteMessage`. The result of the
+    #  action on each message is reported individually in the response.
+    #
+    # + queueUrl - The URL of the Amazon SQS queue from which messages are deleted. Queue URLs and names are case-sensitive.
+    # + entries - List of the receipt handles of the messages to be deleted.
+    # + return - A `DeleteMessageBatchResponse` indicating which deletions succeeded or failed and `Error` on failure.
+    isolated remote function deleteMessageBatch(string queueUrl, DeleteMessageBatchEntry[] entries)
+        returns DeleteMessageBatchResponse|Error {
+        return self.externDeleteMessageBatch(queueUrl,entries);
+    }
+
+    isolated function externDeleteMessageBatch(string queueUrl, DeleteMessageBatchEntry[] entries) returns DeleteMessageBatchResponse|Error = @java:Method {
+        name: "deleteMessagebatch",
+        'class: "io.ballerina.lib.aws.sqs.NativeClientAdaptor"
+    } external;
+
+
 
 
 

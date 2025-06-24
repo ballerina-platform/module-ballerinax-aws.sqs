@@ -96,9 +96,9 @@ public class NativeClientAdaptor {
 
         return env.yieldAndRun(() -> {
             try {
-                SendMessageRequest request = CommonUtils.getNativeSendMessageRequest(queueUrl, messageBody, bConfig);
+                SendMessageRequest request = SendMessageMapper.getNativeSendMessageRequest(queueUrl, messageBody, bConfig);
                 SendMessageResponse response = sqsClient.sendMessage(request);
-                return CommonUtils.getNativeSendMessageResponse(response);
+                return SendMessageMapper.getNativeSendMessageResponse(response);
             } catch (Exception e) {
                 String msg = "Failed to send message: " + Objects.requireNonNullElse(e.getMessage(), "Unknown error");
                 return CommonUtils.createError(msg, e);
@@ -153,8 +153,7 @@ public class NativeClientAdaptor {
         });
     }
 
-
-     public static Object close(BObject bClient) {
+    public static Object close(BObject bClient) {
         SqsClient nativeClient = (SqsClient) bClient.getNativeData(NATIVE_SQS_CLIENT);
         try {
             nativeClient.close();
