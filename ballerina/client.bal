@@ -86,6 +86,24 @@ public isolated client class Client {
         name: "deleteMessage"
     } external;
 
+    # Sends up to 10 messages as a batch to the specified Amazon SQS queue
+    #
+    # + queueUrl - The URL of the Amazon SQS queue to which batched messages are sent. Queue URLs and names are case-sensitive
+    # + entries - A list of `SendMessageBatchEntry` items
+    # + return - A `SendMessageBatchResponse` indicating which messages succeeded or failed and `Error` on failure
+    isolated remote function sendMessageBatch(string queueUrl, SendMessageBatchEntry[] entries)
+        returns SendMessageBatchResponse|Error {
+        return self.externSendMessageBatch(queueUrl, entries);
+    }
+
+    isolated function externSendMessageBatch(string queueUrl, SendMessageBatchEntry[] entries) 
+        returns SendMessageBatchResponse|Error = @java:Method {
+        name: "sendMessageBatch",
+        'class: "io.ballerina.lib.aws.sqs.NativeClientAdaptor"
+    } external;
+
+
+
 
 
     # Gracefully closes AWS SQS API client resources

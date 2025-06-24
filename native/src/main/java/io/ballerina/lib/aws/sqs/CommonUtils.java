@@ -37,10 +37,15 @@ import io.ballerina.runtime.api.values.BString;
 import software.amazon.awssdk.awscore.exception.AwsErrorDetails;
 import software.amazon.awssdk.awscore.exception.AwsServiceException;
 import software.amazon.awssdk.http.SdkHttpResponse;
+import software.amazon.awssdk.services.sqs.model.BatchResultErrorEntry;
 import software.amazon.awssdk.services.sqs.model.Message;
 import software.amazon.awssdk.services.sqs.model.MessageAttributeValue;
 import software.amazon.awssdk.services.sqs.model.ReceiveMessageRequest;
 import software.amazon.awssdk.services.sqs.model.ReceiveMessageResponse;
+import software.amazon.awssdk.services.sqs.model.SendMessageBatchRequest;
+import software.amazon.awssdk.services.sqs.model.SendMessageBatchRequestEntry;
+import software.amazon.awssdk.services.sqs.model.SendMessageBatchResponse;
+import software.amazon.awssdk.services.sqs.model.SendMessageBatchResultEntry;
 import software.amazon.awssdk.services.sqs.model.SendMessageRequest;
 import software.amazon.awssdk.services.sqs.model.SendMessageResponse;
 
@@ -86,6 +91,17 @@ public final class CommonUtils {
     private static final BString BODY = StringUtils.fromString("body");
     private static final BString MD5_OF_MESSAGE_ATTRIBUTES = StringUtils.fromString("md5OfMessageAttributes");
     private static final BString RECEIPT_HANDLE = StringUtils.fromString("receiptHandle");
+
+    // Constants related to SendMessageBatch
+    private static final String SEND_MESSAGE_BATCH_RESPONSE = "SendMessageBatchResponse";
+    private static final String SEND_MESSAGE_BATCH_RESULT_ENTRY = "SendMessageBatchResultEntry";
+    private static final String BATCH_RESULT_ERROR_ENTRY = "BatchResultErrorEntry";
+    private static final BString SUCCESSFUL = StringUtils.fromString("successful");
+    private static final BString FAILED = StringUtils.fromString("failed");
+    private static final BString ID = StringUtils.fromString("id");
+    private static final BString CODE = StringUtils.fromString("code");
+    private static final BString SENDER_FAULT = StringUtils.fromString("senderFault");
+    private static final BString MESSAGE = StringUtils.fromString("message");
     
 
 
@@ -226,6 +242,92 @@ public static BArray getNativeReceiveMessageResponse(ReceiveMessageResponse resp
         resultArr.add(i++, msgRecord);
     }
     return resultArr;
+}
+
+public static SendMessageBatchRequest getNativeSendMessageBatchRequest(BString queueUrl, BArray bEntries) {
+    List<SendMessageBatchRequestEntry> entries = new ArrayList<>();
+    for (int i = 0; i < bEntries.size(); i++) {
+        BMap<BString, Object> entry = (BMap<BString, Object>) bEntries.get(i);
+        SendMessageBatchRequestEntry.Builder builder = SendMessageBatchRequestEntry.builder()
+                .id(entry.getStringValue(ID).getValue())
+                .messageBody(entry.getStringValue(BODY).getValue());
+        // Optional SendMessageConfig fields
+        if (entry.containsKey(DELAY_SECONDS)) {
+            builder.delaySeconds(((Long) entry.get(DELAY_SECONDS)).intValue());
+        }
+        if (entry.containsKey(MESSAGE_DEDUPLICATION_ID)) {
+            builder.messageDeduplicationId(entry.getStringValue(MESSAGE_DEDUPLICATION_ID).getValue());
+        }
+        if (entry.containsKey(MESSAGE_GROUP_ID)) {
+            builder.messageGroupId(entry.getStringValue(MESSAGE_GROUP_ID).getValue());
+        }
+        if (entry.containsKey(AWS_TRACE_HEADER)) {
+            builder.messageAttributes(Map.of("AWSTraceHeader",
+                    MessageAttributeValue.builder()
+                            .dataType("String")
+                            .stringValue(entry.getStringValue(AWS_TRACE_HEADER).getValue())
+                            .build()));
+        }
+        if (entry.containsKey(MESSAGE_ATTRIBUTES)) {
+            BMap<BString, Object> attrs = (BMap<BString, Object>) entry.get(MESSAGE_ATTRIBUTES);
+            Map<String, MessageAttributeValue> attrMap = new HashMap<>();
+            for (Object key : attrs.getKeys()) {
+                BString attrKey = (BString) key;
+                BMap<BString, Object> attrVal = (BMap<BString, Object>) attrs.get(attrKey);
+                MessageAttributeValue mav = MessageAttributeValue.builder()
+                        .dataType(attrVal.getStringValue(StringUtils.fromString("dataType")).getValue())
+                        .stringValue(attrVal.getStringValue(StringUtils.fromString("stringValue")).getValue())
+                        .build();
+                attrMap.put(attrKey.getValue(), mav);
+            }
+            builder.messageAttributes(attrMap);
+        }
+        entries.add(builder.build());
+    }
+    return SendMessageBatchRequest.builder()
+            .queueUrl(queueUrl.getValue())
+            .entries(entries)
+            .build();
+}
+
+public static BMap<BString, Object> getNativeSendMessageBatchResponse(SendMessageBatchResponse response) {
+    Type SendMessageBatchResultEntry = ValueCreator.createRecordValue(ModuleUtils.getModule(), "SEND_MESSAGE_BATCH_RESULT_ENTRY").getType();
+    BArray successfulArr = ValueCreator.createArrayValue(TypeCreator.createArrayType(SendMessageBatchResultEntry));
+    for (SendMessageBatchResultEntry entry : response.successful()) {
+        BMap<BString, Object> entryRecord = ValueCreator.createRecordValue(ModuleUtils.getModule(), SEND_MESSAGE_BATCH_RESULT_ENTRY);
+        entryRecord.put(ID, StringUtils.fromString(entry.id()));
+        entryRecord.put(MD5_OF_BODY, StringUtils.fromString(entry.md5OfMessageBody()));
+        entryRecord.put(MESSAGE_ID, StringUtils.fromString(entry.messageId()));
+        if (entry.md5OfMessageAttributes() != null) {
+            entryRecord.put(MD5_OF_ATTRIBUTES, StringUtils.fromString(entry.md5OfMessageAttributes()));
+        }
+        if (entry.md5OfMessageSystemAttributes() != null) {
+            entryRecord.put(MD5_OF_SYS_ATTRIBUTES, StringUtils.fromString(entry.md5OfMessageSystemAttributes()));
+        }
+        if (entry.sequenceNumber() != null) {
+            entryRecord.put(SEQUENCE_NUMBER, StringUtils.fromString(entry.sequenceNumber()));
+        }
+        successfulArr.append(entryRecord);
+    }
+
+     Type BatchResultErrorEntry = ValueCreator.createRecordValue(ModuleUtils.getModule(), "BATCH_RESULT_ERROR_ENTRY").getType();
+    BArray failedArr = ValueCreator.createArrayValue(TypeCreator.createArrayType(BatchResultErrorEntry));
+
+    for (BatchResultErrorEntry entry : response.failed()) {
+        BMap<BString, Object> entryRecord = ValueCreator.createRecordValue(ModuleUtils.getModule(), BATCH_RESULT_ERROR_ENTRY);
+        entryRecord.put(ID, StringUtils.fromString(entry.id()));
+        entryRecord.put(CODE, StringUtils.fromString(entry.code()));
+        entryRecord.put(SENDER_FAULT, entry.senderFault());
+        if (entry.message() != null) {
+            entryRecord.put(MESSAGE, StringUtils.fromString(entry.message()));
+        }
+        failedArr.append(entryRecord);
+    }
+
+    BMap<BString, Object> result = ValueCreator.createRecordValue(ModuleUtils.getModule(), SEND_MESSAGE_BATCH_RESPONSE);
+    result.put(SUCCESSFUL, successfulArr);
+    result.put(FAILED, failedArr);
+    return result;
 }
 
 

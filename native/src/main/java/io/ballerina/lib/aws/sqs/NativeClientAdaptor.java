@@ -20,6 +20,7 @@ import java.nio.file.Path;
 import java.util.Objects;
 
 import io.ballerina.runtime.api.Environment;
+import io.ballerina.runtime.api.values.BArray;
 import io.ballerina.runtime.api.values.BMap;
 import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.api.values.BString;
@@ -34,6 +35,8 @@ import software.amazon.awssdk.services.sqs.SqsClient;
 import software.amazon.awssdk.services.sqs.model.DeleteMessageRequest;
 import software.amazon.awssdk.services.sqs.model.ReceiveMessageRequest;
 import software.amazon.awssdk.services.sqs.model.ReceiveMessageResponse;
+import software.amazon.awssdk.services.sqs.model.SendMessageBatchRequest;
+import software.amazon.awssdk.services.sqs.model.SendMessageBatchResponse;
 import software.amazon.awssdk.services.sqs.model.SendMessageRequest;
 import software.amazon.awssdk.services.sqs.model.SendMessageResponse;
 
@@ -135,7 +138,20 @@ public class NativeClientAdaptor {
          });
     }
 
+    public static Object sendMessageBatch(Environment env, BObject bClient, BString queueurl, BArray bEntries) {
+        SqsClient sqsClient = (SqsClient) bClient.getNativeData(NATIVE_SQS_CLIENT);
 
+        return env.yieldAndRun(() -> {
+            try {
+                SendMessageBatchRequest request = CommonUtils.getNativeSendMessageBatchRequest(queueurl, bEntries);
+                SendMessageBatchResponse response = sqsClient.sendMessageBatch(request);
+                return CommonUtils.getNativeSendMessageBatchResponse(response);
+            } catch (Exception e) {
+                String msg = "Failed to send batch message"+Objects.requireNonNullElse(e.getMessage(), "Unknown error");
+                return CommonUtils.createError(msg, e);
+            }
+        });
+    }
 
 
      public static Object close(BObject bClient) {

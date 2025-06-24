@@ -227,3 +227,53 @@ public type MessageAttributes record {|
    string sequenceNumber?;
    string deadLetterQueueSourceArn?;
 |};
+
+# A single message entry in a SendMessageBatch request.
+#
+# + messageId - An identifier for a message in this batch used to communicate the result. The Ids of a batch request need to be unique within a request. This identifier can have up to 80 characters.
+# The following characters are accepted: alphanumeric characters, hyphens(-), and underscores (_). 
+# + messageBody - The body of the message.
+public type SendMessageBatchEntry record {|
+  string messageId;
+  string messageBody;
+  *SendMessageConfig;
+|};
+
+# The full response of the SendMessageBatch operation.
+#
+# + successful - A list of SendMessageBatchResultEntry items.
+# + failed - A list of BatchResultErrorEntry items with Error details about each message that can't be enqueued.
+public type SendMessageBatchResponse record {|
+   SendMessageBatchResultEntry[] successful;
+   BatchResultErrorEntry[] failed;
+|};
+
+# A successful result entry from a SendMessageBatch response.
+#
+# + id - An identifier for the message in this batch.
+# + md5OfMessageBody - An MD5 digest of the non-URL-encoded message body string. You can use this attribute to verify that Amazon SQS received the message correctly. Amazon SQS URL-decodes the message before creating the MD5 digest.
+# + messageId - An identifier for the message. 
+# + md5OfMessageAttributes - An MD5 digest of the non-URL-encoded message attribute string. You can use this attribute to verify that Amazon SQS received the message correctly. Amazon SQS URL-decodes the message before creating the MD5 digest.
+# + md5OfMessageSystemAttributes - An MD5 digest of the non-URL-encoded message system attribute string. You can use this attribute to verify that Amazon SQS received the message correctly. Amazon SQS URL-decodes the message before creating the MD5 digest. 
+# + sequenceNumber - The large, non-consecutive number that Amazon SQS assigns to each message. The length of SequenceNumber is 128 bits. As SequenceNumber continues to increase for a particular MessageGroupId. Applies only to FIFO queues. 
+public type SendMessageBatchResultEntry record {|
+   string id;
+   string md5OfMessageBody;
+   string messageId;
+   string md5OfMessageAttributes?;
+   string md5OfMessageSystemAttributes?;
+   string sequenceNumber?;
+|};
+
+# An Error entry in a failed SendMessageBatch response.
+#
+# + id - The Id of an entry in a batch request.
+# + code - An Error code representing why the action failed on this entry.
+# + senderFault - Specifies whether the Error happened due to the caller of the batch API action. 
+# + message - A message explaining why the action failed on this ent
+public type BatchResultErrorEntry record {|
+   string id;
+   string code;
+   boolean senderFault;
+   string message?;
+|};
