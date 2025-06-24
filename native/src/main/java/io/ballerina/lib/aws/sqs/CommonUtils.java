@@ -96,7 +96,7 @@ public final class CommonUtils {
     private static final String SEND_MESSAGE_BATCH_RESPONSE = "SendMessageBatchResponse";
     private static final BString SUCCESSFUL = StringUtils.fromString("successful");
     private static final BString FAILED = StringUtils.fromString("failed");
-    private static final BString ID = StringUtils.fromString("messageId");
+    private static final BString ID = StringUtils.fromString("id");
     private static final BString CODE = StringUtils.fromString("code");
     private static final BString SENDER_FAULT = StringUtils.fromString("senderFault");
     private static final BString MESSAGE = StringUtils.fromString("message");
