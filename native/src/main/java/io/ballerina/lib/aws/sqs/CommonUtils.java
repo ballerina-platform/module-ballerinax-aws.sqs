@@ -94,8 +94,6 @@ public final class CommonUtils {
 
     // Constants related to SendMessageBatch
     private static final String SEND_MESSAGE_BATCH_RESPONSE = "SendMessageBatchResponse";
-    private static final String SEND_MESSAGE_BATCH_RESULT_ENTRY = "SendMessageBatchResultEntry";
-    private static final String BATCH_RESULT_ERROR_ENTRY = "BatchResultErrorEntry";
     private static final BString SUCCESSFUL = StringUtils.fromString("successful");
     private static final BString FAILED = StringUtils.fromString("failed");
     private static final BString ID = StringUtils.fromString("messageId");
