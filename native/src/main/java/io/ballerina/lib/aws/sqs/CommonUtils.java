@@ -51,7 +51,7 @@ import software.amazon.awssdk.services.sqs.model.SendMessageResponse;
 
 
  /**
- * {@code CommonUtils} contains the common utility functions for the Ballerina AWS SQS Client.
+ * {@code CommonUtils} Contains the common utility functions for the Ballerina AWS SQS Client
  */
 
 public final class CommonUtils {
@@ -98,7 +98,7 @@ public final class CommonUtils {
     private static final String BATCH_RESULT_ERROR_ENTRY = "BatchResultErrorEntry";
     private static final BString SUCCESSFUL = StringUtils.fromString("successful");
     private static final BString FAILED = StringUtils.fromString("failed");
-    private static final BString ID = StringUtils.fromString("id");
+    private static final BString ID = StringUtils.fromString("messageId");
     private static final BString CODE = StringUtils.fromString("code");
     private static final BString SENDER_FAULT = StringUtils.fromString("senderFault");
     private static final BString MESSAGE = StringUtils.fromString("message");
@@ -244,6 +244,7 @@ public static BArray getNativeReceiveMessageResponse(ReceiveMessageResponse resp
     return resultArr;
 }
 
+@SuppressWarnings("unchecked")
 public static SendMessageBatchRequest getNativeSendMessageBatchRequest(BString queueUrl, BArray bEntries) {
     List<SendMessageBatchRequestEntry> entries = new ArrayList<>();
     for (int i = 0; i < bEntries.size(); i++) {
@@ -291,10 +292,10 @@ public static SendMessageBatchRequest getNativeSendMessageBatchRequest(BString q
 }
 
 public static BMap<BString, Object> getNativeSendMessageBatchResponse(SendMessageBatchResponse response) {
-    Type SendMessageBatchResultEntry = ValueCreator.createRecordValue(ModuleUtils.getModule(), "SEND_MESSAGE_BATCH_RESULT_ENTRY").getType();
-    BArray successfulArr = ValueCreator.createArrayValue(TypeCreator.createArrayType(SendMessageBatchResultEntry));
+    Type sendMessageBatchResultEntryType = ValueCreator.createRecordValue(ModuleUtils.getModule(), "SendMessageBatchResultEntry").getType();
+    BArray successfulArr = ValueCreator.createArrayValue(TypeCreator.createArrayType(sendMessageBatchResultEntryType));
     for (SendMessageBatchResultEntry entry : response.successful()) {
-        BMap<BString, Object> entryRecord = ValueCreator.createRecordValue(ModuleUtils.getModule(), SEND_MESSAGE_BATCH_RESULT_ENTRY);
+        BMap<BString, Object> entryRecord = ValueCreator.createRecordValue(ModuleUtils.getModule(), "SendMessageBatchResultEntry");
         entryRecord.put(ID, StringUtils.fromString(entry.id()));
         entryRecord.put(MD5_OF_BODY, StringUtils.fromString(entry.md5OfMessageBody()));
         entryRecord.put(MESSAGE_ID, StringUtils.fromString(entry.messageId()));
@@ -310,11 +311,11 @@ public static BMap<BString, Object> getNativeSendMessageBatchResponse(SendMessag
         successfulArr.append(entryRecord);
     }
 
-     Type BatchResultErrorEntry = ValueCreator.createRecordValue(ModuleUtils.getModule(), "BATCH_RESULT_ERROR_ENTRY").getType();
-    BArray failedArr = ValueCreator.createArrayValue(TypeCreator.createArrayType(BatchResultErrorEntry));
+     Type batchResultErrorEntryType = ValueCreator.createRecordValue(ModuleUtils.getModule(), "BatchResultErrorEntry").getType();
+    BArray failedArr = ValueCreator.createArrayValue(TypeCreator.createArrayType(batchResultErrorEntryType));
 
     for (BatchResultErrorEntry entry : response.failed()) {
-        BMap<BString, Object> entryRecord = ValueCreator.createRecordValue(ModuleUtils.getModule(), BATCH_RESULT_ERROR_ENTRY);
+        BMap<BString, Object> entryRecord = ValueCreator.createRecordValue(ModuleUtils.getModule(), "BatchResultErrorEntry");
         entryRecord.put(ID, StringUtils.fromString(entry.id()));
         entryRecord.put(CODE, StringUtils.fromString(entry.code()));
         entryRecord.put(SENDER_FAULT, entry.senderFault());
