@@ -105,7 +105,38 @@ isolated function testSendMessageBatchWithEmptyList() returns error? {
         test:assertEquals(details.httpStatusCode,400);
         test:assertEquals(details.errorCode, "AWS.SimpleQueueService.EmptyBatchRequest");
         test:assertEquals(details.errorMessage, "There should be at least one SendMessageBatchRequestEntry in the request.");
-
-
     }
 }
+
+
+@test:Config {
+    groups: ["sendMessageBatch"]
+}
+isolated function testSendMessageBatchExceedsTotalSizeLimit() returns error? {
+    string queueUrl = "https://sqs.eu-north-1.amazonaws.com/284495578152/TestQueue";
+
+    string largeBody = ""; // string with size ~26220 Bytes.
+    int i = 0;
+    while i < 26220 {
+        largeBody += "A";
+        i += 1;
+    }
+
+    SendMessageBatchEntry[] entries = [];
+    foreach int j in 1...10 {
+        entries.push({
+            id: "msg" + j.toString(),
+            body: largeBody
+        });
+    }
+
+    SendMessageBatchResponse|Error result = sqsClient->sendMessageBatch(queueUrl, entries);
+    test:assertTrue(result is Error);
+    if result is error {
+        ErrorDetails details = result.detail();
+        test:assertEquals(details.httpStatusCode, 400);
+        test:assertEquals(details.errorCode, "AWS.SimpleQueueService.BatchRequestTooLong");
+        test:assertEquals(details.errorMessage,"Batch requests cannot be longer than 262144 bytes. You have sent 262200 bytes.");
+    }
+}
+
