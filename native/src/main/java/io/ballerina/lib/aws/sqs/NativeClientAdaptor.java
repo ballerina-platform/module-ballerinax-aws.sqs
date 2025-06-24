@@ -111,9 +111,9 @@ public class NativeClientAdaptor {
 
         return env.yieldAndRun(() -> {
             try {
-                ReceiveMessageRequest request = CommonUtils.getNativeReceiveMessageRequest(queueUrl, bConfig);
+                ReceiveMessageRequest request = ReceiveMessageMapper.getNativeReceiveMessageRequest(queueUrl, bConfig);
                 ReceiveMessageResponse response = sqsClient.receiveMessage(request);
-                return CommonUtils.getNativeReceiveMessageResponse(response);
+                return ReceiveMessageMapper.getNativeReceiveMessageResponse(response);
             } catch (Exception e) {
                 String msg = "Failed to receive message: " + Objects.requireNonNullElse(e.getMessage(), "Unknown error");
                 return CommonUtils.createError(msg, e);
@@ -143,9 +143,9 @@ public class NativeClientAdaptor {
 
         return env.yieldAndRun(() -> {
             try {
-                SendMessageBatchRequest request = CommonUtils.getNativeSendMessageBatchRequest(queueurl, bEntries);
+                SendMessageBatchRequest request = SendMessageBatchMapper.getNativeSendMessageBatchRequest(queueurl, bEntries);
                 SendMessageBatchResponse response = sqsClient.sendMessageBatch(request);
-                return CommonUtils.getNativeSendMessageBatchResponse(response);
+                return SendMessageBatchMapper.getNativeSendMessageBatchResponse(response);
             } catch (Exception e) {
                 String msg = "Failed to send batch message"+Objects.requireNonNullElse(e.getMessage(), "Unknown error");
                 return CommonUtils.createError(msg, e);
