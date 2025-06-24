@@ -114,7 +114,7 @@ public isolated client class Client {
     }
 
     isolated function externDeleteMessageBatch(string queueUrl, DeleteMessageBatchEntry[] entries) returns DeleteMessageBatchResponse|Error = @java:Method {
-        name: "deleteMessagebatch",
+        name: "deleteMessageBatch",
         'class: "io.ballerina.lib.aws.sqs.NativeClientAdaptor"
     } external;
 
