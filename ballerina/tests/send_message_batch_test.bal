@@ -38,9 +38,9 @@ isolated function testSendMessageBatchWithDuplicatemessageId() returns error? {
     test:assertTrue(result is Error);
     if result is error {
         ErrorDetails details = result.detail();
-        test:assertEquals(details.httpStatusCode, 403);
-        test:assertEquals(details.errorCode, "InvalidClientTokenId");
-        test:assertEquals(details.errorMessage, "The security token included in the request is invalid.");
+        test:assertEquals(details.httpStatusCode, 400);
+        test:assertEquals(details.errorCode, "AWS.SimpleQueueService.BatchEntryIdsNotDistinct");
+        test:assertEquals(details.errorMessage, "Id id1 repeated.");
     }
 }
 
