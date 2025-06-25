@@ -127,10 +127,10 @@ public isolated client class Client {
     # + createQueueConfig - Optional parameters such as `queueAttributes` and `tags`.
     # + return - The URL of the created queue, or an Error.
     isolated remote function createQueue(string queueName ,*CreateQueueConfig createQueueConfig) returns string|Error {
-        return error Error("Not implemented");
+        return self.externCreateQueue(queueName,createQueueConfig);
     }
 
-    isolated remote function externCreateQueue(string queueName, *CreateQueueConfig createQueueConfig) returns string|Error = @java:Method {
+    isolated function externCreateQueue(string queueName, *CreateQueueConfig createQueueConfig) returns string|Error = @java:Method {
         name: "createQueue",
         'class: "io.ballerina.lib.aws.sqs.NativeClientAdaptor"
     } external;
