@@ -23,6 +23,24 @@ public class CreateQueueMapper {
     public static CreateQueueRequest getNativeCreateQueueRequest(BString queueName, BMap<BString, Object> bConfig) {
         CreateQueueRequest.Builder builder = CreateQueueRequest.builder().queueName(queueName.getValue());
 
+        final Map<String, String> ATTRIBUTE_NAME_MAP = Map.ofEntries(
+            Map.entry("delaySeconds", "DelaySeconds"),
+            Map.entry("maximumMessageSize", "MaximumMessageSize"),
+            Map.entry("messageRetentionPeriod", "MessageRetentionPeriod"),
+            Map.entry("policy", "Policy"),
+            Map.entry("receiveMessageWaitTimeSeconds", "ReceiveMessageWaitTimeSeconds"),
+            Map.entry("visibilityTimeout", "VisibilityTimeout"),
+            Map.entry("redrivePolicy", "RedrivePolicy"),
+            Map.entry("redriveAllowPolicy", "RedriveAllowPolicy"),
+            Map.entry("kmsMasterKeyId", "KmsMasterKeyId"),
+            Map.entry("kmsDataKeyReusePeriodSeconds", "KmsDataKeyReusePeriodSeconds"),
+            Map.entry("sqsManagedSseEnabled", "SqsManagedSseEnabled"),
+            Map.entry("fifoQueue", "FifoQueue"),
+            Map.entry("contentBasedDeduplication", "ContentBasedDeduplication"),
+            Map.entry("deduplicationScope", "DeduplicationScope"),
+            Map.entry("fifoThroughputLimit", "FifoThroughputLimit")
+        );
+
         if (bConfig != null) {
             if (bConfig.containsKey(QUEUE_ATTRIBUTES)) {
                 BMap<BString, Object> attrs = (BMap<BString, Object>) bConfig.get(QUEUE_ATTRIBUTES);
@@ -31,8 +49,10 @@ public class CreateQueueMapper {
                     for (Object key : attrs.getKeys()) {
                         BString attrkey = (BString) key;
                         Object value = attrs.get(attrkey);
-                        QueueAttributeName attributeName = QueueAttributeName.fromValue(attrkey.getValue());
-                        attrMap.put(attributeName, value.toString());
+                        String awsAttrName = ATTRIBUTE_NAME_MAP.get(attrkey.getValue());
+                        if (awsAttrName != null && value != null) {
+                        attrMap.put(QueueAttributeName.fromValue(awsAttrName), value.toString());
+                    }
                     }
                     builder.attributes(attrMap);
                 }
