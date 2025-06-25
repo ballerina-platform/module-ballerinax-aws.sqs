@@ -51,15 +51,24 @@ isolated function testCreateQueueWithInvalidName() returns error? {
 @test:Config {
     groups: ["createQueue"]
 }
-isolated function testCreateQueueWithFullAttributes() returns error? {
-    string queueName = "attr-test-queue";
+isolated function testCreateQueueWithAttributes() returns error? {
+    string queueName = "attr-test-queue-2";
     CreateQueueConfig config = {
         queueAttributes: {
             delaySeconds: 5,
             maximumMessageSize: 2048,
             messageRetentionPeriod: 86400,
             receiveMessageWaitTimeSeconds: 10,
-            visibilityTimeout: 30
+            visibilityTimeout: 30,
+            redrivePolicy: {
+                deadLetterTargetArn: "arn:aws:sqs:eu-north-1:284495578152:standard-test-queue",
+                maxReceiveCount: 4
+                },
+            sqsManagedSseEnabled: true,
+            redriveAllowPolicy: {
+                redrivePermission: "byQueue",
+                sourceQueueArns: ["arn:aws:sqs:eu-north-1:284495578152:standard-test-queue"]
+            }
         }
     };
     string|error result = sqsClient->createQueue(queueName, config);
@@ -67,5 +76,24 @@ isolated function testCreateQueueWithFullAttributes() returns error? {
         test:assertTrue(result.endsWith(queueName));
     } else {
         test:assertFail("Queue creation with attributes failed: " + result.toString());
+    }
+}
+
+@test:Config {
+    groups: ["createQueue"]
+}
+isolated function testCreateQueueWithTags() returns error? {
+    string queueName = "tagged-queue";
+    CreateQueueConfig config = {
+        tags: {
+            "env": "dev",
+            "project": "sqs"
+        }
+    };
+    string|error result = sqsClient->createQueue(queueName, config);
+    if result is string {
+        test:assertTrue(result.endsWith(queueName));
+    } else {
+        test:assertFail("Queue creation with tags failed: " + result.toString());
     }
 }

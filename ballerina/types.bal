@@ -364,7 +364,6 @@ public type RedrivePolicy record {|
    string deadLetterTargetArn?;
    int maxReceiveCount?;
 |};
-
 # Redrive permission policy for a dead-letter queue.
 #
 # + redrivePermission - The permission type that defines which source queues can specify the current queue as the dead-letter queue.
