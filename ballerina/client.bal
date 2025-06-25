@@ -81,8 +81,9 @@ public isolated client class Client {
     }
 
     isolated function externDeleteMessage(string queueUrl, string receiptHandle) returns Error? = @java:Method {
-        'class: "io.ballerina.lib.aws.sqs.NativeClientAdaptor",
-        name: "deleteMessage"
+        name: "deleteMessage",
+        'class: "io.ballerina.lib.aws.sqs.NativeClientAdaptor"
+        
     } external;
 
     # Sends up to 10 messages as a batch to the specified Amazon SQS queue
@@ -135,11 +136,18 @@ public isolated client class Client {
         'class: "io.ballerina.lib.aws.sqs.NativeClientAdaptor"
     } external;
 
+    # Deletes the specified Amazon SQS queue
+    #
+    # + queueUrl - The URL of the Amazon SQS queue to delete.Queue URLs and names are case-sensitive
+    # + return - `Error` on failure
+    isolated remote function deleteQueue(string queueUrl) returns Error? {
+        return self.externDeleteQueue(queueUrl);
+    }
 
-
-
-
-
+    isolated function externDeleteQueue(string queueUrl) returns Error? = @java:Method {
+        name: "deleteQueue",
+        'class: "io.ballerina.lib.aws.sqs.NativeClientAdaptor"
+    } external;
 
     # Gracefully closes AWS SQS API client resources
     #

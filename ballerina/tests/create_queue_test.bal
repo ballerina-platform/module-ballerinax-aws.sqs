@@ -97,3 +97,4 @@ isolated function testCreateQueueWithTags() returns error? {
         test:assertFail("Queue creation with tags failed: " + result.toString());
     }
 }
+
