@@ -20,6 +20,7 @@ import java.nio.file.Path;
 import java.util.Objects;
 
 import io.ballerina.runtime.api.Environment;
+import io.ballerina.runtime.api.utils.StringUtils;
 import io.ballerina.runtime.api.values.BArray;
 import io.ballerina.runtime.api.values.BMap;
 import io.ballerina.runtime.api.values.BObject;
@@ -179,7 +180,7 @@ public class NativeClientAdaptor {
         try {
             CreateQueueRequest request = CreateQueueMapper.getNativeCreateQueueRequest(queueName, bConfig);
             CreateQueueResponse response = sqsClient.createQueue(request);
-            return response.queueUrl();
+            return StringUtils.fromString(response.queueUrl());
         } catch (Exception e) {
             String msg = "Failed to create queue: " + Objects.requireNonNullElse(e.getMessage(), "Unknown error");
             return CommonUtils.createError(msg, e);
