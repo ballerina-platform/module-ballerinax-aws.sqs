@@ -21,8 +21,8 @@ isolated function testDeleteMessageBatchSuccess() returns error? {
     }
 
     DeleteMessageBatchEntry[] deleteBatch = [
-        { id: sendResult.successful[0].id, receiptHandle: check received[0].receiptHandle.ensureType() },
-        { id: sendResult.successful[1].id, receiptHandle: check received[1].receiptHandle.ensureType() }
+        { id: "msg-id-1", receiptHandle: check received[0].receiptHandle.ensureType() },
+        { id: "msg-id-2", receiptHandle: check received[1].receiptHandle.ensureType() }
     ];
 
     DeleteMessageBatchResponse|error deleteResult = sqsClient->deleteMessageBatch(queueUrl, deleteBatch);
