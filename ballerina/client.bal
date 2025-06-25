@@ -23,7 +23,6 @@ import ballerina/jballerina.java;
 #
 public isolated client class Client {
 
-
     # Initializes the Amazon SQS client with the provided connection configuration
     #
     # + connectionConfig - The Amazon SQS client configuration
@@ -117,6 +116,25 @@ public isolated client class Client {
         name: "deleteMessageBatch",
         'class: "io.ballerina.lib.aws.sqs.NativeClientAdaptor"
     } external;
+
+    # Creates a new Amazon SQS queue with the specified attributes and tags.
+    #
+    # + queueName - The name of the new queue.
+    # The following limits apply to this name:
+    #   - A queue name can have up to 80 characters.
+    #   - Valid values: alphanumeric characters, hyphens (-), and underscores (_).
+    # A FIFO queue name must end with the .fifo suffix. Queue URLs and names are case-sensitive. 
+    # + createQueueConfig - Optional parameters such as `queueAttributes` and `tags`.
+    # + return - The URL of the created queue, or an Error.
+    isolated remote function createQueue(string queueName ,*CreateQueueConfig createQueueConfig) returns string|Error {
+        return error Error("Not implemented");
+    }
+
+    isolated remote function externCreateQueue(string queueName, *CreateQueueConfig createQueueConfig) returns string|Error = @java:Method {
+        name: "createQueue",
+        'class: "io.ballerina.lib.aws.sqs.NativeClientAdaptor"
+    } external;
+
 
 
 

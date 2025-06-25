@@ -302,3 +302,97 @@ public type DeleteMessageBatchResponse record {|
 public type DeleteMessageBatchResultEntry record {|
    string id;
 |};
+
+# Configuration options for creating an AWS SQS queue.
+#
+# + queueAttributes - A map of attributes with their corresponding values. 
+# + tags - Add cost allocation tags to the specified Amazon SQS queue. When you use queue tags, keep the following guidelines in mind:
+#     - Adding more than 50 tags to a queue isn't recommended.
+#     - Tags don't have any semantic meaning.
+#     - Amazon SQS interprets tags as character strings.
+#     - Tags are case-sensitive.
+#     - A new tag with a key identical to that of an existing tag overwrites the existing tag.
+public type CreateQueueConfig record {|
+   QueueAttributes queueAttributes?;
+   map<string> tags?;
+|};
+
+# Represents the attributes of an SQS queue. These attributes can be set when creating a queue or
+# updated later using the `setQueueAttributes` API.
+#
+# + delaySeconds -  The length of time, in seconds, for which the delivery of all messages in the queue is delayed.
+# + maximumMessageSize - The limit of how many bytes a message can contain before Amazon SQS rejects it.
+# + messageRetentionPeriod - The length of time, in seconds, for which Amazon SQS retains a message. 
+# When you change a queue's attributes, the change can take up to 60 seconds for most of the attributes to propagate throughout the Amazon SQS system. Changes made to the `MessageRetentionPeriod` attribute can take up to 15 minutes and will impact existing messages in the queue potentially causing them to be expired and deleted if the `MessageRetentionPeriod` is reduced below the age of existing messages.
+# + policy - The queue's policy,this must be a valid AWS policy.
+# + receiveMessageWaitTimeSeconds - The length of time, in seconds, for which a `ReceiveMessage` action waits for a message to arrive.  
+# + visibilityTimeout - The visibility timeout for the queue, in seconds.
+# + redrivePolicy -Includes the parameters for the dead-letter queue functionality of the source queue.  Apply only to dead-letter queues. 
+# + redriveAllowPolicy - Includes the parameters for the permissions for the dead-letter queue redrive permission. Apply only to dead-letter queues. 
+# + kmsMasterKeyId - The ID of an AWS managed customer master key (CMK) for Amazon SQS or a custom CMK. Apply only to server side encryption.
+# + kmsDataKeyReusePeriodSeconds - The length of time, in seconds, for which Amazon SQS can reuse a data key to encrypt or decrypt messages before calling AWS KMS again.  Apply only to server side encryption.
+# + sqsManagedSseEnabled -  Enables server-side queue encryption using SQS owned encryption keys. Only one server-side encryption option is supported per queue. For example, Server Side Encryption Key Management Service (SSE-KMS) or SSE-SQS. Apply only to server side encryption.
+# + fifoQueue - Designates a queue as FIFO. If you don't specify the `fifoQueue` attribute, Amazon SQS creates a standard queue. You can provide this attribute only during queue creation. Apply only to FIFO queues.
+# You can't change it for an existing queue. When you set this attribute, you must also provide the `MessageGroupId` for your messages explicitly.
+# + contentBasedDeduplication - Enables content-based deduplication. Apply only to FIFO queues.
+# + deduplicationScope - Specifies whether message deduplication occurs at the message group or queue level. Apply only to high throughput for FIFO queues. 
+# + fifoThroughputLimit - Specifies whether the FIFO queue throughput quota applies to the entire queue or per message group. Apply only to high throughput for FIFO queues. 
+public type QueueAttributes record {|
+   int delaySeconds?;
+   int maximumMessageSize?;
+   int messageRetentionPeriod?;
+   string policy?;
+   int receiveMessageWaitTimeSeconds?;
+   int visibilityTimeout?;
+   RedrivePolicy redrivePolicy?;
+   RedriveAllowPolicy redriveAllowPolicy?;
+   string kmsMasterKeyId?;
+   string kmsDataKeyReusePeriodSeconds?;
+   boolean sqsManagedSseEnabled?;
+   boolean fifoQueue?;
+   boolean contentBasedDeduplication?;
+   DeduplicationScope deduplicationScope?;
+   FifoThroughputLimit fifoThroughputLimit?;
+|};
+
+# Dead-letter queue redrive policy.
+#
+# + deadLetterTargetArn - The Amazon Resource Name (ARN) of the dead-letter queue to which Amazon SQS moves messages after the value of `maxReceiveCount` is exceeded.
+# + maxReceiveCount - The number of times a message is delivered to the source queue before being moved to the dead-letter queue. Default: 10. When the `ReceiveCount` for a message exceeds the `maxReceiveCount` for a queue,
+# Amazon SQS moves the message to the dead-letter-queue.
+public type RedrivePolicy record {|
+   string deadLetterTargetArn?;
+   int maxReceiveCount?;
+|};
+
+# Redrive permission policy for a dead-letter queue.
+#
+# + redrivePermission - The permission type that defines which source queues can specify the current queue as the dead-letter queue.
+# Valid values are:
+#   - `allowAll` – (Default) Any source queues in this AWS account in the same Region can specify this queue as the dead-letter queue.
+#   - `denyAll` – No source queues can specify this queue as the dead-letter queue.
+#   - `byQueue` – Only queues specified by the `sourceQueueArns` parameter can specify this queue as the dead-letter queue
+# + sourceQueueArns - An array of Amazon Resource Names (ARNs) of source queues that can specify the current queue as the dead-letter queue.
+public type RedriveAllowPolicy record {|
+   RedrivePermission redrivePermission = ALLOW_ALL;
+   string[] sourceQueueArns?;
+|};
+
+# Allowed redrive permission values.
+public enum RedrivePermission {
+   ALLOW_ALL = "allowAll",
+   DENY_ALL = "denyAll",
+   BY_QUEUE = "byQueue"
+};
+
+# Represents the scope of deduplication for FIFO queues.
+public enum DeduplicationScope{
+   MESSAGE_GROUP = "messageGroup",
+   QUEUE = "queue"
+};
+
+# Represents the throughput limit for FIFO queues.
+public enum FifoThroughputLimit {
+   PER_MESSAGE_GROUP_ID = "perMessageGroupId",
+   PER_QUEUE = "perQueue"
+};

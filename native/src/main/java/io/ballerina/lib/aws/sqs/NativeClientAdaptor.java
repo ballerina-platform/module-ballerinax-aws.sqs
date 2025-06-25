@@ -32,6 +32,8 @@ import software.amazon.awssdk.auth.credentials.InstanceProfileCredentialsProvide
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.profiles.ProfileFile;
 import software.amazon.awssdk.services.sqs.SqsClient;
+import software.amazon.awssdk.services.sqs.model.CreateQueueRequest;
+import software.amazon.awssdk.services.sqs.model.CreateQueueResponse;
 import software.amazon.awssdk.services.sqs.model.DeleteMessageBatchRequest;
 import software.amazon.awssdk.services.sqs.model.DeleteMessageBatchResponse;
 import software.amazon.awssdk.services.sqs.model.DeleteMessageRequest;
@@ -169,6 +171,25 @@ public class NativeClientAdaptor {
             }
         });
     }
+
+    public static Object createQueue(Environment env, BObject bClient, BString queueName, BMap<BString, Object> bConfig) {
+        SqsClient sqsClient = (SqsClient) bClient.getNativeData(NATIVE_SQS_CLIENT);
+
+        return env.yieldAndRun(() -> {
+        try {
+            CreateQueueRequest request = CreateQueueMapper.getNativeCreateQueueRequest(queueName, bConfig);
+            CreateQueueResponse response = sqsClient.createQueue(request);
+            return response.queueUrl();
+        } catch (Exception e) {
+            String msg = "Failed to create queue: " + Objects.requireNonNullElse(e.getMessage(), "Unknown error");
+            return CommonUtils.createError(msg, e);
+        }
+    });
+
+        
+    }
+
+    
 
 
 
