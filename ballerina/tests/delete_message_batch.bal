@@ -55,8 +55,8 @@ isolated function testDeleteMessageBatchWithInvalidReceiptHandle() returns error
     }
 
     DeleteMessageBatchEntry[] entries = [
-        { id: sendResult.successful[0].id, receiptHandle: "invalid-receipt-handle" },
-        { id: sendResult.successful[1].id, receiptHandle: check received[1].receiptHandle.ensureType() }
+        { id: "id1", receiptHandle: "invalid-receipt-handle" },
+        { id: "id2", receiptHandle: check received[1].receiptHandle.ensureType() }
 
     ];
 
