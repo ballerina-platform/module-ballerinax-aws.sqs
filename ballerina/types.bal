@@ -402,3 +402,23 @@ public enum FifoThroughputLimit {
 public type GetQueueUrlConfig record {| 
    string queueOwnerAWSAccountId?;
 |};
+
+# Represents the optional parameters used to list SQS queues.
+#
+# + maxResults -  Maximum number of results to include in the response. You must set MaxResults to receive a value for NextToken in the response.
+# + nextToken -  Pagination token to request the next set of results.
+# + queueNamePrefix - A string to use for filtering the list results. Only those queues whose name begins with the specified string are returned. Queue URLs and names are case-sensitive.
+public type ListQueuesConfig record {|
+   int maxResults?;
+   string nextToken?;
+   string queueNamePrefix?;
+|};
+
+# The response from the ListQueues operation.
+#
+# + queueUrls - A list of queue URLs, up to 1,000 entries, or the value of MaxResults that you sent in the request. 
+# + nextToken - Pagination token to include in the next request. Token value is null if there are no additional results to request, or if you did not set `MaxResults` in the request.
+public type ListQueuesResponse record {|
+   string[] queueUrls;
+   string nextToken?;
+|};

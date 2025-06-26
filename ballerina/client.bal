@@ -155,14 +155,29 @@ public isolated client class Client {
     # + getQueueUrlConfig - The optional parameters for retrieving the queue URL, such as `queueOwnerAWSAccountId`.
     # + return - The URL of the requested queue, or an Error
     isolated remote function getQueueUrl(string queueName, *GetQueueUrlConfig getQueueUrlConfig) 
-        returns string|Error? {
+        returns string|Error {
         return self.externGetQueueUrl(queueName,getQueueUrlConfig);
     }
 
-    isolated function externGetQueueUrl(string queueName, *GetQueueUrlConfig getQueueUrlConfig) returns  string|Error? =@java:Method {
+    isolated function externGetQueueUrl(string queueName, *GetQueueUrlConfig getQueueUrlConfig) returns  string|Error =@java:Method {
         name: "getQueueUrl",
         'class: "io.ballerina.lib.aws.sqs.NativeClientAdaptor"
     } external;
+
+    # Returns a list of your queues in the current region. The response includes a maximum of 1,000 results.
+    # If you specify a value for the optional QueueNamePrefix parameter, only queues with a name that begins with the specified value are returned.
+    #
+    # + listQueuesConfig - The optional parameters for listing queues, such as `maxResults`, `nextToken`, and `queueNamePrefix`.
+    # + return - A `ListQueuesResponse` with queue URLs and optional  `nextToken`, or an Error.
+    isolated remote function listQueues(*ListQueuesConfig listQueuesConfig) returns ListQueuesResponse|Error {
+        return self.externListQueues(listQueuesConfig);
+    }
+
+    isolated function externListQueues(*ListQueuesConfig listQueuesConfig) returns ListQueuesResponse|Error =@java:Method {
+        name: "listQueues",
+        'class: "io.ballerina.lib.aws.sqs.NativeClientAdaptor"
+    } external;
+
 
     # Gracefully closes AWS SQS API client resources
     #

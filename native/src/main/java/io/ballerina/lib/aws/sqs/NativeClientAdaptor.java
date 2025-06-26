@@ -42,6 +42,8 @@ import software.amazon.awssdk.services.sqs.model.DeleteMessageRequest;
 import software.amazon.awssdk.services.sqs.model.DeleteQueueRequest;
 import software.amazon.awssdk.services.sqs.model.GetQueueUrlRequest;
 import software.amazon.awssdk.services.sqs.model.GetQueueUrlResponse;
+import software.amazon.awssdk.services.sqs.model.ListQueuesRequest;
+import software.amazon.awssdk.services.sqs.model.ListQueuesResponse;
 import software.amazon.awssdk.services.sqs.model.ReceiveMessageRequest;
 import software.amazon.awssdk.services.sqs.model.ReceiveMessageResponse;
 import software.amazon.awssdk.services.sqs.model.SendMessageBatchRequest;
@@ -213,17 +215,34 @@ public class NativeClientAdaptor {
     public static Object getQueueUrl(Environment env, BObject bClient, BString queueName, BMap<BString, Object> bConfig) {
     SqsClient sqsClient = (SqsClient) bClient.getNativeData(NATIVE_SQS_CLIENT);
 
-    return env.yieldAndRun(() -> {
-        try {
-            GetQueueUrlRequest request = GetQueueUrlMapper.getNativeGetQueueUrlRequest(queueName, bConfig);
-            GetQueueUrlResponse response = sqsClient.getQueueUrl(request);
-            return StringUtils.fromString(response.queueUrl());
-        } catch (Exception e) {
-            String msg = "Failed to get queue URL: " + Objects.requireNonNullElse(e.getMessage(), "Unknown error");
-            return CommonUtils.createError(msg, e);
-        }
-    });
-}
+        return env.yieldAndRun(() -> {
+            try {
+                GetQueueUrlRequest request = GetQueueUrlMapper.getNativeGetQueueUrlRequest(queueName, bConfig);
+                GetQueueUrlResponse response = sqsClient.getQueueUrl(request);
+                return StringUtils.fromString(response.queueUrl());
+            } catch (Exception e) {
+                String msg = "Failed to get queue URL: " + Objects.requireNonNullElse(e.getMessage(), "Unknown error");
+                return CommonUtils.createError(msg, e);
+            }
+        });
+    }
+
+    public static Object listQueues(Environment env, BObject bClient, BMap<BString, Object> bConfig) {
+        SqsClient sqsClient = (SqsClient) bClient.getNativeData(NATIVE_SQS_CLIENT);
+
+        return env.yieldAndRun(() -> {
+            try {
+                ListQueuesRequest request = ListQueuesMapper.getNativeListQueuesRequest(bConfig);
+                ListQueuesResponse response = sqsClient.listQueues(request);
+                return ListQueuesMapper.getNativeListQueuesResponse(response);
+            } catch (Exception e) {
+                String msg = "Failed to list queues " + Objects.requireNonNullElse(e.getMessage(), "Unknown Error");
+                return CommonUtils.createError(msg, e);
+            }
+        });
+    }
+
+
 
     
 
