@@ -52,6 +52,8 @@ import software.amazon.awssdk.services.sqs.model.SendMessageBatchRequest;
 import software.amazon.awssdk.services.sqs.model.SendMessageBatchResponse;
 import software.amazon.awssdk.services.sqs.model.SendMessageRequest;
 import software.amazon.awssdk.services.sqs.model.SendMessageResponse;
+import software.amazon.awssdk.services.sqs.model.SetQueueAttributesRequest;
+import software.amazon.awssdk.services.sqs.model.SetQueueAttributesResponse;
 
 /**
  * Representation of {@link software.amazon.awssdk.services.sqs.SqsClient} with
@@ -257,6 +259,22 @@ public class NativeClientAdaptor {
                 return CommonUtils.createError(msg, e);
             }
         });
+    }
+
+    public static Object setQueueAttributes(Environment env, BObject bClient, BString queueUrl, BMap<BString, Object> bQueueAttributes) {
+        SqsClient sqsClient = (SqsClient) bClient.getNativeData(NATIVE_SQS_CLIENT);
+
+        return env.yieldAndRun(()-> {
+            try {
+                SetQueueAttributesRequest request = SetQueueAttributesMapper.getNativeSetQueueAttributesRequest(queueUrl, bQueueAttributes);
+                SetQueueAttributesResponse response = sqsClient.setQueueAttributes(request);
+                return null;
+            } catch (Exception e) {
+                String msg = "Failed to set queue attributes: " + Objects.requireNonNullElse(e.getMessage(), "Unknown Error");
+                return CommonUtils.createError(msg, e);
+            }
+        });
+
     }
 
     public static Object close(BObject bClient) {

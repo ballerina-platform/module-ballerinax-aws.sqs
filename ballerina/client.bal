@@ -193,6 +193,20 @@ public isolated client class Client {
         'class: "io.ballerina.lib.aws.sqs.NativeClientAdaptor"
     } external;
 
+    # Sets one or more attributes of the specified SQS queue.
+    # 
+    # + queueUrl - The URL of the Amazon SQS queue whose attributes are set. Queue URLs and names are case-sensitive.
+    # + queueAttributes - The optional parameters for setting queue attributes, such as `queueAttributes`.
+    # + return - `Error` on failure.
+    isolated remote function setQueueAttributes(string queueUrl, QueueAttributes queueAttributes) returns Error? {
+        return self.externSetQueueAttributes(queueUrl,queueAttributes);
+    }
+
+    isolated function externSetQueueAttributes(string queueurl, QueueAttributes queueAttributes) returns Error? = @java:Method {
+        name: "setQueueAttributes",
+        'class: "io.ballerina.lib.aws.sqs.NativeClientAdaptor"
+    } external;
+
     # Gracefully closes AWS SQS API client resources
     #
     # + return - An `Error` if there is an error while closing the client resources or else nil
