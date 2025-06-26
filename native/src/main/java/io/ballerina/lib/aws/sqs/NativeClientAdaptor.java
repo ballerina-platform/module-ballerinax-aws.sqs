@@ -25,6 +25,7 @@ import io.ballerina.runtime.api.values.BArray;
 import io.ballerina.runtime.api.values.BMap;
 import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.api.values.BString;
+
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.AwsCredentials;
 import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
@@ -38,6 +39,9 @@ import software.amazon.awssdk.services.sqs.model.CreateQueueResponse;
 import software.amazon.awssdk.services.sqs.model.DeleteMessageBatchRequest;
 import software.amazon.awssdk.services.sqs.model.DeleteMessageBatchResponse;
 import software.amazon.awssdk.services.sqs.model.DeleteMessageRequest;
+import software.amazon.awssdk.services.sqs.model.DeleteQueueRequest;
+import software.amazon.awssdk.services.sqs.model.GetQueueUrlRequest;
+import software.amazon.awssdk.services.sqs.model.GetQueueUrlResponse;
 import software.amazon.awssdk.services.sqs.model.ReceiveMessageRequest;
 import software.amazon.awssdk.services.sqs.model.ReceiveMessageResponse;
 import software.amazon.awssdk.services.sqs.model.SendMessageBatchRequest;
@@ -181,19 +185,47 @@ public class NativeClientAdaptor {
             CreateQueueRequest request = CreateQueueMapper.getNativeCreateQueueRequest(queueName, bConfig);
             CreateQueueResponse response = sqsClient.createQueue(request);
             return StringUtils.fromString(response.queueUrl());
-        } catch (Exception e) {
-            String msg = "Failed to create queue: " + Objects.requireNonNullElse(e.getMessage(), "Unknown error");
-            return CommonUtils.createError(msg, e);
-        }
-    });
+            } catch (Exception e) {
+                    String msg = "Failed to create queue: " + Objects.requireNonNullElse(e.getMessage(), "Unknown error");
+                    return CommonUtils.createError(msg, e);
+            }
+         });
 
         
     }
 
+    public static Object deleteQueue(Environment env, BObject bClient, BString queueUrl) {
+        SqsClient sqsClient = (SqsClient) bClient.getNativeData(NATIVE_SQS_CLIENT);
+
+        return env.yieldAndRun( ()-> {
+            try {
+                DeleteQueueRequest request = DeleteQueueRequest.builder()
+                    .queueUrl(queueUrl.getValue())
+                    .build();
+                sqsClient.deleteQueue(request);
+                return null;
+            } catch (Exception e) {
+                return CommonUtils.createError("Failed to delete Queue: " + e.getMessage(), e);
+            }
+        });
+    }
+
+    public static Object getQueueUrl(Environment env, BObject bClient, BString queueName, BMap<BString, Object> bConfig) {
+    SqsClient sqsClient = (SqsClient) bClient.getNativeData(NATIVE_SQS_CLIENT);
+
+    return env.yieldAndRun(() -> {
+        try {
+            GetQueueUrlRequest request = GetQueueUrlMapper.getNativeGetQueueUrlRequest(queueName, bConfig);
+            GetQueueUrlResponse response = sqsClient.getQueueUrl(request);
+            return StringUtils.fromString(response.queueUrl());
+        } catch (Exception e) {
+            String msg = "Failed to get queue URL: " + Objects.requireNonNullElse(e.getMessage(), "Unknown error");
+            return CommonUtils.createError(msg, e);
+        }
+    });
+}
+
     
-
-
-
 
     public static Object close(BObject bClient) {
         SqsClient nativeClient = (SqsClient) bClient.getNativeData(NATIVE_SQS_CLIENT);

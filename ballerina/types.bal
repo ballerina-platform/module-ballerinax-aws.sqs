@@ -395,3 +395,10 @@ public enum FifoThroughputLimit {
    PER_MESSAGE_GROUP_ID = "perMessageGroupId",
    PER_QUEUE = "perQueue"
 };
+
+# The optional parameter for the `GetQueueUrl` operation.
+#
+# + queueOwnerAWSAccountId - The AWS account ID of the account that created the queue. This is only required when you are attempting to access a queue owned by another AWS account.
+public type GetQueueUrlConfig record {| 
+   string queueOwnerAWSAccountId?;
+|};

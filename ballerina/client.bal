@@ -149,6 +149,21 @@ public isolated client class Client {
         'class: "io.ballerina.lib.aws.sqs.NativeClientAdaptor"
     } external;
 
+    # Retrieves the URL of the specified Amazon SQS queue.
+    #
+    # + queueName - The name of the queue for which you want to fetch the URL. The name can be up to 80 characters long and can include alphanumeric characters, hyphens (-), and underscores (_). Queue URLs and names are case-sensitive. 
+    # + getQueueUrlConfig - The optional parameters for retrieving the queue URL, such as `queueOwnerAWSAccountId`.
+    # + return - The URL of the requested queue, or an Error
+    isolated remote function getQueueUrl(string queueName, *GetQueueUrlConfig getQueueUrlConfig) 
+        returns string|Error? {
+        return self.externGetQueueUrl(queueName,getQueueUrlConfig);
+    }
+
+    isolated function externGetQueueUrl(string queueName, *GetQueueUrlConfig getQueueUrlConfig) returns  string|Error? =@java:Method {
+        name: "getQueueUrl",
+        'class: "io.ballerina.lib.aws.sqs.NativeClientAdaptor"
+    } external;
+
     # Gracefully closes AWS SQS API client resources
     #
     # + return - An `Error` if there is an error while closing the client resources or else nil
