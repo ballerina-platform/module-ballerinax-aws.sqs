@@ -40,6 +40,8 @@ import software.amazon.awssdk.services.sqs.model.DeleteMessageBatchRequest;
 import software.amazon.awssdk.services.sqs.model.DeleteMessageBatchResponse;
 import software.amazon.awssdk.services.sqs.model.DeleteMessageRequest;
 import software.amazon.awssdk.services.sqs.model.DeleteQueueRequest;
+import software.amazon.awssdk.services.sqs.model.GetQueueAttributesRequest;
+import software.amazon.awssdk.services.sqs.model.GetQueueAttributesResponse;
 import software.amazon.awssdk.services.sqs.model.GetQueueUrlRequest;
 import software.amazon.awssdk.services.sqs.model.GetQueueUrlResponse;
 import software.amazon.awssdk.services.sqs.model.ListQueuesRequest;
@@ -242,9 +244,20 @@ public class NativeClientAdaptor {
         });
     }
 
+    public static Object getQueueAttributes(Environment env, BObject bClient, BString queueUrl, BMap<BString, Object> bConfig) {
+        SqsClient sqsClient = (SqsClient) bClient.getNativeData(NATIVE_SQS_CLIENT);
 
-
-    
+        return env.yieldAndRun(() -> {
+            try {
+                GetQueueAttributesRequest request = GetQueueAttributesMapper.getNativeGetQueueAttributesRequest(queueUrl, bConfig);
+                GetQueueAttributesResponse response = sqsClient.getQueueAttributes(request);
+                return GetQueueAttributesMapper.getNativeGetQueueAttributesResponse(response);
+            } catch (Exception e) {
+                String msg = "Failed to get queue attributes: " + Objects.requireNonNullElse(e.getMessage(), "Unknown error");
+                return CommonUtils.createError(msg, e);
+            }
+        });
+    }
 
     public static Object close(BObject bClient) {
         SqsClient nativeClient = (SqsClient) bClient.getNativeData(NATIVE_SQS_CLIENT);

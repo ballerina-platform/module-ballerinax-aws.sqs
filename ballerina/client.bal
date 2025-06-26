@@ -178,6 +178,20 @@ public isolated client class Client {
         'class: "io.ballerina.lib.aws.sqs.NativeClientAdaptor"
     } external;
 
+    #Retrieves the attributes of the specified Amazon SQS queue.
+    #  
+    # + queueUrl - The URL of the Amazon SQS queue whose attribute information is retrieved. Queue URLs and names are case-sensitive.
+    # + getQueueAttributesConfig - The optional parameters for retrieving queue attributes, such as `attributeNames`.
+    # + return - A `GetQueueAttributesResponse` containing the queue attributes or an Error.
+    isolated remote function getQueueAttributes(string queueUrl, *GetQueueAttributesConfig getQueueAttributesConfig)
+        returns GetQueueAttributesResponse|Error {
+        return self.externgetQueueAttributes(queueUrl, getQueueAttributesConfig);
+    }
+
+    isolated function externgetQueueAttributes(string queueurl, *GetQueueAttributesConfig getQueueAttributesConfig) returns GetQueueAttributesResponse|Error =@java:Method {
+        name: "getQueueAttributes",
+        'class: "io.ballerina.lib.aws.sqs.NativeClientAdaptor"
+    } external;
 
     # Gracefully closes AWS SQS API client resources
     #
