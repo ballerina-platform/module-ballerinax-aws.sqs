@@ -32,7 +32,6 @@ isolated function testCreateFifoQueue() returns error? {
     }
 }
 
-
 @test:Config {
     groups: ["createQueue"]
 }
@@ -43,7 +42,7 @@ isolated function testCreateQueueWithInvalidName() returns error? {
     if result is error {
         ErrorDetails details = result.detail();
         test:assertEquals(details.errorCode, "InvalidParameterValue");
-        test:assertEquals(details.httpStatusCode,400);
+        test:assertEquals(details.httpStatusCode, 400);
         test:assertEquals(details.errorMessage, "Can only include alphanumeric characters, hyphens, or underscores. 1 to 80 in length");
     }
 }
@@ -63,7 +62,7 @@ isolated function testCreateQueueWithAttributes() returns error? {
             redrivePolicy: {
                 deadLetterTargetArn: "arn:aws:sqs:eu-north-1:284495578152:standard-test-queue",
                 maxReceiveCount: 4
-                },
+            },
             sqsManagedSseEnabled: true,
             redriveAllowPolicy: {
                 redrivePermission: "byQueue",

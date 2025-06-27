@@ -1,7 +1,6 @@
 import ballerina/os;
 import ballerina/test;
 
-
 final string accessKeyId = os:getEnv("BALLERINA_AWS_TEST_ACCESS_KEY_ID");
 final string secretAccessKey = os:getEnv("BALLERINA_AWS_TEST_SECRET_ACCESS_KEY");
 

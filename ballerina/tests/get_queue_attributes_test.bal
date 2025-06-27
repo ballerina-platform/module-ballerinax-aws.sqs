@@ -1,5 +1,5 @@
-import ballerina/test;
 import ballerina/io;
+import ballerina/test;
 
 @test:Config {
     groups: ["getQueueAttributes"]
@@ -31,7 +31,7 @@ isolated function testGetQueueAttributesWithoutConfig() returns error? {
 isolated function testGetQueueAttributesWithSomeAttributes() returns error? {
 
     GetQueueAttributesConfig config = {
-        attributeNames: [MAXIMUM_MESSAGE_SIZE, REDRIVE_ALLOW_POLICY,REDRIVE_POLICY]  
+        attributeNames: [MAXIMUM_MESSAGE_SIZE, REDRIVE_ALLOW_POLICY, REDRIVE_POLICY]
     };
     GetQueueAttributesResponse|Error result = sqsClient->getQueueAttributes("https://sqs.eu-north-1.amazonaws.com/284495578152/attr-test-queue-1", config);
     io:println(result);
@@ -44,5 +44,5 @@ isolated function testGetQueueAttributesWithSomeAttributes() returns error? {
         test:assertEquals(detail.errorCode, "InvalidAttributeName");
         test:assertEquals(detail.errorMessage, "Unknown Attribute FifoQueue.");
         test:assertEquals(detail.httpStatusCode, 400);
-    }    
+    }
 }

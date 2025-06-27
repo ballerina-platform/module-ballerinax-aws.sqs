@@ -1,5 +1,5 @@
-import ballerina/test;
 import ballerina/io;
+import ballerina/test;
 
 @test:Config {
     groups: ["listQueues"]
@@ -14,26 +14,26 @@ isolated function testListQueues() returns error? {
     groups: ["listQueues"]
 }
 isolated function testListQueuesWithPrefix() returns error? {
-    
+
     ListQueuesConfig config = {
         queueNamePrefix: "attr"
-        };
+    };
 
     ListQueuesResponse|Error result = sqsClient->listQueues(config);
-    io:print(result);     
+    io:print(result);
 }
 
 @test:Config {
     groups: ["listQueues"]
 }
 isolated function testListQueuesWithMaxResult() returns error? {
-    
+
     ListQueuesConfig config = {
         maxResults: 3
-        };
+    };
 
     ListQueuesResponse|Error result = sqsClient->listQueues(config);
-    io:print(result); 
+    io:print(result);
 
 }
 
@@ -41,7 +41,7 @@ isolated function testListQueuesWithMaxResult() returns error? {
     groups: ["listQueues"]
 }
 isolated function testListQueuesPagination() returns error? {
-    
+
     ListQueuesConfig config1 = {
         maxResults: 2
     };

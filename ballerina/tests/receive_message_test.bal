@@ -1,5 +1,5 @@
-import ballerina/test;
 import ballerina/io;
+import ballerina/test;
 
 @test:Config {
     groups: ["receiveMessage"]
@@ -37,7 +37,6 @@ isolated function testReceiveMessageWithMultiplemessages() returns error? {
         }
     }
 }
-
 
 @test:Config {
     groups: ["receiveMessage"]
@@ -91,9 +90,4 @@ isolated function testReceiveMessageWithAllOptionalConfigs() returns error? {
         test:assertTrue(result.length() >= 0);
     }
 }
-
-
-
-
-
 

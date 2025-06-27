@@ -33,7 +33,7 @@ isolated function testDeleteMessageWithInvalidReceiptHandle() returns error? {
     string fakeReceiptHandle = "InvalidReceiptHandle123";
 
     Error? deleteResult = sqsClient->deleteMessage(queueUrl, fakeReceiptHandle);
-    
+
     test:assertTrue(deleteResult is Error);
     if deleteResult is error {
         ErrorDetails details = deleteResult.detail();
@@ -41,10 +41,4 @@ isolated function testDeleteMessageWithInvalidReceiptHandle() returns error? {
         test:assertEquals(details.errorCode, "ReceiptHandleIsInvalid");
     }
 }
-
-
-
-
-
-
 

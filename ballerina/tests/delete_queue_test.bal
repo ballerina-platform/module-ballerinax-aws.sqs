@@ -21,6 +21,6 @@ isolated function testDeleteNonExistentQueue() returns error? {
         ErrorDetails detais = result.detail();
         test:assertEquals(detais.errorCode, "AWS.SimpleQueueService.NonExistentQueue");
         test:assertEquals(detais.httpStatusCode, 400);
-        test:assertEquals(detais.errorMessage,"The specified queue does not exist.");
+        test:assertEquals(detais.errorMessage, "The specified queue does not exist.");
     }
 }

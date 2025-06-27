@@ -34,7 +34,7 @@ isolated function testSendMessageWithAttributes() returns error? {
     };
     SendMessageResponse|Error result = sqsClient->sendMessage(queueUrl, message, sendMessageConfig);
     if result is SendMessageResponse {
-        test:assertNotEquals(result.messageId, "", msg = "MessageId should not be empty");   
+        test:assertNotEquals(result.messageId, "", msg = "MessageId should not be empty");
     } else {
         test:assertFail("sendMessage with attributes failed: " + result.toString());
     }
@@ -83,7 +83,7 @@ isolated function testSendMessageWithDeduplicationAndGroupId() returns error? {
     SendMessageConfig sendMessageConfig = {
         messageDeduplicationId: "dedup-id-123",
         messageGroupId: "group-id-456"
-    };  
+    };
     SendMessageResponse|Error result = sqsClient->sendMessage(queueUrl, message, sendMessageConfig);
     if result is SendMessageResponse {
         test:assertNotEquals(result.messageId, "", msg = "MessageId should not be empty");
@@ -96,7 +96,7 @@ isolated function testSendMessageWithDeduplicationAndGroupId() returns error? {
     groups: ["sendMessage"]
 }
 isolated function testSendMessageToNonexistentQueue() returns error? {
-    string queueUrl = "https://sqs.eu-north-1.amazonaws.com/284495578152/InvalidQueue"; 
+    string queueUrl = "https://sqs.eu-north-1.amazonaws.com/284495578152/InvalidQueue";
     string message = "Hello, queue!";
     SendMessageConfig sendMessageConfig = {};
 
@@ -111,7 +111,6 @@ isolated function testSendMessageToNonexistentQueue() returns error? {
     }
 }
 
-
 @test:Config {
     groups: ["sendMessage"]
 }
@@ -125,9 +124,8 @@ isolated function testSendMessageWithEmptyMessageBody() returns error? {
         test:assertEquals(details.httpStatusCode, 400);
         test:assertEquals(details.errorCode, "MissingParameter");
         test:assertEquals(details.errorMessage, "The request must contain the parameter MessageBody.");
-    }   
+    }
 }
-
 
 @test:Config {
     groups: ["sendMessage"]
@@ -145,8 +143,8 @@ isolated function testSendMessageWithInvalidDelay() returns error? {
         test:assertEquals(details.httpStatusCode, 400);
         test:assertEquals(details.errorCode, "InvalidParameterValue");
         test:assertEquals(details.errorMessage, "Value -1 for parameter DelaySeconds is invalid. Reason: DelaySeconds must be >= 0 and <= 900.");
-    } 
-        
+    }
+
 }
 
 @test:Config {
@@ -165,7 +163,7 @@ isolated function testSendMessageWithExcessiveDelay() returns error? {
         test:assertEquals(details.httpStatusCode, 400);
         test:assertEquals(details.errorCode, "InvalidParameterValue");
         test:assertEquals(details.errorMessage, "Value 1000 for parameter DelaySeconds is invalid. Reason: DelaySeconds must be >= 0 and <= 900.");
-    }   
+    }
 }
 
 @test:Config {
@@ -181,7 +179,7 @@ isolated function testSendMessageWithInvalidAttributes() returns error? {
                 stringValue: "value"
             }
         }
-    };  
+    };
     SendMessageResponse|Error result = sqsClient->sendMessage(queueUrl, message, sendMessageConfig);
     test:assertTrue(result is Error);
     if result is error {
@@ -189,7 +187,7 @@ isolated function testSendMessageWithInvalidAttributes() returns error? {
         test:assertEquals(details.httpStatusCode, 400);
         test:assertEquals(details.errorCode, "InvalidParameterValue");
         test:assertEquals(details.errorMessage, "The type of message (user) attribute 'invalidAttribute' is invalid. " +
-        "You must use only the following supported type prefixes: Binary, Number, String.");
+                "You must use only the following supported type prefixes: Binary, Number, String.");
     }
 }
 
@@ -200,7 +198,7 @@ isolated function testSendMessageWithEmptyAttributes() returns error? {
     string queueUrl = "https://sqs.eu-north-1.amazonaws.com/284495578152/TestQueue";
     string message = "This should succeed with empty attributes";
     SendMessageConfig sendMessageConfig = {
-        messageAttributes: {}  
+        messageAttributes: {}
     };
     SendMessageResponse|Error result = sqsClient->sendMessage(queueUrl, message, sendMessageConfig);
     if result is SendMessageResponse {
@@ -226,8 +224,5 @@ isolated function testSendMessageWithNilAttributes() returns error? {
         test:assertFail("sendMessage with null attributes failed: " + result.toString());
     }
 }
-
-
-        
 
 //TODO : testSendMessagewithExceedsSize
