@@ -16,7 +16,7 @@
  * under the License.
  */
 
- package io.ballerina.lib.aws.sqs;
+package io.ballerina.lib.aws.sqs;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -31,7 +31,7 @@ import software.amazon.awssdk.services.sqs.model.SendMessageResponse;
 
 public final class SendMessageMapper {
 
-    //Constants related to `SendmessageResponse`
+    // Constants related to `SendmessageResponse`
     private static final String SEND_MESSAGE_RESPONSE = "SendMessageResponse";
     private static final BString MESSAGE_ID = StringUtils.fromString("messageId");
     private static final BString MD5_OF_BODY = StringUtils.fromString("md5OfMessageBody");
@@ -46,35 +46,35 @@ public final class SendMessageMapper {
     private static final BString MESSAGE_DEDUPLICATION_ID = StringUtils.fromString("messageDeduplicationId");
     private static final BString MESSAGE_GROUP_ID = StringUtils.fromString("messageGroupId");
 
-   private SendMessageMapper() {
+    private SendMessageMapper() {
 
-   }
- 
+    }
+
     @SuppressWarnings("unchecked")
-    public static SendMessageRequest getNativeSendMessageRequest(BString queueUrl, BString messageBody, 
-        BMap<BString, Object> sendMessageConfig) throws Exception {
+    public static SendMessageRequest getNativeSendMessageRequest(BString queueUrl, BString messageBody,
+            BMap<BString, Object> sendMessageConfig) throws Exception {
 
-    SendMessageRequest.Builder builder = SendMessageRequest.builder()
-            .queueUrl(queueUrl.getValue())
-            .messageBody(messageBody.getValue());
-    
-    if (sendMessageConfig.containsKey(DELAY_SECONDS)) {
+        SendMessageRequest.Builder builder = SendMessageRequest.builder()
+                .queueUrl(queueUrl.getValue())
+                .messageBody(messageBody.getValue());
+
+        if (sendMessageConfig.containsKey(DELAY_SECONDS)) {
             builder.delaySeconds(((Long) sendMessageConfig.get(DELAY_SECONDS)).intValue());
         }
-    if (sendMessageConfig.containsKey(MESSAGE_DEDUPLICATION_ID)) {
+        if (sendMessageConfig.containsKey(MESSAGE_DEDUPLICATION_ID)) {
             builder.messageDeduplicationId(sendMessageConfig.getStringValue(MESSAGE_DEDUPLICATION_ID).getValue());
         }
-    if (sendMessageConfig.containsKey(MESSAGE_GROUP_ID)) {
+        if (sendMessageConfig.containsKey(MESSAGE_GROUP_ID)) {
             builder.messageGroupId(sendMessageConfig.getStringValue(MESSAGE_GROUP_ID).getValue());
         }
-    if (sendMessageConfig.containsKey(AWS_TRACE_HEADER)) {
+        if (sendMessageConfig.containsKey(AWS_TRACE_HEADER)) {
             builder.messageAttributes(Map.of("AWSTraceHeader",
                     MessageAttributeValue.builder()
                             .dataType("String")
                             .stringValue(sendMessageConfig.getStringValue(AWS_TRACE_HEADER).getValue())
                             .build()));
         }
-    if (sendMessageConfig.containsKey(MESSAGE_ATTRIBUTES)) {
+        if (sendMessageConfig.containsKey(MESSAGE_ATTRIBUTES)) {
             BMap<BString, Object> attrs = (BMap<BString, Object>) sendMessageConfig.get(MESSAGE_ATTRIBUTES);
             Map<String, MessageAttributeValue> attrMap = new HashMap<>();
             for (Object key : attrs.getKeys()) {
@@ -89,11 +89,10 @@ public final class SendMessageMapper {
             builder.messageAttributes(attrMap);
         }
         return builder.build();
-    
-}
 
+    }
 
-public static BMap<BString, Object> getNativeSendMessageResponse(SendMessageResponse response) {
+    public static BMap<BString, Object> getNativeSendMessageResponse(SendMessageResponse response) {
         BMap<BString, Object> result = ValueCreator.createRecordValue(
                 ModuleUtils.getModule(), SEND_MESSAGE_RESPONSE);
         result.put(MESSAGE_ID, StringUtils.fromString(response.messageId()));
@@ -110,4 +109,4 @@ public static BMap<BString, Object> getNativeSendMessageResponse(SendMessageResp
         return result;
     }
 
- }
+}

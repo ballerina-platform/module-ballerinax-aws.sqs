@@ -31,9 +31,9 @@ import software.amazon.awssdk.awscore.exception.AwsErrorDetails;
 import software.amazon.awssdk.awscore.exception.AwsServiceException;
 import software.amazon.awssdk.http.SdkHttpResponse;
 
-
- /**
- * {@code CommonUtils} Contains the common utility functions for the Ballerina AWS SQS Client
+/**
+ * {@code CommonUtils} Contains the common utility functions for the Ballerina
+ * AWS SQS Client
  */
 
 public final class CommonUtils {
@@ -46,14 +46,9 @@ public final class CommonUtils {
     private static final BString ERROR_DETAILS_ERROR_CODE = StringUtils.fromString("errorCode");
     private static final BString ERROR_DETAILS_ERROR_MESSAGE = StringUtils.fromString("errorMessage");
 
-
-
-
-
     private CommonUtils() {
     }
 
-    
     public static BError createError(String message, Throwable exception) {
         BError cause = ErrorCreator.createError(exception);
         BMap<BString, Object> errorDetails = ValueCreator.createRecordValue(
@@ -74,12 +69,4 @@ public final class CommonUtils {
                 ModuleUtils.getModule(), ERROR, StringUtils.fromString(message), cause, errorDetails);
     }
 
-    
-
-
-
-
-
-
 }
-

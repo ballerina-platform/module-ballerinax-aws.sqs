@@ -16,7 +16,7 @@
  * under the License.
  */
 
- package io.ballerina.lib.aws.sqs;
+package io.ballerina.lib.aws.sqs;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -50,61 +50,61 @@ public class ReceiveMessageMapper {
     private static final BString MD5_OF_BODY = StringUtils.fromString("md5OfMessageBody");
 
     private ReceiveMessageMapper() {
-        
+
     }
 
-    public static ReceiveMessageRequest getNativeReceiveMessageRequest(BString queueUrl, BMap<BString, Object> receiveMessageConfig) {
-    ReceiveMessageRequest.Builder builder = ReceiveMessageRequest.builder()
-            .queueUrl(queueUrl.getValue());
+    public static ReceiveMessageRequest getNativeReceiveMessageRequest(BString queueUrl,
+            BMap<BString, Object> receiveMessageConfig) {
+        ReceiveMessageRequest.Builder builder = ReceiveMessageRequest.builder()
+                .queueUrl(queueUrl.getValue());
 
-    if (receiveMessageConfig.containsKey(WAIT_TIME_SECONDS)) {
-        builder.waitTimeSeconds(((Long) receiveMessageConfig.get(WAIT_TIME_SECONDS)).intValue());
-    }
-    if (receiveMessageConfig.containsKey(VISIBILITY_TIMEOUT)) {
-        builder.visibilityTimeout(((Long) receiveMessageConfig.get(VISIBILITY_TIMEOUT)).intValue());
-    }
-    if (receiveMessageConfig.containsKey(MAX_NUMBER_OF_MESSAGES)) {
-        builder.maxNumberOfMessages(((Long) receiveMessageConfig.get(MAX_NUMBER_OF_MESSAGES)).intValue());
-    }
-    if (receiveMessageConfig.containsKey(RECEIVE_REQUEST_ATTEMPT_ID)) {
-        builder.receiveRequestAttemptId(receiveMessageConfig.getStringValue(RECEIVE_REQUEST_ATTEMPT_ID).getValue());
-    }
-    if (receiveMessageConfig.containsKey(MESSAGE_ATTRIBUTE_NAMES)) {
-        BArray attrNamesArr = (BArray) receiveMessageConfig.get(MESSAGE_ATTRIBUTE_NAMES);
-        List<String> attrNames = new ArrayList<>();
-        for (int i = 0; i < attrNamesArr.size(); i++) {
-            attrNames.add(attrNamesArr.getBString(i).getValue());
+        if (receiveMessageConfig.containsKey(WAIT_TIME_SECONDS)) {
+            builder.waitTimeSeconds(((Long) receiveMessageConfig.get(WAIT_TIME_SECONDS)).intValue());
         }
-        builder.messageAttributeNames(attrNames);
+        if (receiveMessageConfig.containsKey(VISIBILITY_TIMEOUT)) {
+            builder.visibilityTimeout(((Long) receiveMessageConfig.get(VISIBILITY_TIMEOUT)).intValue());
+        }
+        if (receiveMessageConfig.containsKey(MAX_NUMBER_OF_MESSAGES)) {
+            builder.maxNumberOfMessages(((Long) receiveMessageConfig.get(MAX_NUMBER_OF_MESSAGES)).intValue());
+        }
+        if (receiveMessageConfig.containsKey(RECEIVE_REQUEST_ATTEMPT_ID)) {
+            builder.receiveRequestAttemptId(receiveMessageConfig.getStringValue(RECEIVE_REQUEST_ATTEMPT_ID).getValue());
+        }
+        if (receiveMessageConfig.containsKey(MESSAGE_ATTRIBUTE_NAMES)) {
+            BArray attrNamesArr = (BArray) receiveMessageConfig.get(MESSAGE_ATTRIBUTE_NAMES);
+            List<String> attrNames = new ArrayList<>();
+            for (int i = 0; i < attrNamesArr.size(); i++) {
+                attrNames.add(attrNamesArr.getBString(i).getValue());
+            }
+            builder.messageAttributeNames(attrNames);
+        }
+        if (receiveMessageConfig.containsKey(MESSAGE_SYSTEM_ATTRIBUTE_NAMES)) {
+            BArray sysAttrNamesArr = (BArray) receiveMessageConfig.get(MESSAGE_SYSTEM_ATTRIBUTE_NAMES);
+            List<String> sysAttrNames = new ArrayList<>();
+            for (int i = 0; i < sysAttrNamesArr.size(); i++) {
+                sysAttrNames.add(sysAttrNamesArr.getBString(i).getValue());
+            }
+            builder.messageAttributeNames(sysAttrNames);
+        }
+        return builder.build();
     }
-    if (receiveMessageConfig.containsKey(MESSAGE_SYSTEM_ATTRIBUTE_NAMES)) {
-    BArray sysAttrNamesArr = (BArray) receiveMessageConfig.get(MESSAGE_SYSTEM_ATTRIBUTE_NAMES);
-    List<String> sysAttrNames = new ArrayList<>();
-    for (int i = 0; i < sysAttrNamesArr.size(); i++) {
-        sysAttrNames.add(sysAttrNamesArr.getBString(i).getValue());
-    }
-    builder.messageAttributeNames(sysAttrNames);
-}
-    return builder.build();
-}
 
-public static BArray getNativeReceiveMessageResponse(ReceiveMessageResponse response) {
-    List<Message> messages = response.messages();
-    Type recordType = ValueCreator.createRecordValue(ModuleUtils.getModule(), MESSAGE_RECORD).getType();
-    BArray resultArr = ValueCreator.createArrayValue(TypeCreator.createArrayType(recordType));
+    public static BArray getNativeReceiveMessageResponse(ReceiveMessageResponse response) {
+        List<Message> messages = response.messages();
+        Type recordType = ValueCreator.createRecordValue(ModuleUtils.getModule(), MESSAGE_RECORD).getType();
+        BArray resultArr = ValueCreator.createArrayValue(TypeCreator.createArrayType(recordType));
 
-    int i = 0;
-    for (Message msg : messages) {
-        BMap<BString, Object> msgRecord = ValueCreator.createRecordValue(ModuleUtils.getModule(), MESSAGE_RECORD);
-        msgRecord.put(BODY, StringUtils.fromString(msg.body()));
-        msgRecord.put(MD5_OF_BODY, StringUtils.fromString(msg.md5OfBody()));
-        msgRecord.put(MD5_OF_MESSAGE_ATTRIBUTES, StringUtils.fromString(msg.md5OfMessageAttributes()));
-        msgRecord.put(MESSAGE_ID, StringUtils.fromString(msg.messageId()));
-        msgRecord.put(RECEIPT_HANDLE, StringUtils.fromString(msg.receiptHandle()));
-        resultArr.add(i++, msgRecord);
+        int i = 0;
+        for (Message msg : messages) {
+            BMap<BString, Object> msgRecord = ValueCreator.createRecordValue(ModuleUtils.getModule(), MESSAGE_RECORD);
+            msgRecord.put(BODY, StringUtils.fromString(msg.body()));
+            msgRecord.put(MD5_OF_BODY, StringUtils.fromString(msg.md5OfBody()));
+            msgRecord.put(MD5_OF_MESSAGE_ATTRIBUTES, StringUtils.fromString(msg.md5OfMessageAttributes()));
+            msgRecord.put(MESSAGE_ID, StringUtils.fromString(msg.messageId()));
+            msgRecord.put(RECEIPT_HANDLE, StringUtils.fromString(msg.receiptHandle()));
+            resultArr.add(i++, msgRecord);
+        }
+        return resultArr;
     }
-    return resultArr;
+
 }
- 
-    
- }

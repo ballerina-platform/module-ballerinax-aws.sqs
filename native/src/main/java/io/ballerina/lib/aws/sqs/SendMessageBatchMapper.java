@@ -16,7 +16,6 @@
  * under the License.
  */
 
-
 package io.ballerina.lib.aws.sqs;
 
 import java.util.ArrayList;
@@ -47,7 +46,7 @@ public class SendMessageBatchMapper {
     private static final BString CODE = StringUtils.fromString("code");
     private static final BString SENDER_FAULT = StringUtils.fromString("senderFault");
     private static final BString MESSAGE = StringUtils.fromString("message");
-     private static final BString MESSAGE_ID = StringUtils.fromString("messageId");
+    private static final BString MESSAGE_ID = StringUtils.fromString("messageId");
     private static final BString MD5_OF_BODY = StringUtils.fromString("md5OfMessageBody");
     private static final BString MD5_OF_ATTRIBUTES = StringUtils.fromString("md5OfMessageAttributes");
     private static final BString MD5_OF_SYS_ATTRIBUTES = StringUtils.fromString("md5OfMessageSystemAttributes");
@@ -59,8 +58,8 @@ public class SendMessageBatchMapper {
     private static final BString MESSAGE_GROUP_ID = StringUtils.fromString("messageGroupId");
     private static final BString BODY = StringUtils.fromString("body");
 
-    private SendMessageBatchMapper(){
-        
+    private SendMessageBatchMapper() {
+
     }
 
     @SuppressWarnings("unchecked")
@@ -111,10 +110,13 @@ public class SendMessageBatchMapper {
     }
 
     public static BMap<BString, Object> getNativeSendMessageBatchResponse(SendMessageBatchResponse response) {
-        Type sendMessageBatchResultEntryType = ValueCreator.createRecordValue(ModuleUtils.getModule(), "SendMessageBatchResultEntry").getType();
-        BArray successfulArr = ValueCreator.createArrayValue(TypeCreator.createArrayType(sendMessageBatchResultEntryType));
+        Type sendMessageBatchResultEntryType = ValueCreator
+                .createRecordValue(ModuleUtils.getModule(), "SendMessageBatchResultEntry").getType();
+        BArray successfulArr = ValueCreator
+                .createArrayValue(TypeCreator.createArrayType(sendMessageBatchResultEntryType));
         for (SendMessageBatchResultEntry entry : response.successful()) {
-            BMap<BString, Object> entryRecord = ValueCreator.createRecordValue(ModuleUtils.getModule(), "SendMessageBatchResultEntry");
+            BMap<BString, Object> entryRecord = ValueCreator.createRecordValue(ModuleUtils.getModule(),
+                    "SendMessageBatchResultEntry");
             entryRecord.put(ID, StringUtils.fromString(entry.id()));
             entryRecord.put(MD5_OF_BODY, StringUtils.fromString(entry.md5OfMessageBody()));
             entryRecord.put(MESSAGE_ID, StringUtils.fromString(entry.messageId()));
@@ -130,11 +132,13 @@ public class SendMessageBatchMapper {
             successfulArr.append(entryRecord);
         }
 
-        Type batchResultErrorEntryType = ValueCreator.createRecordValue(ModuleUtils.getModule(), "BatchResultErrorEntry").getType();
+        Type batchResultErrorEntryType = ValueCreator
+                .createRecordValue(ModuleUtils.getModule(), "BatchResultErrorEntry").getType();
         BArray failedArr = ValueCreator.createArrayValue(TypeCreator.createArrayType(batchResultErrorEntryType));
 
         for (BatchResultErrorEntry entry : response.failed()) {
-            BMap<BString, Object> entryRecord = ValueCreator.createRecordValue(ModuleUtils.getModule(), "BatchResultErrorEntry");
+            BMap<BString, Object> entryRecord = ValueCreator.createRecordValue(ModuleUtils.getModule(),
+                    "BatchResultErrorEntry");
             entryRecord.put(ID, StringUtils.fromString(entry.id()));
             entryRecord.put(CODE, StringUtils.fromString(entry.code()));
             entryRecord.put(SENDER_FAULT, entry.senderFault());
@@ -144,11 +148,11 @@ public class SendMessageBatchMapper {
             failedArr.append(entryRecord);
         }
 
-        BMap<BString, Object> result = ValueCreator.createRecordValue(ModuleUtils.getModule(), SEND_MESSAGE_BATCH_RESPONSE);
+        BMap<BString, Object> result = ValueCreator.createRecordValue(ModuleUtils.getModule(),
+                SEND_MESSAGE_BATCH_RESPONSE);
         result.put(SUCCESSFUL, successfulArr);
         result.put(FAILED, failedArr);
         return result;
     }
 
-    
 }

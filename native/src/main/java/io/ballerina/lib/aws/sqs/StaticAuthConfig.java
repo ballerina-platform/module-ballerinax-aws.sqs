@@ -44,8 +44,7 @@ public record StaticAuthConfig(String accessKeyId, String secretAccessKey, Strin
         this(
                 bAuthConfig.getStringValue(AWS_ACCESS_KEY_ID).getValue(),
                 bAuthConfig.getStringValue(AWS_SECRET_ACCESS_KEY).getValue(),
-                bAuthConfig.containsKey(AWS_SESSION_TOKEN) ?
-                        bAuthConfig.getStringValue(AWS_SESSION_TOKEN).getValue() : null
-        );
+                bAuthConfig.containsKey(AWS_SESSION_TOKEN) ? bAuthConfig.getStringValue(AWS_SESSION_TOKEN).getValue()
+                        : null);
     }
 }

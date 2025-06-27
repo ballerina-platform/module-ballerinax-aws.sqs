@@ -41,8 +41,7 @@ public record ConnectionConfig(Region region, Object authConfig) {
     public ConnectionConfig(BMap<BString, Object> bConnectionConfig) {
         this(
                 getRegion(bConnectionConfig),
-                getAuthConfig(bConnectionConfig)
-        );
+                getAuthConfig(bConnectionConfig));
     }
 
     private static Region getRegion(BMap<BString, Object> bConnectionConfig) {
@@ -59,5 +58,4 @@ public record ConnectionConfig(Region region, Object authConfig) {
         return new InstanceProfileCredentials(bAuthConfig);
     }
 
-   
 }

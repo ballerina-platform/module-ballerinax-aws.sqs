@@ -16,17 +16,15 @@ import software.amazon.awssdk.services.sqs.model.QueueAttributeName;
 
 public class GetQueueAttributesMapper {
 
-
     private static final BString ATTRIBUTE_NAMES = StringUtils.fromString("attributeNames");
     private static final String GET_QUEUE_ATTRIBUTES_RESPONSE = "GetQueueAttributesResponse";
     private static final BString QUEUE_ATTRIBUTES = StringUtils.fromString("queueAttributes");
-    
 
+    private GetQueueAttributesMapper() {
+    }
 
-
-    private GetQueueAttributesMapper() {}
-
-    public static GetQueueAttributesRequest getNativeGetQueueAttributesRequest(BString queueUrl, BMap<BString, Object> bGetQueueAttributesConfig) {
+    public static GetQueueAttributesRequest getNativeGetQueueAttributesRequest(BString queueUrl,
+            BMap<BString, Object> bGetQueueAttributesConfig) {
         GetQueueAttributesRequest.Builder builder = GetQueueAttributesRequest.builder().queueUrl(queueUrl.getValue());
 
         if (bGetQueueAttributesConfig != null && bGetQueueAttributesConfig.containsKey(ATTRIBUTE_NAMES)) {
@@ -34,7 +32,7 @@ public class GetQueueAttributesMapper {
 
             if (attributenamesArray != null) {
                 List<QueueAttributeName> attrNames = new ArrayList<>();
-                for (int i =0; i < attributenamesArray.size(); i++) {
+                for (int i = 0; i < attributenamesArray.size(); i++) {
                     Object val = attributenamesArray.get(i);
                     if (val instanceof BString) {
                         String attrNameStr = ((BString) val).getValue();
@@ -46,24 +44,25 @@ public class GetQueueAttributesMapper {
                 }
                 if (!attrNames.isEmpty()) {
                     builder.attributeNames(attrNames);
-                }                
-            }            
+                }
+            }
         }
         return builder.build();
     }
 
     public static BMap<BString, Object> getNativeGetQueueAttributesResponse(GetQueueAttributesResponse response) {
-        BMap<BString, Object> result = ValueCreator.createRecordValue(ModuleUtils.getModule(), GET_QUEUE_ATTRIBUTES_RESPONSE);
-        Map<QueueAttributeName,String> attrs = response.attributes();
+        BMap<BString, Object> result = ValueCreator.createRecordValue(ModuleUtils.getModule(),
+                GET_QUEUE_ATTRIBUTES_RESPONSE);
+        Map<QueueAttributeName, String> attrs = response.attributes();
         BMap<BString, Object> attrMap = ValueCreator.createMapValue();
         if (attrs != null) {
             for (Entry<QueueAttributeName, String> entry : attrs.entrySet()) {
-                attrMap.put(StringUtils.fromString(entry.getKey().toString()), StringUtils.fromString(entry.getValue()));
+                attrMap.put(StringUtils.fromString(entry.getKey().toString()),
+                        StringUtils.fromString(entry.getValue()));
             }
         }
         result.put(QUEUE_ATTRIBUTES, attrMap);
         return result;
     }
-
 
 }

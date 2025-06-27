@@ -7,8 +7,9 @@ import software.amazon.awssdk.services.sqs.model.GetQueueUrlRequest;
 
 public class GetQueueUrlMapper {
     private static final BString QUEUE_OWNER_AWS_ACCOUNT_ID = StringUtils.fromString("queueOwnerAWSAccountId");
-    
-    private GetQueueUrlMapper() {}
+
+    private GetQueueUrlMapper() {
+    }
 
     public static GetQueueUrlRequest getNativeGetQueueUrlRequest(BString queueName, BMap<BString, Object> bConfig) {
         GetQueueUrlRequest.Builder builder = GetQueueUrlRequest.builder().queueName(queueName.getValue());

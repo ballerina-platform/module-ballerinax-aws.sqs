@@ -19,11 +19,12 @@ public class ListQueuesMapper {
     private static final BString QUEUE_NAME_PREFIX = StringUtils.fromString("queueNamePrefix");
     private static final String LIST_QUEUES_RESPONSE = "ListQueuesResponse";
     private static final BString QUEUE_URLS = StringUtils.fromString("queueUrls");
-    
 
-    private ListQueuesMapper() {}
+    private ListQueuesMapper() {
+    }
 
-    public static ListQueuesRequest getNativeListQueuesRequest (BMap<BString, Object> listQueuesConfig) throws Exception {
+    public static ListQueuesRequest getNativeListQueuesRequest(BMap<BString, Object> listQueuesConfig)
+            throws Exception {
         ListQueuesRequest.Builder builder = ListQueuesRequest.builder();
         if (listQueuesConfig != null) {
             if (listQueuesConfig.containsKey(MAX_RESULTS)) {
@@ -35,7 +36,8 @@ public class ListQueuesMapper {
             if (listQueuesConfig.containsKey(QUEUE_NAME_PREFIX)) {
                 builder.queueNamePrefix(listQueuesConfig.getStringValue(QUEUE_NAME_PREFIX).getValue());
             }
-        } return builder.build();
+        }
+        return builder.build();
     }
 
     public static BMap<BString, Object> getNativeListQueuesResponse(ListQueuesResponse response) {
@@ -48,13 +50,12 @@ public class ListQueuesMapper {
             }
         }
         result.put(QUEUE_URLS, urlsArray);
-        
+
         if (response.nextToken() != null) {
             result.put(NEXT_TOKEN, StringUtils.fromString(response.nextToken()));
         }
         return result;
 
     }
-
 
 }

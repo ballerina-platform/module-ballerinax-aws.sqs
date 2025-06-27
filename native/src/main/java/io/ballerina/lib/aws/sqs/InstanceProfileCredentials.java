@@ -23,12 +23,15 @@ import io.ballerina.runtime.api.values.BMap;
 import io.ballerina.runtime.api.values.BString;
 
 /**
- * {@code InstanceProfileCredentials} represents EC2 IAM role based authentication configurations
+ * {@code InstanceProfileCredentials} represents EC2 IAM role based
+ * authentication configurations
  * for the ballerina SQS API Client.
  *
- * @param profileName Configure the profile name used for loading IMDS-related configuration,
- *                    like the endpoint mode (IPv4 vs IPv6).
- * @param credentialsFilePath The path to the profile file containing the credentials.
+ * @param profileName         Configure the profile name used for loading
+ *                            IMDS-related configuration,
+ *                            like the endpoint mode (IPv4 vs IPv6).
+ * @param credentialsFilePath The path to the profile file containing the
+ *                            credentials.
  */
 public record InstanceProfileCredentials(String profileName, String credentialsFilePath) {
     private static final BString EC2_INSTANCE_PROFILE_NAME = StringUtils.fromString("profileName");
@@ -36,10 +39,11 @@ public record InstanceProfileCredentials(String profileName, String credentialsF
 
     public InstanceProfileCredentials(BMap<BString, Object> bAuthConfig) {
         this(
-                bAuthConfig.containsKey(EC2_INSTANCE_PROFILE_NAME) ?
-                        bAuthConfig.getStringValue(EC2_INSTANCE_PROFILE_NAME).getValue() : null,
-                bAuthConfig.containsKey(EC2_INSTANCE_PROFILE_FILE) ?
-                        bAuthConfig.getStringValue(EC2_INSTANCE_PROFILE_FILE).getValue() : null
-        );
+                bAuthConfig.containsKey(EC2_INSTANCE_PROFILE_NAME)
+                        ? bAuthConfig.getStringValue(EC2_INSTANCE_PROFILE_NAME).getValue()
+                        : null,
+                bAuthConfig.containsKey(EC2_INSTANCE_PROFILE_FILE)
+                        ? bAuthConfig.getStringValue(EC2_INSTANCE_PROFILE_FILE).getValue()
+                        : null);
     }
 }
