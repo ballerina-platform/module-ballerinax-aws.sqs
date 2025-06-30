@@ -463,3 +463,11 @@ public enum QueueAttributeName {
 public type GetQueueAttributesResponse record {|
     map<string> queueAttributes;
 |};
+
+# The response from the listQueueTags operation.
+#
+# + tags - The list of all tags added to the specified queue.
+public type ListQueueTagsResponse record {|
+    map<string> tags;
+|};
+

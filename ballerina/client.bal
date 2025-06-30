@@ -273,6 +273,20 @@ public isolated client class Client {
 
     } external;
 
+    # List all cost allocation tags added to the specified Amazon SQS queue.
+    #
+    # + queueUrl - The URL of the queue.
+    # + return - The `ListQueueTagsResponse` with tags relevant to the specified queue or an Error.
+    isolated remote function listQueueTags(string queueUrl) returns ListQueueTagsResponse|Error {
+        return self.externListQueueTags(queueUrl);
+    }
+
+    isolated function externListQueueTags(string queueUrl) returns ListQueueTagsResponse|Error = @java:Method {
+        name: "listQueueTags",
+        'class: "io.ballerina.lib.aws.sqs.NativeClientAdaptor"
+
+    } external;
+
     # Gracefully closes AWS SQS API client resources
     #
     # + return - An `Error` if there is an error while closing the client resources or else nil

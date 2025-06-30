@@ -50,6 +50,8 @@ import software.amazon.awssdk.services.sqs.model.GetQueueAttributesRequest;
 import software.amazon.awssdk.services.sqs.model.GetQueueAttributesResponse;
 import software.amazon.awssdk.services.sqs.model.GetQueueUrlRequest;
 import software.amazon.awssdk.services.sqs.model.GetQueueUrlResponse;
+import software.amazon.awssdk.services.sqs.model.ListQueueTagsRequest;
+import software.amazon.awssdk.services.sqs.model.ListQueueTagsResponse;
 import software.amazon.awssdk.services.sqs.model.ListQueuesRequest;
 import software.amazon.awssdk.services.sqs.model.ListQueuesResponse;
 import software.amazon.awssdk.services.sqs.model.PurgeQueueRequest;
@@ -369,29 +371,47 @@ public class NativeClientAdaptor {
     }
 
     public static Object untagQueue(Environment env, BObject bClient, BString queueUrl, BArray bTagKeys) {
-    SqsClient sqsClient = (SqsClient) bClient.getNativeData(NATIVE_SQS_CLIENT);
+        SqsClient sqsClient = (SqsClient) bClient.getNativeData(NATIVE_SQS_CLIENT);
 
-    return env.yieldAndRun(() -> {
-        try {
-            List<String> tagKeys = new ArrayList<>();
-            for (int i = 0; i < bTagKeys.size(); i++) {
-                Object val = bTagKeys.get(i);
-                if (val instanceof BString) {
-                    tagKeys.add(((BString) val).getValue());
+        return env.yieldAndRun(() -> {
+            try {
+                List<String> tagKeys = new ArrayList<>();
+                for (int i = 0; i < bTagKeys.size(); i++) {
+                    Object val = bTagKeys.get(i);
+                    if (val instanceof BString) {
+                        tagKeys.add(((BString) val).getValue());
+                    }
                 }
+                UntagQueueRequest request = UntagQueueRequest.builder()
+                        .queueUrl(queueUrl.getValue())
+                        .tagKeys(tagKeys)
+                        .build();
+                sqsClient.untagQueue(request);
+                return null;
+            } catch (Exception e) {
+                String msg = "Failed to untag queue: " + Objects.requireNonNullElse(e.getMessage(), "Unknown error");
+                return CommonUtils.createError(msg, e);
             }
-            UntagQueueRequest request = UntagQueueRequest.builder()
-                    .queueUrl(queueUrl.getValue())
-                    .tagKeys(tagKeys)
-                    .build();
-            sqsClient.untagQueue(request);
-            return null;
-        } catch (Exception e) {
-            String msg = "Failed to untag queue: " + Objects.requireNonNullElse(e.getMessage(), "Unknown error");
-            return CommonUtils.createError(msg, e);
-        }
-    });
-}
+        });
+    }
+
+    public static Object listQueueTags(Environment env, BObject bClient, BString queueUrl) {
+        SqsClient sqsClient = (SqsClient) bClient.getNativeData(NATIVE_SQS_CLIENT);
+
+        return env.yieldAndRun(() -> {
+            try {
+                ListQueueTagsRequest request = ListQueueTagsRequest.builder()
+                        .queueUrl(queueUrl.getValue())
+                        .build();
+                ListQueueTagsResponse response = sqsClient.listQueueTags(request);
+                return ListQueueTagsMapper.getNativeListQueueTagsResponse(response);
+            } catch (Exception e) {
+                String msg = "Failed to list queue tags: "
+                        + Objects.requireNonNullElse(e.getMessage(), "Unknown error");
+                return CommonUtils.createError(msg, e);
+            }
+        });
+    }
 
     public static Object close(BObject bClient) {
         SqsClient nativeClient = (SqsClient) bClient.getNativeData(NATIVE_SQS_CLIENT);
