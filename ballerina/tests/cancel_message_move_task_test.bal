@@ -1,14 +1,13 @@
 import ballerina/test;
 
-
 @test:Config {
     groups: ["cancelMessageMoveTask"]
 }
 isolated function testCancelMessageMoveTask() returns error? {
-   
+
     string dlqArn = "arn:aws:sqs:eu-north-1:284495578152:testDLQ";
     string mainQueueArn = "arn:aws:sqs:eu-north-1:284495578152:TestQ";
-    
+
     StartMessageMoveTaskConfig config = {
         destinationARN: mainQueueArn,
         maxNumberOfMessagesPerSecond: 1
@@ -25,7 +24,7 @@ isolated function testCancelMessageMoveTask() returns error? {
 
         if cancelResult is CancelMessageMoveTaskResponse {
             test:assertTrue(cancelResult.approximateNumberOfMessagesMoved >= 0,
-                msg = "Approximate number of messages moved should be non-negative");
+                    msg = "Approximate number of messages moved should be non-negative");
         }
     }
 }

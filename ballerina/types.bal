@@ -37,7 +37,7 @@ public type StaticAuthConfig record {|
 # Represents AWS profile-based authentication configuration for SQS API
 #
 # + profileName - Name of the AWS profile in `~/.aws/credentials`
-# + credentialsFilePath - Optional custom path to the credentials file. Defaults to `"~/.aws/credentials"`. 
+# + credentialsFilePath - Optional custom path to the credentials file. Defaults to `"~/.aws/credentials"`
 # The credentials file should follow the standard AWS format:
 #
 # ```
@@ -54,7 +54,7 @@ public type ProfileAuthConfig record {|
     string credentialsFilePath = "~/.aws/credentials";
 |};
 
-# An Amazon Web Services region that hosts a set of Amazon services.
+# An Amazon Web Services region that hosts a set of Amazon services
 public enum Region {
     AF_SOUTH_1 = "af-south-1",
     AP_EAST_1 = "ap-east-1",
@@ -104,7 +104,7 @@ public enum Region {
 # Includes identifiers and checksums used to validate the success and integrity of the message sent.
 # For FIFO queues, includes a sequence number to maintain message order.
 #
-# + messageId - Contains the MessageId of the message sent to the queue. 
+# + messageId - Contains the MessageId of the message sent to the queue.
 # + md5OfMessageBody - An MD5 digest of the non-URL-encoded message body string. This attribute can be used to verify that Amazon SQS received the message correctly. 
 # + md5OfMessageAttributes - An MD5 digest of the non-URL-encoded message attribute string. This attribute can be used to verify that Amazon SQS received the message correctly. 
 # + md5OfMessageSystemAttributes - An MD5 digest of the non-URL-encoded message system attribute string. This attribute can be used to verify that Amazon SQS received the message correctly.  
@@ -119,7 +119,7 @@ public type SendMessageResponse record {|
 
 # Represents common optional parameters used when sending a message to an Amazon SQS queue.These fields can be applied to both `SendMessage` and `SendMessageBatch`.
 #
-# + delaySeconds - The length of time, in seconds, for which to delay a specific message. Valid values: 0 to 900. Maximum: 15 minutes. Messages with a positive DelaySeconds value become available for processing after the delay period is finished. If you don't specify a value, the default value for the queue applies. 
+# + delaySeconds - The length of time, in seconds, for which to delay a specific message. Valid values: 0 to 900. Maximum: 15 minutes. Messages with a positive `DelaySeconds` value become available for processing after the delay period is finished. If you don't specify a value, the default value for the queue applies. 
 # + messageAttributes - Custom user-defined attributes to send with the message. Each attribute has a name, type, and value. `messageAttributes` can be used to attach custom metadata to Amazon SQS messages for your applications. 
 # + awsTraceHeader - The AWS X-Ray tracing header to associate with the message. This value is assigned to the system attribute `awsTraceHeader` and enables distributed tracing support in AWS services. This is the only supported system attribute in Amazon SQS currently.
 # + messageDeduplicationId - A token used for deduplicating sent messages. Applies only to FIFO queues.
