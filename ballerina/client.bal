@@ -207,6 +207,23 @@ public isolated client class Client {
         'class: "io.ballerina.lib.aws.sqs.NativeClientAdaptor"
     } external;
 
+    # Changes the visibility timeout of a specified message in a queue to a new value. The default visibility timeout for a message is 30 seconds. The  minimum is 0 seconds. The maximum is 12 hours.
+    #
+    # + queueUrl - The URL of the Amazon SQS queue whose message's visibility is changed. Queue URLs and names are case-sensitive. 
+    # + receiptHandle - The receipt handle associated with the message, whose visibility timeout is changed. This parameter is returned by the `ReceiveMessage` action. 
+    # + visibilityTimeout - The new value for the message's visibility timeout (in seconds).
+    # + return - `Error` on failure.
+    isolated remote function changeMessageVisibility(string queueUrl, string receiptHandle, int visibilityTimeout) returns Error? {
+        return self.externChangeMessageVisibility(queueUrl, receiptHandle, visibilityTimeout);
+    }
+
+    isolated function externChangeMessageVisibility(string queueUrl, string receiptHandle, int visibilityTimeout)
+    returns Error? = @java:Method {
+        name: "changeMessageVisibility",
+        'class: "io.ballerina.lib.aws.sqs.NativeClientAdaptor"
+
+    } external;
+
     # Gracefully closes AWS SQS API client resources
     #
     # + return - An `Error` if there is an error while closing the client resources or else nil
