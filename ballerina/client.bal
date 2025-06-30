@@ -224,6 +224,20 @@ public isolated client class Client {
 
     } external;
 
+    # Purges the specified queue, deleting all messages in it. This action is irreversible.
+    #
+    # + queueUrl - The URL of the queue from which the PurgeQueue action deletes messages. Queue URLs and names are case-sensitive.
+    # + return - `Error` on failure.
+    isolated remote function purgeQueue(string queueUrl) returns Error? {
+        return self.externPurgeQueue(queueUrl);
+    }
+
+    isolated function externPurgeQueue(string queueUrl) returns Error? = @java:Method {
+        name: "purgeQueue",
+        'class: "io.ballerina.lib.aws.sqs.NativeClientAdaptor"
+
+    } external;
+
     # Gracefully closes AWS SQS API client resources
     #
     # + return - An `Error` if there is an error while closing the client resources or else nil

@@ -48,6 +48,8 @@ import software.amazon.awssdk.services.sqs.model.GetQueueUrlRequest;
 import software.amazon.awssdk.services.sqs.model.GetQueueUrlResponse;
 import software.amazon.awssdk.services.sqs.model.ListQueuesRequest;
 import software.amazon.awssdk.services.sqs.model.ListQueuesResponse;
+import software.amazon.awssdk.services.sqs.model.PurgeQueueRequest;
+import software.amazon.awssdk.services.sqs.model.PurgeQueueResponse;
 import software.amazon.awssdk.services.sqs.model.ReceiveMessageRequest;
 import software.amazon.awssdk.services.sqs.model.ReceiveMessageResponse;
 import software.amazon.awssdk.services.sqs.model.SendMessageBatchRequest;
@@ -312,6 +314,24 @@ public class NativeClientAdaptor {
                         + Objects.requireNonNullElse(e.getMessage(), "Unknown Error");
                 return CommonUtils.createError(msg, e);
             }
+        });
+    }
+
+    public static Object purgeQueue(Environment env, BObject bClient, BString queueurl) {
+        SqsClient sqsClient = (SqsClient) bClient.getNativeData(NATIVE_SQS_CLIENT);
+
+        return env.yieldAndRun(() -> {
+            try {
+                PurgeQueueRequest request = PurgeQueueRequest.builder()
+                        .queueUrl(queueurl.getValue())
+                        .build();
+                PurgeQueueResponse response = sqsClient.purgeQueue(request);
+                return null;
+            } catch (Exception e) {
+                String msg = "Failed to purge queue" + Objects.requireNonNullElse(e.getMessage(), "Unknown Error");
+                return CommonUtils.createError(msg, e);
+            }
+
         });
     }
 
