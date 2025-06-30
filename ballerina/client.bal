@@ -238,6 +238,41 @@ public isolated client class Client {
 
     } external;
 
+    # Add cost allocation tags to the specified Amazon SQS queue. For an overview, see Tagging Your Amazon SQS Queues in the Amazon SQS Developer Guide. When you use queue tags, keep the following guidelines in mind:
+    # - Adding more than 50 tags to a queue isn't recommended.
+    # - Tags don't have any semantic meaning. Amazon SQS interprets tags as character strings.
+    # - Tags are case-sensitive.
+    # - A new tag with a key identical to that of an existing tag overwrites the existing tag.
+    #
+    # + queueUrl - The URL of the Amazon SQS queue to which tags are added. Queue URLs and names are case-sensitive.
+    # + tags - The list of tags to be added to the specified queue. Each tag is a key-value pair.
+    # + return - `Error` on failure.
+    isolated remote function tagQueue(string queueUrl, map<string> tags
+    ) returns Error? {
+        return self.externTagQueue(queueUrl, tags);
+    }
+
+    isolated function externTagQueue(string queueUrl, map<string> tags) returns Error? = @java:Method {
+        name: "tagQueue",
+        'class: "io.ballerina.lib.aws.sqs.NativeClientAdaptor"
+
+    } external;
+
+    # Remove cost allocation tags from the specified Amazon SQS queue.
+    #
+    # + queueUrl - The URL of the Amazon SQS queue from which tags are removed. Queue URLs and names are case-sensitive.
+    # + tags - The list of tags to be untagged from the specified queue.
+    # + return - `Error` on failure.
+    isolated remote function untagQueue(string queueUrl, string[] tags) returns Error? {
+        return self.externUntagQueue(queueUrl, tags);
+    }
+
+    isolated function externUntagQueue(string queueurl, string[] tags) returns Error? = @java:Method {
+        name: "untagQueue",
+        'class: "io.ballerina.lib.aws.sqs.NativeClientAdaptor"
+
+    } external;
+
     # Gracefully closes AWS SQS API client resources
     #
     # + return - An `Error` if there is an error while closing the client resources or else nil
