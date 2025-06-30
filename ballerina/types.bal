@@ -471,3 +471,30 @@ public type ListQueueTagsResponse record {|
     map<string> tags;
 |};
 
+# The configuration options for starting a message move task in AWS SQS.
+#
+# + destinationARN - The ARN of the queue that receives the moved messages. You can use this field to specify the
+# destination queue where you would like to redrive messages. If this field is left blank, the messages will be redriven
+# back to their respective original source queues.
+# + maxNumberOfMessagesPerSecond - The number of messages to be moved per second (the message movement rate).
+# You can use this field to define a fixed message movement rate. The maximum value for messages per second is 500.
+# If this field is left blank, the system will optimize the rate based on the queue message backlog size,
+# which may vary throughout the duration of the message movement task.
+public type StartMessageMoveTaskConfig record {|
+    string destinationARN?;
+    int maxNumberOfMessagesPerSecond?;
+|};
+
+# The response from the startMessageMoveTask operation
+#
+# + taskHandle - An identifier associated with a message movement task. You can use this identifier to cancel a specified message movement task using the cancelMessageMoveTask action.
+public type StartMessageMoveTaskResponse record {|
+    string taskHandle;
+|};
+
+# The response from the cancelMessageMoveTask operation.
+#
+# + approximateNumberOfMessagesMoved - The approximate number of messages already moved to the destination queue.
+public type CancelMessageMoveTaskResponse record {|
+    int approximateNumberOfMessagesMoved;
+|};

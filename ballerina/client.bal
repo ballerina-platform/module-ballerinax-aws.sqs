@@ -287,6 +287,38 @@ public isolated client class Client {
 
     } external;
 
+    # Starts an asynchronous task to move messages from a specified source queue to a specified destination queue. This action is currently limited to supporting message redrive from queues that are configured as dead-letter queues (DLQs) of other Amazon SQS queues only. Non-SQS queue sources of dead-letter queues, such as AWS Lambda or Amazon SNS topics, are currently not supported. In dead-letter queues redrive context, the  `StartMessageMoveTask` the source queue is the DLQ, while the destination  queue can be the original source queue (from which the messages were driven to the dead-letter-queue), or a custom destination queue. Only one active message movement task is supported per queue at any given time.
+    #
+    # + sourceARN - The ARN of the queue that contains the messages to be moved to another queue. Currently, only ARNs of dead-letter queues (DLQs) whose sources are other Amazon SQS queues are accepted. DLQs whose sources are non-SQS queues, such as AWS Lambda or Amazon SNS topics, are not currently supported.
+    # + startMessageMoveTaskConfig - The optional parameters for starting a message move task, such as `destinationARN` and `maxNumberOfMessagesPerSecond`.
+    # + return - The `StartMessageMoveTaskResponse` if the operation is successful or an Error.
+    isolated remote function startMessageMoveTask(string sourceARN, *StartMessageMoveTaskConfig startMessageMoveTaskConfig)
+        returns StartMessageMoveTaskResponse|Error {
+        return self.externStartMessageMoveTask(sourceARN, startMessageMoveTaskConfig);
+    }
+
+    isolated function externStartMessageMoveTask(string sourceARN, *StartMessageMoveTaskConfig startMessageMoveTaskConfig) returns StartMessageMoveTaskResponse|Error = @java:Method {
+        name: "startMessageMoveTask",
+        'class: "io.ballerina.lib.aws.sqs.NativeClientAdaptor"
+
+    } external;
+
+    # Cancels a specified message movement task. A message movement can only be cancelled when the current status is RUNNING. Cancelling a message movement task does not revert the messages that have already been moved. It can only stop the messages that have not been moved yet.
+    # - This action is currently limited to supporting message redrive from dead-letter queues (DLQs) only. In this context, the source queue is the dead-letter queue (DLQ), while the destination queue can be the original source queue (from which the messages were driven to the dead-letter-queue), or a custom destination queue.
+    # - Only one active message movement task is supported per queue at any given time.
+    #
+    # + taskHandle - An identifier associated with a message movement task.
+    # + return - The `CancelMessageMoveTaskResponse` containing the approximate number of messages already moved to the destination queue, or an Error.
+    isolated remote function cancelMessageMoveTask(string taskHandle) returns CancelMessageMoveTaskResponse|Error {
+        return self.externCancelMessageMoveTask(taskHandle);
+    }
+
+    isolated function externCancelMessageMoveTask(string taskHandle) returns CancelMessageMoveTaskResponse|Error = @java:Method {
+        name: "cancelMessageMoveTask",
+        'class: "io.ballerina.lib.aws.sqs.NativeClientAdaptor"
+
+    } external;
+
     # Gracefully closes AWS SQS API client resources
     #
     # + return - An `Error` if there is an error while closing the client resources or else nil

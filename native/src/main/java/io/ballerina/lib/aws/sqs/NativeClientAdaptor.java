@@ -38,6 +38,8 @@ import software.amazon.awssdk.auth.credentials.InstanceProfileCredentialsProvide
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.profiles.ProfileFile;
 import software.amazon.awssdk.services.sqs.SqsClient;
+import software.amazon.awssdk.services.sqs.model.CancelMessageMoveTaskRequest;
+import software.amazon.awssdk.services.sqs.model.CancelMessageMoveTaskResponse;
 import software.amazon.awssdk.services.sqs.model.ChangeMessageVisibilityRequest;
 import software.amazon.awssdk.services.sqs.model.ChangeMessageVisibilityResponse;
 import software.amazon.awssdk.services.sqs.model.CreateQueueRequest;
@@ -64,6 +66,8 @@ import software.amazon.awssdk.services.sqs.model.SendMessageRequest;
 import software.amazon.awssdk.services.sqs.model.SendMessageResponse;
 import software.amazon.awssdk.services.sqs.model.SetQueueAttributesRequest;
 import software.amazon.awssdk.services.sqs.model.SetQueueAttributesResponse;
+import software.amazon.awssdk.services.sqs.model.StartMessageMoveTaskRequest;
+import software.amazon.awssdk.services.sqs.model.StartMessageMoveTaskResponse;
 import software.amazon.awssdk.services.sqs.model.TagQueueRequest;
 import software.amazon.awssdk.services.sqs.model.UntagQueueRequest;
 
@@ -407,6 +411,42 @@ public class NativeClientAdaptor {
                 return ListQueueTagsMapper.getNativeListQueueTagsResponse(response);
             } catch (Exception e) {
                 String msg = "Failed to list queue tags: "
+                        + Objects.requireNonNullElse(e.getMessage(), "Unknown error");
+                return CommonUtils.createError(msg, e);
+            }
+        });
+    }
+
+    public static Object startMessageMoveTask(Environment env, BObject bClient, BString sourceArn,
+            BMap<BString, Object> bConfig) {
+        SqsClient sqsClient = (SqsClient) bClient.getNativeData(NATIVE_SQS_CLIENT);
+
+        return env.yieldAndRun(() -> {
+            try {
+                StartMessageMoveTaskRequest request = StartMessageMoveTaskMapper
+                        .getNativeStartMessageMoveTaskRequest(sourceArn, bConfig);
+                StartMessageMoveTaskResponse response = sqsClient.startMessageMoveTask(request);
+                return StartMessageMoveTaskMapper.getNativeStartMessageMoveTaskResponse(response);
+            } catch (Exception e) {
+                String msg = "Failed to start message move task: "
+                        + Objects.requireNonNullElse(e.getMessage(), "Unknown error");
+                return CommonUtils.createError(msg, e);
+            }
+        });
+    }
+
+    public static Object cancelMessageMoveTask(Environment env, BObject bClient, BString taskHandle) {
+        SqsClient sqsClient = (SqsClient) bClient.getNativeData(NATIVE_SQS_CLIENT);
+
+        return env.yieldAndRun(() -> {
+            try {
+                CancelMessageMoveTaskRequest request = CancelMessageMoveTaskRequest.builder()
+                        .taskHandle(taskHandle.getValue())
+                        .build();
+                CancelMessageMoveTaskResponse response = sqsClient.cancelMessageMoveTask(request);
+                return CancelMessageMoveTaskMapper.getNativeCancelMessageMoveTaskResponse(response);
+            } catch (Exception e) {
+                String msg = "Failed to cancel message move task: "
                         + Objects.requireNonNullElse(e.getMessage(), "Unknown error");
                 return CommonUtils.createError(msg, e);
             }
