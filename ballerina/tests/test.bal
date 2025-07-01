@@ -520,7 +520,7 @@ function testBasicReceiveMessage() returns error? {
     dependsOn: [testCreateStandardQueue],
     groups: ["receiveMessage"]
 }
- function testReceiveMessageWithMultiplemessages() returns error? {
+function testReceiveMessageWithMultiplemessages() returns error? {
     string queueUrl = standardQueueUrl;
     ReceiveMessageConfig config = {
         maxNumberOfMessages: 5
@@ -553,7 +553,7 @@ isolated function testReceiveMessageInvalidQueueUrl() returns error? {
     dependsOn: [testCreateStandardQueue],
     groups: ["receiveMessage"]
 }
- function testReceiveMessageInvalidMaxMessages() returns error? {
+function testReceiveMessageInvalidMaxMessages() returns error? {
     string queueUrl = standardQueueUrl;
     ReceiveMessageConfig config = {
         maxNumberOfMessages: 20
@@ -586,6 +586,50 @@ function testReceiveMessageWithAllOptionalConfigs() returns error? {
         test:assertFail("Unexpected error: " + result.toString());
     } else {
         test:assertTrue(result.length() >= 0);
+    }
+}
+
+@test:Config {
+    dependsOn: [testCreateStandardQueue],
+    groups: ["deleteMessage"]
+}
+function testDeleteMessage() returns error? {
+    string queueUrl = standardQueueUrl;
+
+    // Receive the message to get receiptHandle
+    Message[]|error receiveResult = sqsClient->receiveMessage(queueUrl);
+    if receiveResult is error {
+        test:assertFail("Failed to receive message: " + receiveResult.toString());
+    }
+    if receiveResult.length() == 0 {
+        test:assertFail("Expected to receive at least one message but got none.");
+    }
+
+    Message message = receiveResult[0];
+    string receiptHandle = check message.receiptHandle.ensureType();
+
+    // Delete the message using the latest receipt handle
+    Error? deleteResult = sqsClient->deleteMessage(queueUrl, receiptHandle);
+    if deleteResult is error {
+        test:assertFail("Failed to delete message: " + deleteResult.toString());
+    }
+}
+
+@test:Config {
+    dependsOn: [testCreateStandardQueue],
+    groups: ["deleteMessage"]
+}
+function testDeleteMessageWithInvalidReceiptHandle() returns error? {
+    string queueUrl = standardQueueUrl;
+    string fakeReceiptHandle = "InvalidReceiptHandle123";
+
+    Error? deleteResult = sqsClient->deleteMessage(queueUrl, fakeReceiptHandle);
+
+    test:assertTrue(deleteResult is Error);
+    if deleteResult is error {
+        ErrorDetails details = deleteResult.detail();
+        test:assertEquals(details.httpStatusCode, 404);
+        test:assertEquals(details.errorCode, "ReceiptHandleIsInvalid");
     }
 }
 
