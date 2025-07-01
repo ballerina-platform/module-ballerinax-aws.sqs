@@ -6,6 +6,19 @@ string fifoQueueUrl = "";
 string attrQueueurl = "";
 
 @test:Config {
+    groups: ["init"]
+}
+isolated function testInit() returns error? {
+    ConnectionConfig connectionConfig = {
+        region: awsRegion,
+        auth
+    };
+    Client redshiftData = check new (connectionConfig);
+    check redshiftData->close();
+}
+
+
+@test:Config {
     groups: ["createQueue"]
 }
 function testCreateStandardQueue() returns error? {
@@ -1123,4 +1136,70 @@ function testCancelMessageMoveTask() returns error? {
         test:assertFail("Failed to cancel message move task: " + cancelResult.toString());
     }
 }
+
+@test:Config {
+    dependsOn: [testCreateStandardQueue],
+    groups: ["purgeQueue"]
+}
+function testPurgeQueue() returns error? {
+    string queueUrl = standardQueueUrl;
+
+    Error? result = sqsClient->purgeQueue(queueUrl);
+    test:assertTrue(result is ());
+    test:assertFalse(result is error, msg = "purgeQueue should not return an error");
+
+}
+
+
+@test:Config {
+    dependsOn: [testCreateFifoQueue],
+    groups: ["deleteQueue"]
+}
+
+function testDeleteQueue() returns error? {
+    string queueUrl = fifoQueueUrl;
+    Error? result = sqsClient->deleteQueue(queueUrl);
+    test:assertTrue(result is ());
+    test:assertFalse(result is Error, msg = "Expected successful deletion, but got an error");
+}
+
+@test:Config {
+    groups: ["deleteQueue"]
+}
+isolated function testDeleteNonExistentQueue() returns error? {
+    string queueUrl = "https://sqs.eu-north-1.amazonaws.com/284495578152/Secondtest";
+    Error? result = sqsClient->deleteQueue(queueUrl);
+    test:assertTrue(result is Error, msg = "Expected uncessfull deletion.");
+    if result is error {
+        ErrorDetails detais = result.detail();
+        test:assertEquals(detais.errorCode, "AWS.SimpleQueueService.NonExistentQueue");
+        test:assertEquals(detais.httpStatusCode, 400);
+        test:assertEquals(detais.errorMessage, "The specified queue does not exist.");
+    }
+}
+
+
+
+
+@test:AfterSuite {}
+
+function testDeleteAllQueues() returns error? {
+    ListQueuesResponse|Error listResult = sqsClient->listQueues();
+    if listResult is ListQueuesResponse {
+        foreach string queueUrl in listResult.queueUrls {
+            
+            Error? delResult = sqsClient->deleteQueue(queueUrl);
+            if delResult is error {
+                io:println("Failed to delete queue: " + queueUrl + " Error: " + delResult.toString());
+            } else {
+                io:println("Deleted queue: " + queueUrl);
+            }
+        }
+    } else {
+        test:assertFail("Failed to list queues: " + listResult.toString());
+    }
+}
+
+
+
 
