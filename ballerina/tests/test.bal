@@ -3,6 +3,7 @@ import ballerina/test;
 
 string standardQueueUrl = "";
 string fifoQueueUrl = "";
+string attrQueueurl = "";
 
 @test:Config {
     groups: ["createQueue"]
@@ -737,6 +738,45 @@ function testDeleteMessageBatchWithDuplicateIds() returns error? {
         test:assertEquals(details.errorCode, "AWS.SimpleQueueService.BatchEntryIdsNotDistinct");
         test:assertEquals(details.httpStatusCode, 400);
         test:assertEquals(details.errorMessage, "Id dup-id repeated.");
+    }
+}
+
+@test:Config {
+    dependsOn: [testCreateStandardQueue],
+    groups: ["setQueueAttributes"]
+}
+
+function testSetQueueAttribues() returns error? {
+    string queueUrl = standardQueueUrl;
+    QueueAttributes attributes = {
+        delaySeconds: 78,
+        visibilityTimeout: 13000,
+        redriveAllowPolicy: {
+            redrivePermission: DENY_ALL
+            }
+    };
+    Error? result = sqsClient->setQueueAttributes(queueUrl, attributes);
+    io:print(result);
+    test:assertTrue(result is ());
+}
+
+@test:Config {
+    dependsOn: [testCreateStandardQueue],
+    groups: ["setQueueAttributes"]
+}
+function testSetQueueAttribuesWithInvalidDelay() returns error? {
+    string queueUrl = standardQueueUrl;
+    QueueAttributes attributes = {
+        delaySeconds: 901
+    };
+    Error? result = sqsClient->setQueueAttributes(queueUrl, attributes);
+    io:print(result);
+    test:assertTrue(result is Error);
+    if result is error {
+        ErrorDetails details = result.detail();
+        test:assertEquals(details.errorCode, "InvalidAttributeValue");
+        test:assertEquals(details.httpStatusCode, 400);
+        test:assertEquals(details.errorMessage, "Invalid value for the parameter DelaySeconds.");
     }
 }
 
