@@ -1,5 +1,5 @@
-import ballerina/test;
 import ballerina/io;
+import ballerina/test;
 
 string standardQueueUrl = "";
 string fifoQueueUrl = "";
@@ -356,33 +356,38 @@ function testSendMessageWithNilAttributes() returns error? {
 }
 
 @test:Config {
+    dependsOn: [testCreateStandardQueue],
     groups: ["sendMessageBatch"]
 }
-isolated function testSendMessageBatchSuccess() returns error? {
-    string queueUrl = "https://sqs.eu-north-1.amazonaws.com/284495578152/TestQueue";
+function testSendMessageBatchSuccess() returns error? {
+    string queueUrl = standardQueueUrl;
     SendMessageBatchEntry[] entries = [
-        {id: "5", body: "Hello A1"},
-        {id: "6", body: "Hello B1"}
+        {id: "id-1", body: "Hello A1"},
+        {id: "id-2", body: "Hello A2"},
+        {id: "id-3", body: "Hello A3"},
+        {id: "id-4", body: "Hello A4"},
+        {id: "id-5", body: "Hello A5"}
     ];
 
     SendMessageBatchResponse|Error result = sqsClient->sendMessageBatch(queueUrl, entries);
     if result is SendMessageBatchResponse {
         io:println(result.successful);
         test:assertEquals(result.failed.length(), 0, msg = "All messages should succeed");
-        test:assertEquals(result.successful.length(), 2);
+        test:assertEquals(result.successful.length(), 5);
     } else {
         test:assertFail("Expected batch send to succeed, got: " + result.toString());
     }
 }
 
 @test:Config {
+    dependsOn: [testCreateStandardQueue],
     groups: ["sendMessageBatch"]
 }
-isolated function testSendMessageBatchWithDuplicatemessageId() returns error? {
-    string queueUrl = "https://sqs.eu-north-1.amazonaws.com/284495578152/TestQueue";
+function testSendMessageBatchWithDuplicatemessageId() returns error? {
+    string queueUrl = standardQueueUrl;
     SendMessageBatchEntry[] entries = [
-        {id: "id1", body: "Hello A"},
-        {id: "id1", body: "Hello B"} //duplicate ID
+        {id: "idA", body: "Hello A"},
+        {id: "idA", body: "Hello B"}
     ];
     SendMessageBatchResponse|Error result = sqsClient->sendMessageBatch(queueUrl, entries);
     if result is SendMessageBatchResponse {
@@ -393,19 +398,20 @@ isolated function testSendMessageBatchWithDuplicatemessageId() returns error? {
         ErrorDetails details = result.detail();
         test:assertEquals(details.httpStatusCode, 400);
         test:assertEquals(details.errorCode, "AWS.SimpleQueueService.BatchEntryIdsNotDistinct");
-        test:assertEquals(details.errorMessage, "Id id1 repeated.");
+        test:assertEquals(details.errorMessage, "Id idA repeated.");
     }
 }
 
 @test:Config {
+    dependsOn: [testCreateStandardQueue],
     groups: ["sendMessageBatch"]
 }
-isolated function testSendMessageBatchPartialFailure() returns error? {
-    string queueUrl = "https://sqs.eu-north-1.amazonaws.com/284495578152/TestQueue";
+function testSendMessageBatchPartialFailure() returns error? {
+    string queueUrl = standardQueueUrl;
 
     SendMessageBatchEntry[] entries = [
         {id: "1", body: "Valid message"},
-        {id: "2", body: ""} // empty body
+        {id: "2", body: ""}
     ];
     SendMessageBatchResponse|Error result = sqsClient->sendMessageBatch(queueUrl, entries);
     if result is SendMessageBatchResponse {
@@ -425,10 +431,11 @@ isolated function testSendMessageBatchPartialFailure() returns error? {
 }
 
 @test:Config {
+    dependsOn: [testCreateStandardQueue],
     groups: ["sendMessageBatch"]
 }
-isolated function testSendMessageBatchExceedsLimit() returns error? {
-    string queueUrl = "https://sqs.eu-north-1.amazonaws.com/284495578152/TestQueue";
+function testSendMessageBatchExceedsLimit() returns error? {
+    string queueUrl = standardQueueUrl;
     SendMessageBatchEntry[] entries = [];
     foreach int i in 1 ... 11 {
         entries.push({id: i.toString(), body: "body1" + i.toBalString()});
@@ -445,10 +452,11 @@ isolated function testSendMessageBatchExceedsLimit() returns error? {
 }
 
 @test:Config {
+    dependsOn: [testCreateStandardQueue],
     groups: ["sendMessageBatch"]
 }
-isolated function testSendMessageBatchWithEmptyList() returns error? {
-    string queueUrl = "https://sqs.eu-north-1.amazonaws.com/284495578152/TestQueue";
+function testSendMessageBatchWithEmptyList() returns error? {
+    string queueUrl = standardQueueUrl;
     SendMessageBatchEntry[] entries = [];
 
     SendMessageBatchResponse|Error result = sqsClient->sendMessageBatch(queueUrl, entries);
@@ -462,10 +470,11 @@ isolated function testSendMessageBatchWithEmptyList() returns error? {
 }
 
 @test:Config {
+    dependsOn: [testCreateStandardQueue],
     groups: ["sendMessageBatch"]
 }
-isolated function testSendMessageBatchExceedsTotalSizeLimit() returns error? {
-    string queueUrl = "https://sqs.eu-north-1.amazonaws.com/284495578152/TestQueue";
+function testSendMessageBatchExceedsTotalSizeLimit() returns error? {
+    string queueUrl = standardQueueUrl;
 
     string largeBody = ""; // string with size ~26220 Bytes.
     int i = 0;
