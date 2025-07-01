@@ -1002,7 +1002,7 @@ function testTagQueueWithEmptyTagKey() returns error? {
 function testUntagQueue() returns error? {
     string queueUrl = standardQueueUrl;
     string[] tags = ["env", "version"];
-    Error? result = sqsClient->untagQueue(queueUrl,tags);
+    Error? result = sqsClient->untagQueue(queueUrl, tags);
     test:assertTrue(result is ());
 }
 
@@ -1013,6 +1013,114 @@ function testUntagQueue() returns error? {
 
 function testListQueueTags() returns error? {
     string queueurl = standardQueueUrl;
-    ListQueueTagsResponse|Error result = sqsClient->listQueueTags(queueurl);  
+    ListQueueTagsResponse|Error result = sqsClient->listQueueTags(queueurl);
     test:assertTrue(result is ListQueueTagsResponse);
 }
+
+string dlqUrl = "";
+string dlqARN = "";
+string sourceQueueUrl = "";
+string sourceARN = "";
+string moveTaskHandle = ""; // <-- Store the task handle here
+
+@test:Config {
+    groups: ["startMessageMoveTask"]
+}
+function testStartMessageMoveTask() returns error? {
+
+    // Create DLQ with redriveAllowPolicy
+    CreateQueueConfig dlqConfig = {
+        queueAttributes: {
+            redriveAllowPolicy: {
+                redrivePermission: ALLOW_ALL
+            }
+        }
+    };
+
+    string|Error dlqResult = sqsClient->createQueue("DLQueue", dlqConfig);
+    if dlqResult is error {
+        test:assertFail("Failed to create DLQ: " + dlqResult.toString());
+    }
+    dlqUrl = dlqResult.toString();
+
+    // Get DLQ ARN
+    GetQueueAttributesConfig config = {
+        attributeNames: [QUEUE_ARN]
+    };
+    GetQueueAttributesResponse|Error dlqArnresult = sqsClient->getQueueAttributes(dlqUrl, config);
+    if dlqArnresult is GetQueueAttributesResponse {
+        map<string> attrs = dlqArnresult.queueAttributes;
+        dlqARN = <string>attrs["QueueArn"];
+        io:println("DLQ ARN: " + dlqARN);
+        io:println("DLQArnResult :" + dlqArnresult.toString());
+    } else {
+        test:assertFail("Failed to get DLQ ARN: " + dlqArnresult.toString());
+    }
+
+    // Create Source Queue with redrivePolicy to DLQ
+    CreateQueueConfig sourceQueueConfig = {
+        queueAttributes: {
+            redrivePolicy: {
+                deadLetterTargetArn: dlqARN,
+                maxReceiveCount: 2
+            }
+        }
+    };
+
+    string|Error sourceQueueResult = sqsClient->createQueue("Source-Queue", sourceQueueConfig);
+    if sourceQueueResult is string {
+        sourceQueueUrl = sourceQueueResult.toString();
+        io:println("Source Queue URL: " + sourceQueueUrl);
+    } else {
+        test:assertFail("Failed to create Source Queue: " + sourceQueueResult.toString());
+    }
+
+    // Send messages to the source queue
+    string testMsg = "MoveTaskTestMessage";
+    int numMessages = 4;
+    foreach int i in 1 ... numMessages {
+        SendMessageResponse|Error sendResult = sqsClient->sendMessage(sourceQueueUrl, testMsg + i.toString());
+        if sendResult is error {
+            test:assertFail("Failed to send message to source queue: " + sendResult.toString());
+        }
+    }
+
+    // Receive the messages more than maxReceiveCount times 
+    int receiveAttempts = 3;
+    foreach int attempt in 1 ... receiveAttempts {
+        Message[]|Error received = sqsClient->receiveMessage(sourceQueueUrl, {maxNumberOfMessages: 10});
+        if received is error {
+            test:assertFail("Failed to receive message from source queue: " + received.toString());
+        }
+    }
+
+    // Call startMessageMoveTask
+    StartMessageMoveTaskResponse|Error moveTaskResult = sqsClient->startMessageMoveTask(dlqARN, {maxNumberOfMessagesPerSecond: 1});
+    if moveTaskResult is StartMessageMoveTaskResponse {
+        moveTaskHandle = moveTaskResult.taskHandle; 
+        io:println("Started message move task: " + moveTaskHandle);
+        test:assertTrue(moveTaskHandle != "", msg = "Task handle should not be empty");
+    } else {
+        test:assertFail("Failed to start message move task: " + moveTaskResult.toString());
+    }
+}
+
+@test:Config {
+    dependsOn: [testStartMessageMoveTask],
+    groups: ["cancelMessageMoveTask"]
+}
+function testCancelMessageMoveTask() returns error? {
+    if moveTaskHandle == "" {
+        test:assertFail("No move task handle available to cancel.");
+    }
+    CancelMessageMoveTaskResponse|Error cancelResult = sqsClient->cancelMessageMoveTask(moveTaskHandle);
+    if cancelResult is CancelMessageMoveTaskResponse {
+        io:println("Cancelled message move task. Approximate number of messages moved: " +
+            cancelResult.approximateNumberOfMessagesMoved.toString());
+        test:assertTrue(cancelResult.approximateNumberOfMessagesMoved >= 0,
+            msg = "Approximate number of messages moved should be non-negative");
+    } else {
+        test:assertFail("Failed to cancel message move task: " + cancelResult.toString());
+    }
+}
+
