@@ -59,6 +59,7 @@ function testCreateQueueWithAttributes() returns error? {
     string|Error result = sqsClient->createQueue(queueName, config);
     if result is string {
         test:assertTrue(result.endsWith(queueName));
+        attrQueueurl = result.toString();
     } else {
         test:assertFail("Queue creation with attributes failed: " + result.toString());
     }
@@ -753,7 +754,7 @@ function testSetQueueAttribues() returns error? {
         visibilityTimeout: 13000,
         redriveAllowPolicy: {
             redrivePermission: DENY_ALL
-            }
+        }
     };
     Error? result = sqsClient->setQueueAttributes(queueUrl, attributes);
     io:print(result);
@@ -780,3 +781,52 @@ function testSetQueueAttribuesWithInvalidDelay() returns error? {
     }
 }
 
+@test:Config {
+    dependsOn: [testCreateQueueWithAttributes],
+    groups: ["getQueueAttributes"]
+}
+
+function testGetQueueAttributesAll() returns error? {
+    string queueUrl = attrQueueurl;
+
+    GetQueueAttributesConfig config = {
+        attributeNames: ["All"]
+    };
+    GetQueueAttributesResponse|Error result = sqsClient->getQueueAttributes(queueUrl, config);
+    test:assertTrue(result is GetQueueAttributesResponse);
+}
+
+@test:Config {
+    dependsOn: [testCreateQueueWithAttributes],
+    groups: ["getQueueAttributes"]
+}
+ function testGetQueueAttributesWithoutConfig() returns error? {
+    string queueUrl = attrQueueurl;
+
+    GetQueueAttributesResponse|Error result = sqsClient->getQueueAttributes(queueUrl);
+    test:assertTrue(result is GetQueueAttributesResponse);
+}
+
+@test:Config {
+    dependsOn: [testCreateStandardQueue],
+    groups: ["getQueueAttributes"]
+}
+function testGetQueueAttributesWithSomeAttributes() returns error? {
+
+    string queueUrl = standardQueueUrl;
+
+    GetQueueAttributesConfig config = {
+        attributeNames: [MAXIMUM_MESSAGE_SIZE, REDRIVE_ALLOW_POLICY, REDRIVE_POLICY]
+    };
+    GetQueueAttributesResponse|Error result = sqsClient->getQueueAttributes(queueUrl, config);
+
+    test:assertTrue(result is GetQueueAttributesResponse);
+
+    test:assertFalse(result is Error);
+    if result is error {
+        ErrorDetails detail = result.detail();
+        test:assertEquals(detail.errorCode, "InvalidAttributeName");
+        test:assertEquals(detail.errorMessage, "Unknown Attribute FifoQueue.");
+        test:assertEquals(detail.httpStatusCode, 400);
+    }
+}
