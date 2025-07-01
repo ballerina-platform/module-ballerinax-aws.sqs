@@ -596,7 +596,6 @@ function testReceiveMessageWithAllOptionalConfigs() returns error? {
 function testDeleteMessage() returns error? {
     string queueUrl = standardQueueUrl;
 
-    // Receive the message to get receiptHandle
     Message[]|error receiveResult = sqsClient->receiveMessage(queueUrl);
     if receiveResult is error {
         test:assertFail("Failed to receive message: " + receiveResult.toString());
@@ -608,7 +607,6 @@ function testDeleteMessage() returns error? {
     Message message = receiveResult[0];
     string receiptHandle = check message.receiptHandle.ensureType();
 
-    // Delete the message using the latest receipt handle
     Error? deleteResult = sqsClient->deleteMessage(queueUrl, receiptHandle);
     if deleteResult is error {
         test:assertFail("Failed to delete message: " + deleteResult.toString());
@@ -630,6 +628,115 @@ function testDeleteMessageWithInvalidReceiptHandle() returns error? {
         ErrorDetails details = deleteResult.detail();
         test:assertEquals(details.httpStatusCode, 404);
         test:assertEquals(details.errorCode, "ReceiptHandleIsInvalid");
+    }
+}
+
+@test:Config {
+    dependsOn: [testCreateStandardQueue],
+    groups: ["deleteMessageBatch"]
+}
+function testDeleteMessageBatchSuccess() returns error? {
+    string queueUrl = standardQueueUrl;
+
+    SendMessageBatchEntry[] batch = [
+        {id: "id-a", body: "Message A"},
+        {id: "id-b", body: "Message B"}
+    ];
+    SendMessageBatchResponse|Error sendResult = sqsClient->sendMessageBatch(queueUrl, batch);
+    if sendResult is error {
+        test:assertFail("Failed to send batch messages: " + sendResult.toString());
+    }
+
+    Message[]|error received = sqsClient->receiveMessage(queueUrl, {maxNumberOfMessages: 2});
+    if received is error || received.length() < 2 {
+        test:assertFail("Expected 2 messages, but received fewer");
+    }
+
+    DeleteMessageBatchEntry[] deleteBatch = [
+        {id: "msg-id-1", receiptHandle: check received[0].receiptHandle.ensureType()},
+        {id: "msg-id-2", receiptHandle: check received[1].receiptHandle.ensureType()}
+    ];
+
+    DeleteMessageBatchResponse|Error deleteResult = sqsClient->deleteMessageBatch(queueUrl, deleteBatch);
+    if deleteResult is DeleteMessageBatchResponse {
+        test:assertEquals(deleteResult.successful.length(), 2);
+        test:assertEquals(deleteResult.failed.length(), 0);
+    } else {
+        test:assertFail("Expected successful batch delete, got: " + deleteResult.toString());
+    }
+}
+
+@test:Config {
+    dependsOn: [testCreateStandardQueue],
+    groups: ["deleteMessageBatch"]
+}
+function testDeleteMessageBatchWithInvalidReceiptHandle() returns error? {
+    string queueUrl = standardQueueUrl;
+
+    SendMessageBatchEntry[] batch = [
+        {id: "id1", body: "Message A"},
+        {id: "id2", body: "Message B"}
+    ];
+    SendMessageBatchResponse|Error sendResult = sqsClient->sendMessageBatch(queueUrl, batch);
+    if sendResult is error {
+        test:assertFail("Failed to send batch messages: " + sendResult.toString());
+    }
+
+    Message[]|Error received = sqsClient->receiveMessage(queueUrl, {maxNumberOfMessages: 2});
+    if received is error || received.length() < 2 {
+        test:assertFail("Expected 2 messages, but received fewer");
+    }
+
+    DeleteMessageBatchEntry[] entries = [
+        {id: "id-1", receiptHandle: "invalid-receipt-handle"},
+        {id: "id-2", receiptHandle: check received[1].receiptHandle.ensureType()}
+
+    ];
+
+    DeleteMessageBatchResponse|Error result = sqsClient->deleteMessageBatch(queueUrl, entries);
+    if result is DeleteMessageBatchResponse {
+        test:assertEquals(result.successful.length(), 1);
+        test:assertEquals(result.failed.length(), 1);
+        test:assertEquals(result.failed[0].id, "id-1");
+    } else {
+        test:assertFail("Expected partial failure, got error: " + result.toString());
+    }
+}
+
+@test:Config {
+    dependsOn: [testCreateStandardQueue],
+    groups: ["deleteMessageBatch"]
+}
+function testDeleteMessageBatchWithDuplicateIds() returns error? {
+    string queueUrl = standardQueueUrl;
+
+    SendMessageBatchEntry[] batch = [
+        {id: "id1", body: "Message A"},
+        {id: "id2", body: "Message B"},
+        {id: "id3", body: "Message C"}
+    ];
+    SendMessageBatchResponse|Error sendResult = sqsClient->sendMessageBatch(queueUrl, batch);
+    if sendResult is error {
+        test:assertFail("Failed to send batch messages: " + sendResult.toString());
+    }
+
+    Message[]|Error received = sqsClient->receiveMessage(queueUrl, {maxNumberOfMessages: 3});
+    if received is error || received.length() < 2 {
+        test:assertFail("Expected 2 messages, but received fewer");
+    }
+
+    DeleteMessageBatchEntry[] entries = [
+        {id: "dup-id", receiptHandle: check received[0].receiptHandle.ensureType()},
+        {id: "dup-id", receiptHandle: check received[0].receiptHandle.ensureType()}
+    ];
+
+    DeleteMessageBatchResponse|Error result = sqsClient->deleteMessageBatch(queueUrl, entries);
+    test:assertTrue(result is Error);
+    if result is error {
+        ErrorDetails details = result.detail();
+        test:assertEquals(details.errorCode, "AWS.SimpleQueueService.BatchEntryIdsNotDistinct");
+        test:assertEquals(details.httpStatusCode, 400);
+        test:assertEquals(details.errorMessage, "Id dup-id repeated.");
     }
 }
 
