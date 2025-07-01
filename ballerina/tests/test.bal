@@ -994,3 +994,14 @@ function testTagQueueWithEmptyTagKey() returns error? {
     }
 }
 
+@test:Config {
+    dependsOn: [testCreateStandardQueue, testTagQueue],
+    groups: ["untagQueue"]
+}
+
+function testUntagQueue() returns error? {
+    string queueUrl = standardQueueUrl;
+    string[] tags = ["env", "version"];
+    Error? result = sqsClient->untagQueue(queueUrl,tags);
+    test:assertTrue(result is ());
+}
