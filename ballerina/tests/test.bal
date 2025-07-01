@@ -957,3 +957,40 @@ isolated function testGetNonExistentQueueUrl() returns error? {
     }
 
 }
+
+@test:Config {
+    dependsOn: [testCreateStandardQueue],
+    groups: ["tagQueue"]
+}
+
+function testTagQueue() returns error? {
+    string queueUrl = standardQueueUrl;
+    map<string> tags = {
+        "env": "dev",
+        "version": "0.1.0"
+    };
+    Error? result = sqsClient->tagQueue(queueUrl, tags);
+    test:assertTrue(result is ());
+}
+
+@test:Config {
+    dependsOn: [testCreateStandardQueue],
+    groups: ["tagQueue"]
+}
+
+function testTagQueueWithEmptyTagKey() returns error? {
+    string queueUrl = standardQueueUrl;
+    map<string> tags = {
+        "": "production"
+
+    };
+    Error? result = sqsClient->tagQueue(queueUrl, tags);
+    test:assertTrue(result is Error);
+    if result is error {
+        ErrorDetails details = result.detail();
+        test:assertEquals(details.errorCode, "InvalidParameterValue");
+        test:assertEquals(details.httpStatusCode, 400);
+        test:assertEquals(details.errorMessage, "Tag keys must be between 1 and 128 characters in length.");
+    }
+}
+
