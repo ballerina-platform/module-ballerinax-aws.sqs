@@ -800,7 +800,7 @@ function testGetQueueAttributesAll() returns error? {
     dependsOn: [testCreateQueueWithAttributes],
     groups: ["getQueueAttributes"]
 }
- function testGetQueueAttributesWithoutConfig() returns error? {
+function testGetQueueAttributesWithoutConfig() returns error? {
     string queueUrl = attrQueueurl;
 
     GetQueueAttributesResponse|Error result = sqsClient->getQueueAttributes(queueUrl);
@@ -829,4 +829,27 @@ function testGetQueueAttributesWithSomeAttributes() returns error? {
         test:assertEquals(detail.errorMessage, "Unknown Attribute FifoQueue.");
         test:assertEquals(detail.httpStatusCode, 400);
     }
+}
+
+@test:Config {
+    dependsOn: [testCreateStandardQueue],
+    groups: ["changeMessageVisibility"]
+}
+function testChangeMessageVisibility() returns error? {
+
+    string queueUrl = standardQueueUrl;
+
+    ReceiveMessageConfig receiveConfig = {
+        maxNumberOfMessages: 1,
+        waitTimeSeconds: 1
+    };
+    Message[] receivedMessages = check sqsClient->receiveMessage(queueUrl, receiveConfig);
+
+    test:assertEquals(receivedMessages.length(), 1, msg = "Expected to receive 1 message");
+
+    string? receiptHandle = receivedMessages[0].receiptHandle;
+    int newVisibilityTimeout = 60;
+
+    Error? result = sqsClient->changeMessageVisibility(queueUrl, <string>receiptHandle, newVisibilityTimeout);
+    test:assertFalse(result is error, msg = "changeMessageVisibility should not return error");
 }
