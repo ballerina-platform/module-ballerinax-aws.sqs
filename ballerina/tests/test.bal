@@ -922,3 +922,38 @@ isolated function testListQueuesPagination() returns error? {
         }
     }
 }
+
+@test:Config {
+    dependsOn: [testCreateStandardQueue],
+    groups: ["getQueueUrl"]
+}
+function testGetQueueUrl() returns error? {
+    string queueName = "test-queue";
+    string expectedQueueUrl = standardQueueUrl;
+
+    string|Error? result = sqsClient->getQueueUrl(queueName);
+    test:assertTrue(result is string);
+    if result is string {
+        test:assertEquals(result, expectedQueueUrl, msg = "Returned queue URL does not match the expected value.");
+    }
+
+}
+
+@test:Config {
+    groups: ["getQueueUrl"]
+}
+isolated function testGetNonExistentQueueUrl() returns error? {
+    string queueName = "TestQueue2";
+
+    string|Error? result = sqsClient->getQueueUrl(queueName);
+
+    test:assertTrue(result is Error);
+    if result is error {
+        ErrorDetails details = result.detail();
+        test:assertEquals(details.errorCode, "AWS.SimpleQueueService.NonExistentQueue");
+        test:assertEquals(details.errorMessage, "The specified queue does not exist.");
+        test:assertEquals(details.httpStatusCode, 400);
+
+    }
+
+}
