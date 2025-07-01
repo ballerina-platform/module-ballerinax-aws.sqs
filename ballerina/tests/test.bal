@@ -1005,3 +1005,14 @@ function testUntagQueue() returns error? {
     Error? result = sqsClient->untagQueue(queueUrl,tags);
     test:assertTrue(result is ());
 }
+
+@test:Config {
+    dependsOn: [testCreateStandardQueue, testTagQueue],
+    groups: ["listQueueTags"]
+}
+
+function testListQueueTags() returns error? {
+    string queueurl = standardQueueUrl;
+    ListQueueTagsResponse|Error result = sqsClient->listQueueTags(queueurl);  
+    test:assertTrue(result is ListQueueTagsResponse);
+}
