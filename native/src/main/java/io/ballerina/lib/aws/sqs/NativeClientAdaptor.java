@@ -41,7 +41,6 @@ import software.amazon.awssdk.services.sqs.SqsClient;
 import software.amazon.awssdk.services.sqs.model.CancelMessageMoveTaskRequest;
 import software.amazon.awssdk.services.sqs.model.CancelMessageMoveTaskResponse;
 import software.amazon.awssdk.services.sqs.model.ChangeMessageVisibilityRequest;
-import software.amazon.awssdk.services.sqs.model.ChangeMessageVisibilityResponse;
 import software.amazon.awssdk.services.sqs.model.CreateQueueRequest;
 import software.amazon.awssdk.services.sqs.model.CreateQueueResponse;
 import software.amazon.awssdk.services.sqs.model.DeleteMessageBatchRequest;
@@ -57,7 +56,6 @@ import software.amazon.awssdk.services.sqs.model.ListQueueTagsResponse;
 import software.amazon.awssdk.services.sqs.model.ListQueuesRequest;
 import software.amazon.awssdk.services.sqs.model.ListQueuesResponse;
 import software.amazon.awssdk.services.sqs.model.PurgeQueueRequest;
-import software.amazon.awssdk.services.sqs.model.PurgeQueueResponse;
 import software.amazon.awssdk.services.sqs.model.ReceiveMessageRequest;
 import software.amazon.awssdk.services.sqs.model.ReceiveMessageResponse;
 import software.amazon.awssdk.services.sqs.model.SendMessageBatchRequest;
@@ -65,7 +63,6 @@ import software.amazon.awssdk.services.sqs.model.SendMessageBatchResponse;
 import software.amazon.awssdk.services.sqs.model.SendMessageRequest;
 import software.amazon.awssdk.services.sqs.model.SendMessageResponse;
 import software.amazon.awssdk.services.sqs.model.SetQueueAttributesRequest;
-import software.amazon.awssdk.services.sqs.model.SetQueueAttributesResponse;
 import software.amazon.awssdk.services.sqs.model.StartMessageMoveTaskRequest;
 import software.amazon.awssdk.services.sqs.model.StartMessageMoveTaskResponse;
 import software.amazon.awssdk.services.sqs.model.TagQueueRequest;
@@ -296,7 +293,7 @@ public class NativeClientAdaptor {
             try {
                 SetQueueAttributesRequest request = SetQueueAttributesMapper
                         .getNativeSetQueueAttributesRequest(queueUrl, bQueueAttributes);
-                SetQueueAttributesResponse response = sqsClient.setQueueAttributes(request);
+                sqsClient.setQueueAttributes(request);
                 return null;
             } catch (Exception e) {
                 String msg = "Failed to set queue attributes: "
@@ -318,7 +315,7 @@ public class NativeClientAdaptor {
                         .receiptHandle(receiptHandle.getValue())
                         .visibilityTimeout((int) visibilityTimeout)
                         .build();
-                ChangeMessageVisibilityResponse response = sqsClient.changeMessageVisibility(request);
+                sqsClient.changeMessageVisibility(request);
                 return null;
 
             } catch (Exception e) {
@@ -337,7 +334,7 @@ public class NativeClientAdaptor {
                 PurgeQueueRequest request = PurgeQueueRequest.builder()
                         .queueUrl(queueurl.getValue())
                         .build();
-                PurgeQueueResponse response = sqsClient.purgeQueue(request);
+                sqsClient.purgeQueue(request);
                 return null;
             } catch (Exception e) {
                 String msg = "Failed to purge queue" + Objects.requireNonNullElse(e.getMessage(), "Unknown Error");
