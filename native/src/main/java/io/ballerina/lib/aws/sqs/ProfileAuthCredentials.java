@@ -18,12 +18,14 @@
 
 package io.ballerina.lib.aws.sqs;
 
-import io.ballerina.runtime.api.utils.StringUtils;
-import io.ballerina.runtime.api.values.BMap;
-import io.ballerina.runtime.api.values.BString;
+import java.nio.file.Paths;
+
+import software.amazon.awssdk.auth.credentials.ProfileCredentialsProvider;
+import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
+import software.amazon.awssdk.profiles.ProfileFile;
 
 /**
- * {@code InstanceProfileCredentials} represents EC2 IAM role based
+ * {@code InstanceProfileCredentials} represents IAM role based
  * authentication configurations
  * for the ballerina SQS API Client.
  *
@@ -33,17 +35,15 @@ import io.ballerina.runtime.api.values.BString;
  * @param credentialsFilePath The path to the profile file containing the
  *                            credentials.
  */
-public record InstanceProfileCredentials(String profileName, String credentialsFilePath) {
-    private static final BString EC2_INSTANCE_PROFILE_NAME = StringUtils.fromString("profileName");
-    private static final BString EC2_INSTANCE_PROFILE_FILE = StringUtils.fromString("credentialsFilePath");
 
-    public InstanceProfileCredentials(BMap<BString, Object> bAuthConfig) {
-        this(
-                bAuthConfig.containsKey(EC2_INSTANCE_PROFILE_NAME)
-                        ? bAuthConfig.getStringValue(EC2_INSTANCE_PROFILE_NAME).getValue()
-                        : null,
-                bAuthConfig.containsKey(EC2_INSTANCE_PROFILE_FILE)
-                        ? bAuthConfig.getStringValue(EC2_INSTANCE_PROFILE_FILE).getValue()
-                        : null);
+public class ProfileAuthCredentials {
+    public static AwsCredentialsProvider fromConfig(String profileName, String credentialsFilePath) {
+        return ProfileCredentialsProvider.builder()
+                .profileName(profileName)
+                .profileFile(ProfileFile.builder()
+                        .content(Paths.get(credentialsFilePath))
+                        .type(ProfileFile.Type.CREDENTIALS)
+                        .build())
+                .build();
     }
 }

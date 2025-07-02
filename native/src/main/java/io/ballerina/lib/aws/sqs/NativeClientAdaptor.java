@@ -16,7 +16,6 @@
 
 package io.ballerina.lib.aws.sqs;
 
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -34,9 +33,7 @@ import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.AwsCredentials;
 import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
 import software.amazon.awssdk.auth.credentials.AwsSessionCredentials;
-import software.amazon.awssdk.auth.credentials.InstanceProfileCredentialsProvider;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
-import software.amazon.awssdk.profiles.ProfileFile;
 import software.amazon.awssdk.services.sqs.SqsClient;
 import software.amazon.awssdk.services.sqs.model.CancelMessageMoveTaskRequest;
 import software.amazon.awssdk.services.sqs.model.CancelMessageMoveTaskResponse;
@@ -103,19 +100,10 @@ public class NativeClientAdaptor {
                     : AwsBasicCredentials.create(staticAuth.accessKeyId(), staticAuth.secretAccessKey());
             return StaticCredentialsProvider.create(credentials);
         }
-        InstanceProfileCredentials instanceProfileCredentials = (InstanceProfileCredentials) authConfig;
-        InstanceProfileCredentialsProvider.Builder instanceCredentialBuilder = InstanceProfileCredentialsProvider
-                .builder();
-        if (Objects.nonNull(instanceProfileCredentials.profileName())) {
-            instanceCredentialBuilder.profileName(instanceProfileCredentials.profileName());
+        if (authConfig instanceof AwsCredentialsProvider) {
+            return (AwsCredentialsProvider) authConfig;
         }
-        if (Objects.nonNull(instanceProfileCredentials.credentialsFilePath())) {
-            instanceCredentialBuilder.profileFile(ProfileFile.builder()
-                    .content(Path.of(instanceProfileCredentials.credentialsFilePath()))
-                    .type(ProfileFile.Type.CONFIGURATION)
-                    .build());
-        }
-        return instanceCredentialBuilder.build();
+        throw new IllegalArgumentException("Unsupported authentication configuration");
     }
 
     public static Object sendMessage(Environment env, BObject bClient, BString queueUrl, BString messageBody,
