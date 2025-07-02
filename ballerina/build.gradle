@@ -140,7 +140,7 @@ dependencies {
 task updateTomlFiles {
     doLast {
         def newConfig = ballerinaTomlFilePlaceHolder.text.replace('@project.version@', project.version.toString())
-        //newConfig = newConfig.replace('@toml.version@', tomlVersion)
+        newConfig = newConfig.replace('@toml.version@', tomlVersion)
         newConfig = newConfig.replace("@aws.sdk.version@", project.awsJavaSdkVersion)
         newConfig = newConfig.replace("@apache.httpcore.version@", project.apacheHttpCoreVersion)
         newConfig = newConfig.replace("@apache.httpclient.version@", project.apacheHttpClientVersion)
@@ -151,14 +151,14 @@ task updateTomlFiles {
 
 task commitTomlFiles {
     doLast {
-    //    project.exec {
-    //        ignoreExitValue true
-    //        if (Os.isFamily(Os.FAMILY_WINDOWS)) {
-    //            commandLine 'cmd', '/c', "git commit -m \"[Automated] Update the toml files\" Ballerina.toml Dependencies.toml"
-    //        } else {
-    //            commandLine 'sh', '-c', "git commit -m '[Automated] Update the toml files' Ballerina.toml Dependencies.toml"
-    //        }
-    //    }
+       project.exec {
+           ignoreExitValue true
+           if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+               commandLine 'cmd', '/c', "git commit -m \"[Automated] Update the toml files\" Ballerina.toml Dependencies.toml"
+           } else {
+               commandLine 'sh', '-c', "git commit -m '[Automated] Update the toml files' Ballerina.toml Dependencies.toml"
+           }
+       }
     }
 }
 
