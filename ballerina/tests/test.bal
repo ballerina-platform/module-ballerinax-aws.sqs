@@ -746,7 +746,12 @@ function testDeleteMessageBatchWithDuplicateIds() returns error? {
         test:assertFail("Failed to send batch messages: " + sendResult.toString());
     }
 
-    Message[]|Error received = sqsClient->receiveMessage(queueUrl, {maxNumberOfMessages: 3});
+    ReceiveMessageConfig receiveConfig = {
+        waitTimeSeconds: 15,
+        maxNumberOfMessages: 10
+    };
+
+    Message[]|Error received = sqsClient->receiveMessage(queueUrl, receiveConfig);
     if received is error || received.length() < 2 {
         test:assertFail("Expected 2 messages, but received fewer");
     }
@@ -865,7 +870,7 @@ function testChangeMessageVisibility() returns error? {
 
     ReceiveMessageConfig receiveConfig = {
         maxNumberOfMessages: 1,
-        waitTimeSeconds: 1
+        waitTimeSeconds: 10
     };
     Message[] receivedMessages = check sqsClient->receiveMessage(queueUrl, receiveConfig);
 
