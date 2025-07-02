@@ -673,7 +673,7 @@ function testDeleteMessageBatchSuccess() returns error? {
         test:assertFail("Failed to send batch messages: " + sendResult.toString());
     }
 
-    Message[]|error received = sqsClient->receiveMessage(queueUrl, {maxNumberOfMessages: 2});
+    Message[]|error received = sqsClient->receiveMessage(queueUrl, {maxNumberOfMessages: 2, waitTimeSeconds: 10});
     if received is error || received.length() < 2 {
         test:assertFail("Expected 2 messages, but received fewer");
     }
@@ -708,7 +708,7 @@ function testDeleteMessageBatchWithInvalidReceiptHandle() returns error? {
         test:assertFail("Failed to send batch messages: " + sendResult.toString());
     }
 
-    Message[]|Error received = sqsClient->receiveMessage(queueUrl, {maxNumberOfMessages: 2});
+    Message[]|Error received = sqsClient->receiveMessage(queueUrl, {maxNumberOfMessages: 2, waitTimeSeconds: 15});
     if received is error || received.length() < 2 {
         test:assertFail("Expected 2 messages, but received fewer");
     }
