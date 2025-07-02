@@ -27,12 +27,25 @@ import static io.ballerina.lib.aws.sqs.StaticAuthConfig.AWS_ACCESS_KEY_ID;
 
 /**
  * {@code ConnectionConfig} represents the connection configuration required for
- * ballerina SQS API Client.
+ * the Ballerina AWS SQS API Client.
  *
- * @param region         The AWS region where the SQS cluster is located.
- * @param authConfig     The authentication configuration required for the
- *                       SQS API Client.
- * @param dbAccessConfig The base access configurations for the SQS API.
+ * <p>
+ * This record encapsulates the AWS region and authentication configuration
+ * (either static credentials or profile-based credentials) used to initialize
+ * the SQS client.
+ * </p>
+ *
+ * <ul>
+ * <li><b>region</b> - The AWS region where the SQS service is accessed.</li>
+ * <li><b>authConfig</b> - The authentication configuration, which can be
+ * either:
+ * <ul>
+ * <li>{@link StaticAuthConfig} for static access key/secret key
+ * authentication</li>
+ * <li>{@link ProfileAuthConfig} for profile-based authentication</li>
+ * </ul>
+ * </li>
+ * </ul>
  */
 public record ConnectionConfig(Region region, Object authConfig) {
     private static final BString CONNECTION_CONFIG_REGION = StringUtils.fromString("region");
@@ -59,7 +72,7 @@ public record ConnectionConfig(Region region, Object authConfig) {
             String profileName = bAuthConfig.getStringValue(StringUtils.fromString("profileName")).getValue();
             String credentialsFilePath = bAuthConfig.getStringValue(StringUtils.fromString("credentialsFilePath"))
                     .getValue();
-            return ProfileAuthCredentials.fromConfig(profileName, credentialsFilePath);
+            return ProfileAuthConfig.fromConfig(profileName, credentialsFilePath);
         }
 
         throw new IllegalArgumentException("Unsupported authentication configuration");

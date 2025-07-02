@@ -34,7 +34,6 @@ import software.amazon.awssdk.services.sqs.model.ReceiveMessageResponse;
 
 public class ReceiveMessageMapper {
 
-    // Constants related to `ReceiveMessageConfig` and `Message`
     private static final BString WAIT_TIME_SECONDS = StringUtils.fromString("waitTimeSeconds");
     private static final BString VISIBILITY_TIMEOUT = StringUtils.fromString("visibilityTimeout");
     private static final BString MAX_NUMBER_OF_MESSAGES = StringUtils.fromString("maxNumberOfMessages");
@@ -50,7 +49,6 @@ public class ReceiveMessageMapper {
     private static final BString MD5_OF_BODY = StringUtils.fromString("md5OfMessageBody");
 
     private ReceiveMessageMapper() {
-
     }
 
     public static ReceiveMessageRequest getNativeReceiveMessageRequest(BString queueUrl,

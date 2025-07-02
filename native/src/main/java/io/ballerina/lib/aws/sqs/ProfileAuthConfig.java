@@ -25,18 +25,24 @@ import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
 import software.amazon.awssdk.profiles.ProfileFile;
 
 /**
- * {@code InstanceProfileCredentials} represents IAM role based
- * authentication configurations
- * for the ballerina SQS API Client.
+ * {@code ProfileAuthCredentials} provides a utility to create an AWS
+ * credentials provider
+ * using a named profile from a specified AWS credentials file.
  *
- * @param profileName         Configure the profile name used for loading
- *                            IMDS-related configuration,
- *                            like the endpoint mode (IPv4 vs IPv6).
- * @param credentialsFilePath The path to the profile file containing the
- *                            credentials.
+ * <p>
+ * This is used for profile-based authentication in the Ballerina AWS SQS API
+ * Client.
+ * The credentials file should be in the standard AWS format, and the profile
+ * name must exist in that file.
+ * </p>
+ *
+ * @param profileName         The name of the AWS profile to use from the
+ *                            credentials file
+ * @param credentialsFilePath The path to the AWS credentials file (e.g.,
+ *                            "~/.aws/credentials")
  */
 
-public class ProfileAuthCredentials {
+public class ProfileAuthConfig {
     public static AwsCredentialsProvider fromConfig(String profileName, String credentialsFilePath) {
         return ProfileCredentialsProvider.builder()
                 .profileName(profileName)

@@ -31,15 +31,12 @@ import software.amazon.awssdk.services.sqs.model.SendMessageResponse;
 
 public final class SendMessageMapper {
 
-    // Constants related to `SendmessageResponse`
     private static final String SEND_MESSAGE_RESPONSE = "SendMessageResponse";
     private static final BString MESSAGE_ID = StringUtils.fromString("messageId");
     private static final BString MD5_OF_BODY = StringUtils.fromString("md5OfMessageBody");
     private static final BString MD5_OF_ATTRIBUTES = StringUtils.fromString("md5OfMessageAttributes");
     private static final BString MD5_OF_SYS_ATTRIBUTES = StringUtils.fromString("md5OfMessageSystemAttributes");
     private static final BString SEQUENCE_NUMBER = StringUtils.fromString("sequenceNumber");
-
-    // Constants related to `SendmessageConfig`
     private static final BString DELAY_SECONDS = StringUtils.fromString("delaySeconds");
     private static final BString MESSAGE_ATTRIBUTES = StringUtils.fromString("messageAttributes");
     private static final BString AWS_TRACE_HEADER = StringUtils.fromString("awsTraceHeader");
@@ -47,7 +44,6 @@ public final class SendMessageMapper {
     private static final BString MESSAGE_GROUP_ID = StringUtils.fromString("messageGroupId");
 
     private SendMessageMapper() {
-
     }
 
     @SuppressWarnings("unchecked")

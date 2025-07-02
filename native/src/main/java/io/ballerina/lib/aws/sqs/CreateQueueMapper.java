@@ -15,7 +15,6 @@ public class CreateQueueMapper {
     public static final BString TAGS = StringUtils.fromString("tags");
 
     private CreateQueueMapper() {
-
     }
 
     @SuppressWarnings("unchecked")
