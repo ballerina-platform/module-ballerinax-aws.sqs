@@ -14,32 +14,32 @@
 // specific language governing permissions and limitations
 // under the License.
 
-# Represents the connection configuration for the Amazon SQS client
+# Represents the connection configuration for the Amazon SQS client.
 #
 # + region - AWS region (e.g., `us-east-1`)
-# + auth - Authentication configuration using static credentials or AWS profile
+# + auth - Authentication configuration using either static credentials or an AWS profile
 public type ConnectionConfig record {|
     Region region;
     StaticAuthConfig|ProfileAuthConfig auth;
 |};
 
-# Represents static authentication configurations for the SQS API
+# Represents static authentication configuration for the Amazon SQS Client
 #
-# + accessKeyId - The AWS access key ID, used to identify the user interacting with AWS
-# + secretAccessKey - The AWS secret access key, used to authenticate the user interacting with AWS
-# + sessionToken - The AWS session token, used for authenticating a user with temporary permission to a resource
+# + accessKeyId - AWS access key ID used to identify the AWS account
+# + secretAccessKey - AWS secret access key used to authenticate the user
+# + sessionToken - Optional session token used for temporary credentials
 public type StaticAuthConfig record {|
     string accessKeyId;
     string secretAccessKey;
     string sessionToken?;
 |};
 
-# Represents AWS profile-based authentication configuration for SQS API
+# Represents profile-based authentication configuration for the Amazon SQS client.
 #
-# + profileName - Name of the AWS profile in `~/.aws/credentials`
-# + credentialsFilePath - Optional custom path to the credentials file. Defaults to `"~/.aws/credentials"`
+# + profileName - Name of the AWS profile in the credentials file
+# + credentialsFilePath - Optional custom path to the AWS credentials file
+#
 # The credentials file should follow the standard AWS format:
-#
 # ```
 # [default]
 # aws_access_key_id = YOUR_ACCESS_KEY_ID
@@ -54,7 +54,7 @@ public type ProfileAuthConfig record {|
     string credentialsFilePath = "~/.aws/credentials";
 |};
 
-# An Amazon Web Services region that hosts a set of Amazon services
+# Represents an AWS Region used by the Amazon SQS client.
 public enum Region {
     AF_SOUTH_1 = "af-south-1",
     AP_EAST_1 = "ap-east-1",
@@ -100,15 +100,13 @@ public enum Region {
     US_WEST_2 = "us-west-2"
 }
 
-# Contains the response details returned by the SendMessage API.
-# Includes identifiers and checksums used to validate the success and integrity of the message sent.
-# For FIFO queues, includes a sequence number to maintain message order.
+# Contains response details returned by the `sendMessage` API.
 #
-# + messageId - Contains the MessageId of the message sent to the queue.
-# + md5OfMessageBody - An MD5 digest of the non-URL-encoded message body string. This attribute can be used to verify that Amazon SQS received the message correctly. 
-# + md5OfMessageAttributes - An MD5 digest of the non-URL-encoded message attribute string. This attribute can be used to verify that Amazon SQS received the message correctly. 
-# + md5OfMessageSystemAttributes - An MD5 digest of the non-URL-encoded message system attribute string. This attribute can be used to verify that Amazon SQS received the message correctly.  
-# + sequenceNumber - The large, non-consecutive number that Amazon SQS assigns to each message. The length of SequenceNumber is 128 bits. SequenceNumber continues to increase for a particular MessageGroupId. Applies only to FIFO queues. 
+# + messageId - Unique ID assigned to the message
+# + md5OfMessageBody - MD5 digest of the non-URL-encoded message body
+# + md5OfMessageAttributes - MD5 digest of the non-URL-encoded message attribute string
+# + md5OfMessageSystemAttributes - MD5 digest of the non-URL-encoded system attribute string
+# + sequenceNumber - Message sequence number for FIFO queues
 public type SendMessageResponse record {|
     string messageId;
     string md5OfMessageBody;
@@ -117,13 +115,13 @@ public type SendMessageResponse record {|
     string sequenceNumber?;
 |};
 
-# Represents common optional parameters used when sending a message to an Amazon SQS queue.These fields can be applied to both `SendMessage` and `SendMessageBatch`.
+# Represents optional parameters for sending messages to Amazon SQS.
 #
-# + delaySeconds - The length of time, in seconds, for which to delay a specific message. Valid values: 0 to 900. Maximum: 15 minutes. Messages with a positive `DelaySeconds` value become available for processing after the delay period is finished. If you don't specify a value, the default value for the queue applies. 
-# + messageAttributes - Custom user-defined attributes to send with the message. Each attribute has a name, type, and value. `messageAttributes` can be used to attach custom metadata to Amazon SQS messages for your applications. 
-# + awsTraceHeader - The AWS X-Ray tracing header to associate with the message. This value is assigned to the system attribute `awsTraceHeader` and enables distributed tracing support in AWS services. This is the only supported system attribute in Amazon SQS currently.
-# + messageDeduplicationId - A token used for deduplicating sent messages. Applies only to FIFO queues.
-# + messageGroupId - A tag that specifies the message group it belongs to. Applies only to FIFO queues.
+# + delaySeconds - Duration to delay the message, in seconds (0 to 900)
+# + messageAttributes - Custom attributes to attach to the message
+# + awsTraceHeader - X-Ray tracing header for distributed tracing support
+# + messageDeduplicationId - Token for deduplicating messages (FIFO only)
+# + messageGroupId - Tag specifying the message group (FIFO only)
 public type SendMessageConfig record {|
     int delaySeconds?;
     map<MessageAttributeValue> messageAttributes?;
@@ -132,25 +130,25 @@ public type SendMessageConfig record {|
     string messageGroupId?;
 |};
 
-# The user-specified message attribute value that is sent as part of the message. Each attribute includes a data type and one of the following: a string, a binary value, or a list of strings. The name, data type, and value must not be empty or null. All parts of the message attribute contribute to the 256 KB message size limit (262,144 bytes), including name, type, and value.
+# Represents a user-defined message attribute sent with a message.
 #
-# + dataType - The type of the attribute. Must be String, Number, or Binary.
-# + stringValue - Strings are Unicode with UTF-8 binary encoding. 
-# + binaryValue - Binary type attributes can store any binary data, such as compressed data, encrypted data, or images. 
+# + dataType - Type of the attribute: `String`, `Number`, or `Binary`
+# + stringValue - Optional string value
+# + binaryValue - Optional binary data (e.g., encrypted or compressed)
 public type MessageAttributeValue record {|
     string dataType;
     string stringValue?;
     byte[] binaryValue?;
 |};
 
-# Configuration options for receiving messages from an AWS SQS queue.
+# Represents optional parameters for receiving messages from an SQS queue.
 #
-# + waitTimeSeconds - The duration (in seconds) for which the call waits for a message to arrive before returning. Enables long polling when set to greater than 0.
-# + visibilityTimeout - The duration (in seconds) that the received messages are hidden from subsequent retrieve requests. 
-# + maxNumberOfMessages - The maximum number of messages to return. Valid values: 1 to 10. Default is 1.
-# + receiveRequestAttemptId - A token used for deduplication of `ReceiveMessage` calls. Applies only to FIFO queues. If a networking issue occurs after a ReceiveMessage action, and instead of a response you receive a generic error, it is possible to retry the same action with an identical `receiveRequestAttemptId` to retrieve the same set of messages, even if their visibility timeout has not yet expired. 
-# + messageAttributeNames - A list of message attribute names to return. Use `All` to receive all message attributes.
-# + messageSystemAttributeNames - A list of system attribute names to return. Use `All` to receive all system attributes.
+# + waitTimeSeconds - Duration to wait for a message to arrive (long polling)
+# + visibilityTimeout - Visibility timeout for received messages
+# + maxNumberOfMessages - Maximum number of messages to receive (1 to 10)
+# + receiveRequestAttemptId - Deduplication token for `receiveMessage` requests (FIFO only) 
+# + messageAttributeNames - List of message attribute names to return; use `All` to get all
+# + messageSystemAttributeNames - List of system attribute names to return; use `All` to get all
 public type ReceiveMessageConfig record {|
     int waitTimeSeconds?;
     int visibilityTimeout?;
