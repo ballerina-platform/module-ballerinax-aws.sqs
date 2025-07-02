@@ -1223,7 +1223,7 @@ function testCreateQueueWithPolicy() returns error? {
     string|Error result = sqsClient->createQueue(queueName, config);
     if result is string {
         test:assertTrue(result.endsWith(queueName));
-        
+
         GetQueueAttributesConfig attrConfig = {
             attributeNames: [POLICY]
         };
