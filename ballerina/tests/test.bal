@@ -8,13 +8,25 @@ string attrQueueurl = "";
 @test:Config {
     groups: ["init"]
 }
-isolated function testInit() returns error? {
+isolated function testInitUsingStaticAuth() returns error? {
     ConnectionConfig connectionConfig = {
         region: awsRegion,
-        auth
+        auth: staticAuth
     };
-    Client redshiftData = check new (connectionConfig);
-    check redshiftData->close();
+    Client sqsClient = check new (connectionConfig);
+    check sqsClient->close();
+}
+
+@test:Config {
+    groups: ["init"]
+}
+isolated function testInitUsingProfileAuth() returns error? {
+    ConnectionConfig connectionConfig = {
+        region: awsRegion,
+        auth: profileAuth
+    };
+    Client sqsClient = check new (connectionConfig);
+    check sqsClient->close();
 }
 
 
