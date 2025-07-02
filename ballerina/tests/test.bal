@@ -1186,7 +1186,7 @@ isolated function testDeleteNonExistentQueue() returns error? {
     Error? result = sqsClient->deleteQueue(queueUrl);
     test:assertTrue(result is Error, msg = "Expected uncessfull deletion.");
     if result is error {
-        ErrorDetails detais = result.detail();
+        ErrorDetails details = result.detail();
         test:assertEquals(detais.errorCode, "AWS.SimpleQueueService.NonExistentQueue");
         test:assertEquals(detais.httpStatusCode, 400);
         test:assertEquals(detais.errorMessage, "The specified queue does not exist.");
