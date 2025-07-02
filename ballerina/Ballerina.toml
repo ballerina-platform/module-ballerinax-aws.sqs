@@ -7,7 +7,7 @@ keywords=["IT Operations/Message Brokers", "Cost/Freemium", "Vendor/Amazon"]
 repository= "https://github.com/ballerina-platform/module-ballerinax-aws.sqs"
 icon="icon.png"
 license=["Apache-2.0"]
-distribution = "2201.11.0"
+distribution = "2201.12.6"
 
 
 [[platform.java21.dependency]]
