@@ -18,15 +18,14 @@ import ballerina/jballerina.java;
 
 # The Amazon SQS API Client.
 #
-# This client provides access to Amazon Simple Queue Service (SQS) API using AWS SDK for Java V2.
-# The connector supports static credentials and profile-based credentials.
-#
+# Provides access to Amazon Simple Queue Service (SQS) using the AWS SDK for Java V2.
+# Supports static and profile-based credential configurations.
 public isolated client class Client {
 
-    # Initializes the Amazon SQS client with the provided connection configuration
+    # Initializes the Amazon SQS client with the provided connection configuration.
     #
     # + connectionConfig - The Amazon SQS client configuration
-    # + return - The `sqs:Client` or `sqs:Error` if initialization fails
+    # + return - The `sqs:Client` instance or `sqs:Error` if initialization fails
     public isolated function init(*ConnectionConfig connectionConfig) returns Error? {
         return self.externInit(connectionConfig);
     }
@@ -39,13 +38,12 @@ public isolated client class Client {
 
     # Delivers a message to the specified SQS queue.
     #
-    # + queueUrl - The URL of the Amazon SQS queue to which the message is sent. Queue URLs and names are case-sensitive.
-    # + messageBody - The message to send.The minimum message size is 1 byte (1 character). The maximum is 262,144 bytes (256 KiB).
-    # + sendMessageConfig - Optional parameters such as `delaySeconds`, `messageAttributes`, `messageSystemAttributes`, `messageDeduplicationId`and `messageGroupId`.
-    # + return - A `SendMessageResponse` record on success, or an `Error` on failure.
+    # + queueUrl - URL of the Amazon SQS queue to which the message is sent
+    # + messageBody - Message to send; minimum size is 1 byte and maximum is 262,144 bytes (256 KiB)
+    # + sendMessageConfig - Optional parameters such as `delaySeconds`, `messageAttributes`, `messageSystemAttributes`, `messageDeduplicationId`, and `messageGroupId`
+    # + return - A `sqs:SendMessageResponse` on success, or an `sqs:Error` on failure
     remote isolated function sendMessage(string queueUrl, string messageBody, *SendMessageConfig sendMessageConfig)
     returns SendMessageResponse|Error {
-
         return self.externSendMessage(queueUrl, messageBody, sendMessageConfig);
     }
 
@@ -55,11 +53,11 @@ public isolated client class Client {
         'class: "io.ballerina.lib.aws.sqs.NativeClientAdaptor"
     } external;
 
-    # Retrieves one or more messages from the specified queue
+    # Retrieves one or more messages from the specified queue.
     #
-    # + queueUrl - The URL of the Amazon SQS queue from which messages are received
+    # + queueUrl - URL of the Amazon SQS queue from which messages are received
     # + receiveMessageConfig - Optional parameters for receiving messages
-    # + return - An array of `Message` records or an `Error`
+    # + return - An array of `sqs:Message` records, or an `sqs:Error` on failure
     remote isolated function receiveMessage(string queueUrl, *ReceiveMessageConfig receiveMessageConfig)
         returns Message[]|Error {
         return self.externReceiveMessage(queueUrl, receiveMessageConfig);
@@ -71,11 +69,11 @@ public isolated client class Client {
         'class: "io.ballerina.lib.aws.sqs.NativeClientAdaptor"
     } external;
 
-    # Deletes a specified message from an Amazon SQS queue using the given receipt handle
+    # Deletes a specified message from an Amazon SQS queue using the given receipt handle.
     #
-    # + queueUrl - The URL of the Amazon SQS queue from which messages are deleted
-    # + receiptHandle - The receipt handle associated with the message to delete
-    # + return - `Error` on failure
+    # + queueUrl - URL of the Amazon SQS queue from which messages are deleted
+    # + receiptHandle - Receipt handle associated with the message to delete
+    # + return - An `sqs:Error` if the operation fails
     remote isolated function deleteMessage(string queueUrl, string receiptHandle) returns Error? {
         return self.externDeleteMessage(queueUrl, receiptHandle);
     }
@@ -86,11 +84,11 @@ public isolated client class Client {
 
     } external;
 
-    # Sends up to 10 messages as a batch to the specified Amazon SQS queue
+    # Sends up to 10 messages as a batch to the specified Amazon SQS queue.
     #
-    # + queueUrl - The URL of the Amazon SQS queue to which batched messages are sent. Queue URLs and names are case-sensitive
-    # + entries - A list of `SendMessageBatchEntry` items
-    # + return - A `SendMessageBatchResponse` indicating which messages succeeded or failed and `Error` on failure
+    # + queueUrl - URL of the Amazon SQS queue to which batched messages are sent
+    # + entries - A list of `sqs:SendMessageBatchEntry` records
+    # + return - A `sqs:SendMessageBatchResponse` indicating which messages succeeded or failed, or an `sqs:Error` on failure
     isolated remote function sendMessageBatch(string queueUrl, SendMessageBatchEntry[] entries)
         returns SendMessageBatchResponse|Error {
         return self.externSendMessageBatch(queueUrl, entries);
@@ -102,12 +100,12 @@ public isolated client class Client {
         'class: "io.ballerina.lib.aws.sqs.NativeClientAdaptor"
     } external;
 
-    # Deletes up to ten messages from the specified queue. This is a batch version of `DeleteMessage`. The result of the
-    # action on each message is reported individually in the response.
+    # Deletes up to ten messages from the specified queue. This is a batch version of `sqs:deleteMessage`. 
+    # The result of the action on each message is reported individually in the response.
     #
-    # + queueUrl - The URL of the Amazon SQS queue from which messages are deleted. Queue URLs and names are case-sensitive.
-    # + entries - List of the receipt handles of the messages to be deleted.
-    # + return - A `DeleteMessageBatchResponse` indicating which deletions succeeded or failed and `Error` on failure.
+    # + queueUrl - URL of the Amazon SQS queue from which messages are deleted
+    # + entries - List of `sqs:DeleteMessageBatchEntry` records containing receipt handles of messages to delete
+    # + return - A `sqs:DeleteMessageBatchResponse` indicating which deletions succeeded or failed, or an `sqs:Error` on failure
     isolated remote function deleteMessageBatch(string queueUrl, DeleteMessageBatchEntry[] entries)
         returns DeleteMessageBatchResponse|Error {
         return self.externDeleteMessageBatch(queueUrl, entries);
@@ -120,13 +118,10 @@ public isolated client class Client {
 
     # Creates a new Amazon SQS queue with the specified attributes and tags.
     #
-    # + queueName - The name of the new queue.
-    # The following limits apply to this name:
-    # - A queue name can have up to 80 characters.
-    # - Valid values: alphanumeric characters, hyphens (-), and underscores (_).
-    # A FIFO queue name must end with the .fifo suffix. Queue URLs and names are case-sensitive. 
-    # + createQueueConfig - Optional parameters such as `queueAttributes` and `tags`.
-    # + return - The URL of the created queue, or an Error.
+    # + queueName - Name of the new queue; valid values include alphanumeric characters, hyphens (-), and underscores 
+    # (_), and can be up to 80 characters long. FIFO queue names must end with the `.fifo` suffix
+    # + createQueueConfig - Optional configuration such as `queueAttributes` and `tags`
+    # + return - URL of the created queue, or an `sqs:Error` on failure
     isolated remote function createQueue(string queueName, *CreateQueueConfig createQueueConfig) returns string|Error {
         return self.externCreateQueue(queueName, createQueueConfig);
     }
@@ -136,10 +131,10 @@ public isolated client class Client {
         'class: "io.ballerina.lib.aws.sqs.NativeClientAdaptor"
     } external;
 
-    # Deletes the specified Amazon SQS queue
+    # Deletes the specified Amazon SQS queue.
     #
-    # + queueUrl - The URL of the Amazon SQS queue to delete.Queue URLs and names are case-sensitive
-    # + return - `Error` on failure
+    # + queueUrl - The URL of the Amazon SQS queue to delete
+    # + return - An `sqs:Error` on failure
     isolated remote function deleteQueue(string queueUrl) returns Error? {
         return self.externDeleteQueue(queueUrl);
     }
@@ -151,9 +146,9 @@ public isolated client class Client {
 
     # Retrieves the URL of the specified Amazon SQS queue.
     #
-    # + queueName - The name of the queue for which you want to fetch the URL. The name can be up to 80 characters long and can include alphanumeric characters, hyphens (-), and underscores (_). Queue URLs and names are case-sensitive. 
-    # + getQueueUrlConfig - The optional parameters for retrieving the queue URL, such as `queueOwnerAWSAccountId`.
-    # + return - The URL of the requested queue, or an Error
+    # + queueName - Name of the queue; can include alphanumeric characters, hyphens (-), and underscores (_), and must be up to 80 characters long
+    # + getQueueUrlConfig - Optional parameters such as `queueOwnerAWSAccountId`
+    # + return - URL of the requested queue, or an `sqs:Error` on failure
     isolated remote function getQueueUrl(string queueName, *GetQueueUrlConfig getQueueUrlConfig)
         returns string|Error {
         return self.externGetQueueUrl(queueName, getQueueUrlConfig);
@@ -164,11 +159,10 @@ public isolated client class Client {
         'class: "io.ballerina.lib.aws.sqs.NativeClientAdaptor"
     } external;
 
-    # Returns a list of your queues in the current region. The response includes a maximum of 1,000 results.
-    # If you specify a value for the optional QueueNamePrefix parameter, only queues with a name that begins with the specified value are returned.
+    # Lists the Amazon SQS queues in the current region. Supports filtering by name prefix and paginated results.
     #
-    # + listQueuesConfig - The optional parameters for listing queues, such as `maxResults`, `nextToken`, and `queueNamePrefix`.
-    # + return - A `ListQueuesResponse` with queue URLs and optional  `nextToken`, or an Error.
+    # + listQueuesConfig - Optional parameters such as `queueNamePrefix`, `maxResults`, and `nextToken`
+    # + return - A `sqs:ListQueuesResponse` containing queue URLs and an optional `nextToken`, or an `sqs:Error` on failure
     isolated remote function listQueues(*ListQueuesConfig listQueuesConfig) returns ListQueuesResponse|Error {
         return self.externListQueues(listQueuesConfig);
     }
@@ -180,9 +174,9 @@ public isolated client class Client {
 
     # Retrieves the attributes of the specified Amazon SQS queue.
     #
-    # + queueUrl - The URL of the Amazon SQS queue whose attribute information is retrieved. Queue URLs and names are case-sensitive.
-    # + getQueueAttributesConfig - The optional parameters for retrieving queue attributes, such as `attributeNames`.
-    # + return - A `GetQueueAttributesResponse` containing the queue attributes or an Error.
+    # + queueUrl - URL of the Amazon SQS queue whose attributes are retrieved
+    # + getQueueAttributesConfig - Optional parameters such as `attributeNames`
+    # + return - A `sqs:GetQueueAttributesResponse` containing the queue attributes, or an `sqs:Error` on failure
     isolated remote function getQueueAttributes(string queueUrl, *GetQueueAttributesConfig getQueueAttributesConfig)
         returns GetQueueAttributesResponse|Error {
         return self.externgetQueueAttributes(queueUrl, getQueueAttributesConfig);
@@ -193,11 +187,11 @@ public isolated client class Client {
         'class: "io.ballerina.lib.aws.sqs.NativeClientAdaptor"
     } external;
 
-    # Sets one or more attributes of the specified SQS queue.
+    # Sets one or more attributes for the specified Amazon SQS queue.
     #
-    # + queueUrl - The URL of the Amazon SQS queue whose attributes are set. Queue URLs and names are case-sensitive.
-    # + queueAttributes - The optional parameters for setting queue attributes, such as `queueAttributes`.
-    # + return - `Error` on failure.
+    # + queueUrl - URL of the Amazon SQS queue to configure
+    # + queueAttributes - Attributes to set for the queue
+    # + return - An `sqs:Error` on failure
     isolated remote function setQueueAttributes(string queueUrl, QueueAttributes queueAttributes) returns Error? {
         return self.externSetQueueAttributes(queueUrl, queueAttributes);
     }
@@ -207,12 +201,12 @@ public isolated client class Client {
         'class: "io.ballerina.lib.aws.sqs.NativeClientAdaptor"
     } external;
 
-    # Changes the visibility timeout of a specified message in a queue to a new value. The default visibility timeout for a message is 30 seconds. The  minimum is 0 seconds. The maximum is 12 hours.
+    # Changes the visibility timeout of a specific message in a queue.
     #
-    # + queueUrl - The URL of the Amazon SQS queue whose message's visibility is changed. Queue URLs and names are case-sensitive. 
-    # + receiptHandle - The receipt handle associated with the message, whose visibility timeout is changed. This parameter is returned by the `ReceiveMessage` action. 
-    # + visibilityTimeout - The new value for the message's visibility timeout (in seconds).
-    # + return - `Error` on failure.
+    # + queueUrl - URL of the Amazon SQS queue containing the message
+    # + receiptHandle - Receipt handle of the message returned by the `sqs:receiveMessage` operation
+    # + visibilityTimeout - New visibility timeout value in seconds (minimum 0, maximum 43,200)
+    # + return - An `sqs:Error` on failure
     isolated remote function changeMessageVisibility(string queueUrl, string receiptHandle, int visibilityTimeout) returns Error? {
         return self.externChangeMessageVisibility(queueUrl, receiptHandle, visibilityTimeout);
     }
@@ -226,8 +220,8 @@ public isolated client class Client {
 
     # Purges the specified queue, deleting all messages in it. This action is irreversible.
     #
-    # + queueUrl - The URL of the queue from which the PurgeQueue action deletes messages. Queue URLs and names are case-sensitive.
-    # + return - `Error` on failure.
+    # + queueUrl - TURL of the queue to purge
+    # + return - An `sqs:Error` on failure
     isolated remote function purgeQueue(string queueUrl) returns Error? {
         return self.externPurgeQueue(queueUrl);
     }
@@ -238,15 +232,15 @@ public isolated client class Client {
 
     } external;
 
-    # Add cost allocation tags to the specified Amazon SQS queue. For an overview, see Tagging Your Amazon SQS Queues in the Amazon SQS Developer Guide. When you use queue tags, keep the following guidelines in mind:
-    # - Adding more than 50 tags to a queue isn't recommended.
-    # - Tags don't have any semantic meaning. Amazon SQS interprets tags as character strings.
-    # - Tags are case-sensitive.
-    # - A new tag with a key identical to that of an existing tag overwrites the existing tag.
+    # Adds cost allocation tags to the specified Amazon SQS queue.
     #
-    # + queueUrl - The URL of the Amazon SQS queue to which tags are added. Queue URLs and names are case-sensitive.
-    # + tags - The list of tags to be added to the specified queue. Each tag is a key-value pair.
-    # + return - `Error` on failure.
+    # - A maximum of 50 tags per queue is recommended  
+    # - Tags are case-sensitive and treated as plain character strings  
+    # - New tags with duplicate keys overwrite existing ones  
+    #
+    # + queueUrl - URL of the queue to which tags are added
+    # + tags - Map of tags to add, where each tag is a key-value pair
+    # + return - An `sqs:Error` on failure
     isolated remote function tagQueue(string queueUrl, map<string> tags
     ) returns Error? {
         return self.externTagQueue(queueUrl, tags);
@@ -258,11 +252,11 @@ public isolated client class Client {
 
     } external;
 
-    # Remove cost allocation tags from the specified Amazon SQS queue.
+    # Removes cost allocation tags from the specified Amazon SQS queue.
     #
-    # + queueUrl - The URL of the Amazon SQS queue from which tags are removed. Queue URLs and names are case-sensitive.
-    # + tags - The list of tags to be untagged from the specified queue.
-    # + return - `Error` on failure.
+    # + queueUrl - URL of the queue from which tags are removed
+    # + tags - List of tag keys to remove
+    # + return - An `sqs:Error` on failure
     isolated remote function untagQueue(string queueUrl, string[] tags) returns Error? {
         return self.externUntagQueue(queueUrl, tags);
     }
@@ -273,10 +267,10 @@ public isolated client class Client {
 
     } external;
 
-    # List all cost allocation tags added to the specified Amazon SQS queue.
+    # Lists all cost allocation tags added to the specified Amazon SQS queue.
     #
-    # + queueUrl - The URL of the queue.
-    # + return - The `ListQueueTagsResponse` with tags relevant to the specified queue or an Error.
+    # + queueUrl - URL of the queue whose tags are listed
+    # + return - A `sqs:ListQueueTagsResponse` with associated tags, or an `sqs:Error` on failure
     isolated remote function listQueueTags(string queueUrl) returns ListQueueTagsResponse|Error {
         return self.externListQueueTags(queueUrl);
     }
@@ -287,11 +281,15 @@ public isolated client class Client {
 
     } external;
 
-    # Starts an asynchronous task to move messages from a specified source queue to a specified destination queue. This action is currently limited to supporting message redrive from queues that are configured as dead-letter queues (DLQs) of other Amazon SQS queues only. Non-SQS queue sources of dead-letter queues, such as AWS Lambda or Amazon SNS topics, are currently not supported. In dead-letter queues redrive context, the  `StartMessageMoveTask` the source queue is the DLQ, while the destination  queue can be the original source queue (from which the messages were driven to the dead-letter-queue), or a custom destination queue. Only one active message movement task is supported per queue at any given time.
+    # Starts a message movement task to transfer messages from a dead-letter queue (DLQ) to another queue.
     #
-    # + sourceARN - The ARN of the queue that contains the messages to be moved to another queue. Currently, only ARNs of dead-letter queues (DLQs) whose sources are other Amazon SQS queues are accepted. DLQs whose sources are non-SQS queues, such as AWS Lambda or Amazon SNS topics, are not currently supported.
-    # + startMessageMoveTaskConfig - The optional parameters for starting a message move task, such as `destinationARN` and `maxNumberOfMessagesPerSecond`.
-    # + return - The `StartMessageMoveTaskResponse` if the operation is successful or an Error.
+    # - Only supported for DLQs whose sources are other Amazon SQS queues  
+    # - Not supported for non-SQS sources (e.g., AWS Lambda, Amazon SNS)  
+    # - Only one active task is allowed per queue at any time  
+    #
+    # + sourceARN - ARN of the DLQ from which messages are moved
+    # + startMessageMoveTaskConfig - Optional parameters such as `destinationARN` and `maxNumberOfMessagesPerSecond`
+    # + return - A `sqs:StartMessageMoveTaskResponse` if successful, or an `sqs:Error` on failure
     isolated remote function startMessageMoveTask(string sourceARN, *StartMessageMoveTaskConfig startMessageMoveTaskConfig)
         returns StartMessageMoveTaskResponse|Error {
         return self.externStartMessageMoveTask(sourceARN, startMessageMoveTaskConfig);
@@ -303,12 +301,14 @@ public isolated client class Client {
 
     } external;
 
-    # Cancels a specified message movement task. A message movement can only be cancelled when the current status is RUNNING. Cancelling a message movement task does not revert the messages that have already been moved. It can only stop the messages that have not been moved yet.
-    # - This action is currently limited to supporting message redrive from dead-letter queues (DLQs) only. In this context, the source queue is the dead-letter queue (DLQ), while the destination queue can be the original source queue (from which the messages were driven to the dead-letter-queue), or a custom destination queue.
-    # - Only one active message movement task is supported per queue at any given time.
+    # Cancels an active message movement task for the given task handle.
     #
-    # + taskHandle - An identifier associated with a message movement task.
-    # + return - The `CancelMessageMoveTaskResponse` containing the approximate number of messages already moved to the destination queue, or an Error.
+    # - Only applicable when the task status is `RUNNING`  
+    # - Already moved messages will not be reverted  
+    # - Only one active task is allowed per queue at any time  
+    #
+    # + taskHandle - Identifier of the message movement task
+    # + return - A `sqs:CancelMessageMoveTaskResponse` with the number of messages moved before cancellation, or an `sqs:Error`
     isolated remote function cancelMessageMoveTask(string taskHandle) returns CancelMessageMoveTaskResponse|Error {
         return self.externCancelMessageMoveTask(taskHandle);
     }
@@ -319,9 +319,9 @@ public isolated client class Client {
 
     } external;
 
-    # Gracefully closes AWS SQS API client resources
+    # Gracefully closes the AWS SQS client and releases all associated resources.
     #
-    # + return - An `Error` if there is an error while closing the client resources or else nil
+    # + return - An `sqs:Error` if closing fails, or else nil
     remote isolated function close() returns Error? = @java:Method {
         'class: "io.ballerina.lib.aws.sqs.NativeClientAdaptor"
     } external;
