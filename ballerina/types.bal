@@ -449,7 +449,7 @@ public type GetQueueAttributesResponse record {|
 |};
 
 # Represents the response from the `listQueueTags` operation.
-# 
+#
 # + tags - Map of tags added to the specified queue
 public type ListQueueTagsResponse record {|
     map<string> tags;

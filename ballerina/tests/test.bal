@@ -29,7 +29,6 @@ isolated function testInitUsingProfileAuth() returns error? {
     check sqsClient->close();
 }
 
-
 @test:Config {
     groups: ["createQueue"]
 }
@@ -1122,7 +1121,7 @@ function testStartMessageMoveTask() returns error? {
     // Call startMessageMoveTask
     StartMessageMoveTaskResponse|Error moveTaskResult = sqsClient->startMessageMoveTask(dlqARN, {maxNumberOfMessagesPerSecond: 1});
     if moveTaskResult is StartMessageMoveTaskResponse {
-        moveTaskHandle = moveTaskResult.taskHandle; 
+        moveTaskHandle = moveTaskResult.taskHandle;
         io:println("Started message move task: " + moveTaskHandle);
         test:assertTrue(moveTaskHandle != "", msg = "Task handle should not be empty");
     } else {
@@ -1141,9 +1140,9 @@ function testCancelMessageMoveTask() returns error? {
     CancelMessageMoveTaskResponse|Error cancelResult = sqsClient->cancelMessageMoveTask(moveTaskHandle);
     if cancelResult is CancelMessageMoveTaskResponse {
         io:println("Cancelled message move task. Approximate number of messages moved: " +
-            cancelResult.approximateNumberOfMessagesMoved.toString());
+                cancelResult.approximateNumberOfMessagesMoved.toString());
         test:assertTrue(cancelResult.approximateNumberOfMessagesMoved >= 0,
-            msg = "Approximate number of messages moved should be non-negative");
+                msg = "Approximate number of messages moved should be non-negative");
     } else {
         test:assertFail("Failed to cancel message move task: " + cancelResult.toString());
     }
@@ -1161,7 +1160,6 @@ function testPurgeQueue() returns error? {
     test:assertFalse(result is error, msg = "purgeQueue should not return an error");
 
 }
-
 
 @test:Config {
     dependsOn: [testCreateFifoQueue],
@@ -1190,16 +1188,13 @@ isolated function testDeleteNonExistentQueue() returns error? {
     }
 }
 
-
-
-
 @test:AfterSuite {}
 
 function testDeleteAllQueues() returns error? {
     ListQueuesResponse|Error listResult = sqsClient->listQueues();
     if listResult is ListQueuesResponse {
         foreach string queueUrl in listResult.queueUrls {
-            
+
             Error? delResult = sqsClient->deleteQueue(queueUrl);
             if delResult is error {
                 io:println("Failed to delete queue: " + queueUrl + " Error: " + delResult.toString());
@@ -1212,6 +1207,34 @@ function testDeleteAllQueues() returns error? {
     }
 }
 
+@test:Config {
+    groups: ["policy"]
+}
+function testCreateQueueWithPolicy() returns error? {
+    string queueName = "test-policy-queue";
 
+    string policy = "{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Principal\":\"*\",\"Action\":\"sqs:SendMessage\",\"Resource\":\"*\"}]}";
 
-
+    CreateQueueConfig config = {
+        queueAttributes: {
+            policy: policy
+        }
+    };
+    string|Error result = sqsClient->createQueue(queueName, config);
+    if result is string {
+        test:assertTrue(result.endsWith(queueName));
+        
+        GetQueueAttributesConfig attrConfig = {
+            attributeNames: [POLICY]
+        };
+        GetQueueAttributesResponse|Error attrResult = sqsClient->getQueueAttributes(result, attrConfig);
+        if attrResult is GetQueueAttributesResponse {
+            string? returnedPolicy = attrResult.queueAttributes["Policy"];
+            test:assertEquals(returnedPolicy, policy, msg = "Policy should match the set value");
+        } else {
+            test:assertFail("Failed to get queue attributes: " + attrResult.toString());
+        }
+    } else {
+        test:assertFail("Queue creation with policy failed: " + result.toString());
+    }
+}
