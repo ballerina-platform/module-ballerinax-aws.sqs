@@ -747,7 +747,7 @@ function testDeleteMessageBatchWithDuplicateIds() returns error? {
     }
 
     ReceiveMessageConfig receiveConfig = {
-        waitTimeSeconds: 15,
+        waitTimeSeconds: 12,
         maxNumberOfMessages: 10
     };
 
