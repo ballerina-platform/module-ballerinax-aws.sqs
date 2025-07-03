@@ -46,11 +46,11 @@ public final class SendMessageMapper {
 
     @SuppressWarnings("unchecked")
     public static SendMessageRequest getNativeSendMessageRequest(BString queueUrl, BString messageBody,
-            BMap<BString, Object> sendMessageConfig) throws Exception {
+                    BMap<BString, Object> sendMessageConfig) throws Exception {
 
         SendMessageRequest.Builder builder = SendMessageRequest.builder()
-                .queueUrl(queueUrl.getValue())
-                .messageBody(messageBody.getValue());
+                        .queueUrl(queueUrl.getValue())
+                        .messageBody(messageBody.getValue());
 
         if (sendMessageConfig.containsKey(DELAY_SECONDS)) {
             builder.delaySeconds(((Long) sendMessageConfig.get(DELAY_SECONDS)).intValue());
@@ -63,10 +63,10 @@ public final class SendMessageMapper {
         }
         if (sendMessageConfig.containsKey(AWS_TRACE_HEADER)) {
             builder.messageAttributes(Map.of("AWSTraceHeader",
-                    MessageAttributeValue.builder()
-                            .dataType("String")
-                            .stringValue(sendMessageConfig.getStringValue(AWS_TRACE_HEADER).getValue())
-                            .build()));
+                            MessageAttributeValue.builder()
+                                            .dataType("String")
+                                            .stringValue(sendMessageConfig.getStringValue(AWS_TRACE_HEADER).getValue())
+                                            .build()));
         }
         if (sendMessageConfig.containsKey(MESSAGE_ATTRIBUTES)) {
             BMap<BString, Object> attrs = (BMap<BString, Object>) sendMessageConfig.get(MESSAGE_ATTRIBUTES);
@@ -75,9 +75,9 @@ public final class SendMessageMapper {
                 BString attrKey = (BString) key;
                 BMap<BString, Object> attrVal = (BMap<BString, Object>) attrs.get(attrKey);
                 MessageAttributeValue mav = MessageAttributeValue.builder()
-                        .dataType(attrVal.getStringValue(StringUtils.fromString("dataType")).getValue())
-                        .stringValue(attrVal.getStringValue(StringUtils.fromString("stringValue")).getValue())
-                        .build();
+                                .dataType(attrVal.getStringValue(StringUtils.fromString("dataType")).getValue())
+                                .stringValue(attrVal.getStringValue(StringUtils.fromString("stringValue")).getValue())
+                                .build();
                 attrMap.put(attrKey.getValue(), mav);
             }
             builder.messageAttributes(attrMap);
@@ -88,7 +88,7 @@ public final class SendMessageMapper {
 
     public static BMap<BString, Object> getNativeSendMessageResponse(SendMessageResponse response) {
         BMap<BString, Object> result = ValueCreator.createRecordValue(
-                ModuleUtils.getModule(), SEND_MESSAGE_RESPONSE);
+                        ModuleUtils.getModule(), SEND_MESSAGE_RESPONSE);
         result.put(MESSAGE_ID, StringUtils.fromString(response.messageId()));
         result.put(MD5_OF_BODY, StringUtils.fromString(response.md5OfMessageBody()));
         if (response.md5OfMessageAttributes() != null) {

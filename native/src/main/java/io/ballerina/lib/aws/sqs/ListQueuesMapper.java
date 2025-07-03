@@ -40,7 +40,7 @@ public class ListQueuesMapper {
     }
 
     public static ListQueuesRequest getNativeListQueuesRequest(BMap<BString, Object> listQueuesConfig)
-            throws Exception {
+                    throws Exception {
         ListQueuesRequest.Builder builder = ListQueuesRequest.builder();
         if (listQueuesConfig != null) {
             if (listQueuesConfig.containsKey(MAX_RESULTS)) {

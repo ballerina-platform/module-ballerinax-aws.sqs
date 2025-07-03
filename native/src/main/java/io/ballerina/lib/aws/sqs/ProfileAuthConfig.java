@@ -43,11 +43,11 @@ import software.amazon.awssdk.profiles.ProfileFile;
 public class ProfileAuthConfig {
     public static AwsCredentialsProvider fromConfig(String profileName, String credentialsFilePath) {
         return ProfileCredentialsProvider.builder()
-                .profileName(profileName)
-                .profileFile(ProfileFile.builder()
-                        .content(Paths.get(credentialsFilePath))
-                        .type(ProfileFile.Type.CREDENTIALS)
-                        .build())
-                .build();
+                        .profileName(profileName)
+                        .profileFile(ProfileFile.builder()
+                                        .content(Paths.get(credentialsFilePath))
+                                        .type(ProfileFile.Type.CREDENTIALS)
+                                        .build())
+                        .build();
     }
 }

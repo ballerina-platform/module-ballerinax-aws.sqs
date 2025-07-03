@@ -39,10 +39,10 @@ public record StaticAuthConfig(String accessKeyId, String secretAccessKey, Strin
     private static final BString AWS_SESSION_TOKEN = StringUtils.fromString("sessionToken");
 
     public StaticAuthConfig(BMap<BString, Object> bAuthConfig) {
-        this(
-                bAuthConfig.getStringValue(AWS_ACCESS_KEY_ID).getValue(),
-                bAuthConfig.getStringValue(AWS_SECRET_ACCESS_KEY).getValue(),
-                bAuthConfig.containsKey(AWS_SESSION_TOKEN) ? bAuthConfig.getStringValue(AWS_SESSION_TOKEN).getValue()
-                        : null);
+        this(bAuthConfig.getStringValue(AWS_ACCESS_KEY_ID).getValue(),
+                        bAuthConfig.getStringValue(AWS_SECRET_ACCESS_KEY).getValue(),
+                        bAuthConfig.containsKey(AWS_SESSION_TOKEN)
+                                        ? bAuthConfig.getStringValue(AWS_SESSION_TOKEN).getValue()
+                                        : null);
     }
 }

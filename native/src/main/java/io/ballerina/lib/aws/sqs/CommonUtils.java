@@ -49,21 +49,21 @@ public final class CommonUtils {
     public static BError createError(String message, Throwable exception) {
         BError cause = ErrorCreator.createError(exception);
         BMap<BString, Object> errorDetails = ValueCreator.createRecordValue(
-                ModuleUtils.getModule(), ERROR_DETAILS);
+                        ModuleUtils.getModule(), ERROR_DETAILS);
         if (exception instanceof AwsServiceException awsServiceException &&
-                Objects.nonNull(awsServiceException.awsErrorDetails())) {
+                        Objects.nonNull(awsServiceException.awsErrorDetails())) {
             AwsErrorDetails awsErrorDetails = awsServiceException.awsErrorDetails();
             SdkHttpResponse sdkResponse = awsErrorDetails.sdkHttpResponse();
             if (Objects.nonNull(sdkResponse)) {
                 errorDetails.put(ERROR_DETAILS_HTTP_STATUS_CODE, sdkResponse.statusCode());
                 sdkResponse.statusText().ifPresent(httpStatusTxt -> errorDetails.put(
-                        ERROR_DETAILS_HTTP_STATUS_TEXT, StringUtils.fromString(httpStatusTxt)));
+                                ERROR_DETAILS_HTTP_STATUS_TEXT, StringUtils.fromString(httpStatusTxt)));
             }
             errorDetails.put(ERROR_DETAILS_ERROR_CODE, StringUtils.fromString(awsErrorDetails.errorCode()));
             errorDetails.put(ERROR_DETAILS_ERROR_MESSAGE, StringUtils.fromString(awsErrorDetails.errorMessage()));
         }
         return ErrorCreator.createError(
-                ModuleUtils.getModule(), ERROR, StringUtils.fromString(message), cause, errorDetails);
+                        ModuleUtils.getModule(), ERROR, StringUtils.fromString(message), cause, errorDetails);
     }
 
 }

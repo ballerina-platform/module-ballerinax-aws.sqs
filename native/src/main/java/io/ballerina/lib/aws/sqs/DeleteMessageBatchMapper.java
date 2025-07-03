@@ -50,48 +50,53 @@ public class DeleteMessageBatchMapper {
                 for (int i = 0; i < bEntries.size(); i++) {
                         BMap<BString, Object> entry = (BMap<BString, Object>) bEntries.get(i);
                         DeleteMessageBatchRequestEntry.Builder builder = DeleteMessageBatchRequestEntry.builder()
-                                        .id(entry.getStringValue(ID).getValue())
-                                        .receiptHandle(entry.getStringValue(RECEIPT_HANDLE).getValue());
+                                                        .id(entry.getStringValue(ID).getValue())
+                                                        .receiptHandle(entry.getStringValue(RECEIPT_HANDLE).getValue());
                         entries.add(builder.build());
                 }
                 return DeleteMessageBatchRequest.builder()
-                                .queueUrl(queueurl.getValue())
-                                .entries(entries)
-                                .build();
+                                                .queueUrl(queueurl.getValue())
+                                                .entries(entries)
+                                                .build();
         }
 
         public static BMap<BString, Object> getnativeDeleteMessageBatchResponse(DeleteMessageBatchResponse response) {
                 Type deleteMessageBatchResultEntryType = ValueCreator
-                                .createRecordValue(ModuleUtils.getModule(), "DeleteMessageBatchResultEntry").getType();
+                                                .createRecordValue(ModuleUtils.getModule(),
+                                                                                "DeleteMessageBatchResultEntry")
+                                                .getType();
                 BArray successfulArr = ValueCreator
-                                .createArrayValue(TypeCreator.createArrayType(deleteMessageBatchResultEntryType));
+                                                .createArrayValue(TypeCreator.createArrayType(
+                                                                                deleteMessageBatchResultEntryType));
                 for (DeleteMessageBatchResultEntry entry : response.successful()) {
                         BMap<BString, Object> entryRecord = ValueCreator.createRecordValue(ModuleUtils.getModule(),
-                                        "DeleteMessageBatchResultEntry");
+                                                        "DeleteMessageBatchResultEntry");
                         entryRecord.put(ID, StringUtils.fromString(entry.id()));
                         successfulArr.append(entryRecord);
                 }
 
                 Type batchResultErrorEntryType = ValueCreator
-                                .createRecordValue(ModuleUtils.getModule(), "BatchResultErrorEntry").getType();
+                                                .createRecordValue(ModuleUtils.getModule(), "BatchResultErrorEntry")
+                                                .getType();
                 BArray failedArr = ValueCreator
-                                .createArrayValue(TypeCreator.createArrayType(batchResultErrorEntryType));
+                                                .createArrayValue(TypeCreator.createArrayType(
+                                                                                batchResultErrorEntryType));
 
                 for (BatchResultErrorEntry entry : response.failed()) {
                         BMap<BString, Object> entryRecord = ValueCreator.createRecordValue(ModuleUtils.getModule(),
-                                        "BatchResultErrorEntry");
+                                                        "BatchResultErrorEntry");
                         entryRecord.put(ID, StringUtils.fromString(entry.id()));
                         entryRecord.put(StringUtils.fromString("code"), StringUtils.fromString(entry.code()));
                         entryRecord.put(StringUtils.fromString("senderFault"), entry.senderFault());
                         if (entry.message() != null) {
                                 entryRecord.put(StringUtils.fromString("message"),
-                                                StringUtils.fromString(entry.message()));
+                                                                StringUtils.fromString(entry.message()));
                         }
                         failedArr.append(entryRecord);
                 }
 
                 BMap<BString, Object> result = ValueCreator.createRecordValue(ModuleUtils.getModule(),
-                                DELETE_MESSAGE_BATCH_RESPONSE);
+                                                DELETE_MESSAGE_BATCH_RESPONSE);
                 result.put(SUCCESSFUL, successfulArr);
                 result.put(FAILED, failedArr);
                 return result;

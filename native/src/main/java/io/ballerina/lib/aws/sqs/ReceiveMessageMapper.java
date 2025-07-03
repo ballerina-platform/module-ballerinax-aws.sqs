@@ -50,9 +50,9 @@ public class ReceiveMessageMapper {
     }
 
     public static ReceiveMessageRequest getNativeReceiveMessageRequest(BString queueUrl,
-            BMap<BString, Object> receiveMessageConfig) {
+                    BMap<BString, Object> receiveMessageConfig) {
         ReceiveMessageRequest.Builder builder = ReceiveMessageRequest.builder()
-                .queueUrl(queueUrl.getValue());
+                        .queueUrl(queueUrl.getValue());
 
         if (receiveMessageConfig.containsKey(WAIT_TIME_SECONDS)) {
             builder.waitTimeSeconds(((Long) receiveMessageConfig.get(WAIT_TIME_SECONDS)).intValue());

@@ -33,9 +33,9 @@ public class StartMessageMoveTaskMapper {
     }
 
     public static StartMessageMoveTaskRequest getNativeStartMessageMoveTaskRequest(BString sourceArn,
-            BMap<BString, Object> bConfig) {
+                    BMap<BString, Object> bConfig) {
         StartMessageMoveTaskRequest.Builder builder = StartMessageMoveTaskRequest.builder()
-                .sourceArn(sourceArn.getValue());
+                        .sourceArn(sourceArn.getValue());
         if (bConfig != null) {
             if (bConfig.containsKey(DESTINATION_ARN)) {
                 Object destArn = bConfig.get(DESTINATION_ARN);
@@ -55,7 +55,7 @@ public class StartMessageMoveTaskMapper {
 
     public static BMap<BString, Object> getNativeStartMessageMoveTaskResponse(StartMessageMoveTaskResponse response) {
         BMap<BString, Object> result = ValueCreator.createRecordValue(ModuleUtils.getModule(),
-                START_MESSAGE_MOVE_TASK_RESPONSE);
+                        START_MESSAGE_MOVE_TASK_RESPONSE);
         result.put(TASK_HANDLE, StringUtils.fromString(response.taskHandle()));
         return result;
     }

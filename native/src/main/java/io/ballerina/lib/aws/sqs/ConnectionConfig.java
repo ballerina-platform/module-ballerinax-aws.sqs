@@ -59,14 +59,14 @@ public record ConnectionConfig(Region region, Object authConfig) {
     @SuppressWarnings("unchecked")
     private static Object getAuthConfig(BMap<BString, Object> bConnectionConfig) {
         BMap<BString, Object> bAuthConfig = (BMap<BString, Object>) bConnectionConfig
-                .getMapValue(CONNECTION_CONFIG_AUTH_CONFIG);
+                        .getMapValue(CONNECTION_CONFIG_AUTH_CONFIG);
         if (bAuthConfig.containsKey(AWS_ACCESS_KEY_ID)) {
             return new StaticAuthConfig(bAuthConfig);
         }
         if (bAuthConfig.containsKey(StringUtils.fromString("profileName"))) {
             String profileName = bAuthConfig.getStringValue(StringUtils.fromString("profileName")).getValue();
             String credentialsFilePath = bAuthConfig.getStringValue(StringUtils.fromString("credentialsFilePath"))
-                    .getValue();
+                            .getValue();
             return ProfileAuthConfig.fromConfig(profileName, credentialsFilePath);
         }
 
