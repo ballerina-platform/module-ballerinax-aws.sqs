@@ -156,9 +156,7 @@ function testCreateQueueWithInvalidAttributes() returns error? {
         test:assertEquals(details.errorCode, "InvalidAttributeValue");
         test:assertEquals(details.httpStatusCode, 400);
         test:assertEquals(details.errorMessage, "Invalid value for the parameter DelaySeconds.");
-
     }
-
 }
 
 //send message 
@@ -265,9 +263,7 @@ function testSendMessageToNonexistentQueue() returns error? {
     string queueUrl = "https://sqs.eu-north-1.amazonaws.com/284495578152/InvalidQueue";
     string message = "Hello, queue!";
     SendMessageConfig sendMessageConfig = {};
-
     SendMessageResponse|Error result = sqsClient->sendMessage(queueUrl, message, sendMessageConfig);
-
     test:assertTrue(result is Error);
     if result is error {
         ErrorDetails details = result.detail();
@@ -312,7 +308,6 @@ function testSendMessageWithInvalidDelay() returns error? {
         test:assertEquals(details.errorCode, "InvalidParameterValue");
         test:assertEquals(details.errorMessage, "Value -1 for parameter DelaySeconds is invalid. Reason: DelaySeconds must be >= 0 and <= 900.");
     }
-
 }
 
 @test:Config {
@@ -410,7 +405,6 @@ function testSendMessageBatchSuccess() returns error? {
         {id: "id-4", body: "Hello A4"},
         {id: "id-5", body: "Hello A5"}
     ];
-
     SendMessageBatchResponse|Error result = sqsClient->sendMessageBatch(queueUrl, entries);
     if result is SendMessageBatchResponse {
         io:println(result.successful);
@@ -450,7 +444,6 @@ function testSendMessageBatchWithDuplicatemessageId() returns error? {
 }
 function testSendMessageBatchPartialFailure() returns error? {
     string queueUrl = standardQueueUrl;
-
     SendMessageBatchEntry[] entries = [
         {id: "1", body: "Valid message"},
         {id: "2", body: ""}
@@ -460,7 +453,6 @@ function testSendMessageBatchPartialFailure() returns error? {
         io:println("Failed entry list: ", result.failed);
         io:println("Successful list: ", result.successful);
     }
-
     if result is error {
         test:assertFail("Expected partial success, but got full error: " + result.toString());
     } else {
@@ -500,7 +492,6 @@ function testSendMessageBatchExceedsLimit() returns error? {
 function testSendMessageBatchWithEmptyList() returns error? {
     string queueUrl = standardQueueUrl;
     SendMessageBatchEntry[] entries = [];
-
     SendMessageBatchResponse|Error result = sqsClient->sendMessageBatch(queueUrl, entries);
     test:assertTrue(result is Error);
     if result is error {
@@ -517,14 +508,12 @@ function testSendMessageBatchWithEmptyList() returns error? {
 }
 function testSendMessageBatchExceedsTotalSizeLimit() returns error? {
     string queueUrl = standardQueueUrl;
-
     string largeBody = ""; // string with size ~26220 Bytes.
     int i = 0;
     while i < 26220 {
         largeBody += "A";
         i += 1;
     }
-
     SendMessageBatchEntry[] entries = [];
     foreach int j in 1 ... 10 {
         entries.push({
@@ -532,7 +521,6 @@ function testSendMessageBatchExceedsTotalSizeLimit() returns error? {
             body: largeBody
         });
     }
-
     SendMessageBatchResponse|Error result = sqsClient->sendMessageBatch(queueUrl, entries);
     test:assertTrue(result is Error);
     if result is error {
@@ -582,8 +570,7 @@ function testReceiveMessageWithMultiplemessages() returns error? {
 isolated function testReceiveMessageInvalidQueueUrl() returns error? {
     string queueUrl = "https://sqs.eu-fake-99.amazonaws.com/111111111111/BadQueue";
     Message[]|Error result = sqsClient->receiveMessage(queueUrl);
-
-    test:assertTrue(result is error);
+    test:assertTrue(result is Error);
     if result is error {
         ErrorDetails details = result.detail();
         test:assertEquals(details.httpStatusCode, 404);
@@ -601,7 +588,7 @@ function testReceiveMessageInvalidMaxMessages() returns error? {
         maxNumberOfMessages: 20
     };
     Message[]|Error result = sqsClient->receiveMessage(queueUrl, config);
-    test:assertTrue(result is error);
+    test:assertTrue(result is Error);
     if result is error {
         ErrorDetails details = result.detail();
         test:assertEquals(details.httpStatusCode, 400);
@@ -623,7 +610,7 @@ function testReceiveMessageWithAllOptionalConfigs() returns error? {
         messageAttributeNames: ["All"],
         messageSystemAttributeNames: ["All"]
     };
-    Message[]|error result = sqsClient->receiveMessage(queueUrl, config);
+    Message[]|Error result = sqsClient->receiveMessage(queueUrl, config);
     if result is error {
         test:assertFail("Unexpected error: " + result.toString());
     } else {
@@ -638,7 +625,7 @@ function testReceiveMessageWithAllOptionalConfigs() returns error? {
 function testDeleteMessage() returns error? {
     string queueUrl = standardQueueUrl;
 
-    Message[]|error receiveResult = sqsClient->receiveMessage(queueUrl);
+    Message[]|Error receiveResult = sqsClient->receiveMessage(queueUrl);
     if receiveResult is error {
         test:assertFail("Failed to receive message: " + receiveResult.toString());
     }
@@ -648,7 +635,6 @@ function testDeleteMessage() returns error? {
 
     Message message = receiveResult[0];
     string receiptHandle = check message.receiptHandle.ensureType();
-
     Error? deleteResult = sqsClient->deleteMessage(queueUrl, receiptHandle);
     if deleteResult is error {
         test:assertFail("Failed to delete message: " + deleteResult.toString());
@@ -662,9 +648,7 @@ function testDeleteMessage() returns error? {
 function testDeleteMessageWithInvalidReceiptHandle() returns error? {
     string queueUrl = standardQueueUrl;
     string fakeReceiptHandle = "InvalidReceiptHandle123";
-
     Error? deleteResult = sqsClient->deleteMessage(queueUrl, fakeReceiptHandle);
-
     test:assertTrue(deleteResult is Error);
     if deleteResult is error {
         ErrorDetails details = deleteResult.detail();
@@ -679,7 +663,6 @@ function testDeleteMessageWithInvalidReceiptHandle() returns error? {
 }
 function testDeleteMessageBatchSuccess() returns error? {
     string queueUrl = standardQueueUrl;
-
     SendMessageBatchEntry[] batch = [
         {id: "id-a", body: "Message A"},
         {id: "id-b", body: "Message B"}
@@ -688,17 +671,14 @@ function testDeleteMessageBatchSuccess() returns error? {
     if sendResult is error {
         test:assertFail("Failed to send batch messages: " + sendResult.toString());
     }
-
     Message[]|error received = sqsClient->receiveMessage(queueUrl, {maxNumberOfMessages: 2, waitTimeSeconds: 10});
     if received is error || received.length() < 2 {
         test:assertFail("Expected 2 messages, but received fewer");
     }
-
     DeleteMessageBatchEntry[] deleteBatch = [
         {id: "msg-id-1", receiptHandle: check received[0].receiptHandle.ensureType()},
         {id: "msg-id-2", receiptHandle: check received[1].receiptHandle.ensureType()}
     ];
-
     DeleteMessageBatchResponse|Error deleteResult = sqsClient->deleteMessageBatch(queueUrl, deleteBatch);
     if deleteResult is DeleteMessageBatchResponse {
         test:assertEquals(deleteResult.successful.length(), 2);
@@ -714,7 +694,6 @@ function testDeleteMessageBatchSuccess() returns error? {
 }
 function testDeleteMessageBatchWithInvalidReceiptHandle() returns error? {
     string queueUrl = standardQueueUrl;
-
     SendMessageBatchEntry[] batch = [
         {id: "id1", body: "Message A"},
         {id: "id2", body: "Message B"}
@@ -723,18 +702,14 @@ function testDeleteMessageBatchWithInvalidReceiptHandle() returns error? {
     if sendResult is error {
         test:assertFail("Failed to send batch messages: " + sendResult.toString());
     }
-
     Message[]|Error received = sqsClient->receiveMessage(queueUrl, {maxNumberOfMessages: 8, waitTimeSeconds: 15});
     if received is error || received.length() < 2 {
         test:assertFail("Expected 2 messages, but received fewer");
     }
-
     DeleteMessageBatchEntry[] entries = [
         {id: "id-1", receiptHandle: "invalid-receipt-handle"},
         {id: "id-2", receiptHandle: check received[1].receiptHandle.ensureType()}
-
     ];
-
     DeleteMessageBatchResponse|Error result = sqsClient->deleteMessageBatch(queueUrl, entries);
     if result is DeleteMessageBatchResponse {
         test:assertEquals(result.successful.length(), 1);
@@ -751,7 +726,6 @@ function testDeleteMessageBatchWithInvalidReceiptHandle() returns error? {
 }
 function testDeleteMessageBatchWithDuplicateIds() returns error? {
     string queueUrl = standardQueueUrl;
-
     SendMessageBatchEntry[] batch = [
         {id: "id1", body: "Message A"},
         {id: "id2", body: "Message B"},
@@ -761,22 +735,18 @@ function testDeleteMessageBatchWithDuplicateIds() returns error? {
     if sendResult is error {
         test:assertFail("Failed to send batch messages: " + sendResult.toString());
     }
-
     ReceiveMessageConfig receiveConfig = {
         waitTimeSeconds: 12,
         maxNumberOfMessages: 10
     };
-
     Message[]|Error received = sqsClient->receiveMessage(queueUrl, receiveConfig);
     if received is error || received.length() < 2 {
         test:assertFail("Expected 2 messages, but received fewer");
     }
-
     DeleteMessageBatchEntry[] entries = [
         {id: "dup-id", receiptHandle: check received[0].receiptHandle.ensureType()},
         {id: "dup-id", receiptHandle: check received[0].receiptHandle.ensureType()}
     ];
-
     DeleteMessageBatchResponse|Error result = sqsClient->deleteMessageBatch(queueUrl, entries);
     test:assertTrue(result is Error);
     if result is error {
@@ -791,7 +761,6 @@ function testDeleteMessageBatchWithDuplicateIds() returns error? {
     dependsOn: [testCreateStandardQueue],
     groups: ["setQueueAttributes"]
 }
-
 function testSetQueueAttribues() returns error? {
     string queueUrl = standardQueueUrl;
     QueueAttributes attributes = {
@@ -830,10 +799,8 @@ function testSetQueueAttribuesWithInvalidDelay() returns error? {
     dependsOn: [testCreateQueueWithAttributes],
     groups: ["getQueueAttributes"]
 }
-
 function testGetQueueAttributesAll() returns error? {
     string queueUrl = attrQueueurl;
-
     GetQueueAttributesConfig config = {
         attributeNames: ["All"]
     };
@@ -847,7 +814,6 @@ function testGetQueueAttributesAll() returns error? {
 }
 function testGetQueueAttributesWithoutConfig() returns error? {
     string queueUrl = attrQueueurl;
-
     GetQueueAttributesResponse|Error result = sqsClient->getQueueAttributes(queueUrl);
     test:assertTrue(result is GetQueueAttributesResponse);
 }
@@ -857,16 +823,12 @@ function testGetQueueAttributesWithoutConfig() returns error? {
     groups: ["getQueueAttributes"]
 }
 function testGetQueueAttributesWithSomeAttributes() returns error? {
-
     string queueUrl = standardQueueUrl;
-
     GetQueueAttributesConfig config = {
         attributeNames: [MAXIMUM_MESSAGE_SIZE, REDRIVE_ALLOW_POLICY, REDRIVE_POLICY]
     };
     GetQueueAttributesResponse|Error result = sqsClient->getQueueAttributes(queueUrl, config);
-
     test:assertTrue(result is GetQueueAttributesResponse);
-
     test:assertFalse(result is Error);
     if result is error {
         ErrorDetails detail = result.detail();
@@ -881,20 +843,15 @@ function testGetQueueAttributesWithSomeAttributes() returns error? {
     groups: ["changeMessageVisibility"]
 }
 function testChangeMessageVisibility() returns error? {
-
     string queueUrl = standardQueueUrl;
-
     ReceiveMessageConfig receiveConfig = {
         maxNumberOfMessages: 1,
         waitTimeSeconds: 10
     };
     Message[] receivedMessages = check sqsClient->receiveMessage(queueUrl, receiveConfig);
-
     test:assertEquals(receivedMessages.length(), 1, msg = "Expected to receive 1 message");
-
     string? receiptHandle = receivedMessages[0].receiptHandle;
     int newVisibilityTimeout = 60;
-
     Error? result = sqsClient->changeMessageVisibility(queueUrl, <string>receiptHandle, newVisibilityTimeout);
     test:assertFalse(result is error, msg = "changeMessageVisibility should not return error");
 }
@@ -911,11 +868,9 @@ isolated function testListQueues() returns error? {
     groups: ["listQueues"]
 }
 isolated function testListQueuesWithPrefix() returns error? {
-
     ListQueuesConfig config = {
         queueNamePrefix: "test"
     };
-
     ListQueuesResponse|Error result = sqsClient->listQueues(config);
     test:assertTrue(result is ListQueuesResponse);
 }
@@ -924,41 +879,31 @@ isolated function testListQueuesWithPrefix() returns error? {
     groups: ["listQueues"]
 }
 isolated function testListQueuesWithMaxResult() returns error? {
-
     ListQueuesConfig config = {
         maxResults: 2
     };
-
     ListQueuesResponse|Error result = sqsClient->listQueues(config);
     test:assertTrue(result is ListQueuesResponse);
-
 }
 
 @test:Config {
     groups: ["listQueues"]
 }
 isolated function testListQueuesPagination() returns error? {
-
     ListQueuesConfig config1 = {
         maxResults: 2
     };
-
     ListQueuesResponse|Error firstPage = sqsClient->listQueues(config1);
-
     if firstPage is ListQueuesResponse {
         test:assertEquals(firstPage.queueUrls.length(), 2, msg = "Expected 2 queues in first page");
         test:assertNotEquals(firstPage.nextToken, (), msg = "Expected nextToken in first page");
-
         if firstPage.nextToken is string {
             string? nextPageToken = firstPage.nextToken;
-
             ListQueuesConfig config2 = {
                 maxResults: 10,
                 nextToken: nextPageToken
             };
-
             ListQueuesResponse|Error secondPage = sqsClient->listQueues(config2);
-
             if secondPage is ListQueuesResponse {
                 test:assertTrue(secondPage.queueUrls.length() > 0, msg = "Expected at least 1 queue in second page");
             }
@@ -975,13 +920,11 @@ isolated function testListQueuesPagination() returns error? {
 function testGetQueueUrl() returns error? {
     string queueName = "test-queue";
     string expectedQueueUrl = standardQueueUrl;
-
     string|Error? result = sqsClient->getQueueUrl(queueName);
     test:assertTrue(result is string);
     if result is string {
         test:assertEquals(result, expectedQueueUrl, msg = "Returned queue URL does not match the expected value.");
     }
-
 }
 
 @test:Config {
@@ -989,25 +932,20 @@ function testGetQueueUrl() returns error? {
 }
 isolated function testGetNonExistentQueueUrl() returns error? {
     string queueName = "TestQueue2";
-
     string|Error? result = sqsClient->getQueueUrl(queueName);
-
     test:assertTrue(result is Error);
     if result is error {
         ErrorDetails details = result.detail();
         test:assertEquals(details.errorCode, "AWS.SimpleQueueService.NonExistentQueue");
         test:assertEquals(details.errorMessage, "The specified queue does not exist.");
         test:assertEquals(details.httpStatusCode, 400);
-
     }
-
 }
 
 @test:Config {
     dependsOn: [testCreateStandardQueue],
     groups: ["tagQueue"]
 }
-
 function testTagQueue() returns error? {
     string queueUrl = standardQueueUrl;
     map<string> tags = {
@@ -1022,12 +960,10 @@ function testTagQueue() returns error? {
     dependsOn: [testCreateStandardQueue],
     groups: ["tagQueue"]
 }
-
 function testTagQueueWithEmptyTagKey() returns error? {
     string queueUrl = standardQueueUrl;
     map<string> tags = {
         "": "production"
-
     };
     Error? result = sqsClient->tagQueue(queueUrl, tags);
     test:assertTrue(result is Error);
@@ -1043,7 +979,6 @@ function testTagQueueWithEmptyTagKey() returns error? {
     dependsOn: [testCreateStandardQueue, testTagQueue],
     groups: ["untagQueue"]
 }
-
 function testUntagQueue() returns error? {
     string queueUrl = standardQueueUrl;
     string[] tags = ["env", "version"];
@@ -1055,7 +990,6 @@ function testUntagQueue() returns error? {
     dependsOn: [testCreateStandardQueue, testTagQueue],
     groups: ["listQueueTags"]
 }
-
 function testListQueueTags() returns error? {
     string queueurl = standardQueueUrl;
     ListQueueTagsResponse|Error result = sqsClient->listQueueTags(queueurl);
@@ -1066,7 +1000,7 @@ string dlqUrl = "";
 string dlqARN = "";
 string sourceQueueUrl = "";
 string sourceARN = "";
-string moveTaskHandle = ""; // <-- Store the task handle here
+string moveTaskHandle = ""; 
 
 @test:Config {
     groups: ["startMessageMoveTask"]
@@ -1081,7 +1015,6 @@ function testStartMessageMoveTask() returns error? {
             }
         }
     };
-
     string|Error dlqResult = sqsClient->createQueue("DLQueue", dlqConfig);
     if dlqResult is error {
         test:assertFail("Failed to create DLQ: " + dlqResult.toString());
@@ -1111,7 +1044,6 @@ function testStartMessageMoveTask() returns error? {
             }
         }
     };
-
     string|Error sourceQueueResult = sqsClient->createQueue("Source-Queue", sourceQueueConfig);
     if sourceQueueResult is string {
         sourceQueueUrl = sourceQueueResult.toString();
@@ -1175,11 +1107,9 @@ function testCancelMessageMoveTask() returns error? {
 }
 function testPurgeQueue() returns error? {
     string queueUrl = standardQueueUrl;
-
     Error? result = sqsClient->purgeQueue(queueUrl);
     test:assertTrue(result is ());
     test:assertFalse(result is error, msg = "purgeQueue should not return an error");
-
 }
 
 @test:Config {
@@ -1209,33 +1139,12 @@ isolated function testDeleteNonExistentQueue() returns error? {
     }
 }
 
-@test:AfterSuite {}
-
-function testDeleteAllQueues() returns error? {
-    ListQueuesResponse|Error listResult = sqsClient->listQueues();
-    if listResult is ListQueuesResponse {
-        foreach string queueUrl in listResult.queueUrls {
-
-            Error? delResult = sqsClient->deleteQueue(queueUrl);
-            if delResult is error {
-                io:println("Failed to delete queue: " + queueUrl + " Error: " + delResult.toString());
-            } else {
-                io:println("Deleted queue: " + queueUrl);
-            }
-        }
-    } else {
-        test:assertFail("Failed to list queues: " + listResult.toString());
-    }
-}
-
 @test:Config {
     groups: ["policy"]
 }
 function testCreateQueueWithPolicy() returns error? {
     string queueName = "test-policy-queue";
-
     string policy = "{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Principal\":\"*\",\"Action\":\"sqs:SendMessage\",\"Resource\":\"*\"}]}";
-
     CreateQueueConfig config = {
         queueAttributes: {
             policy: policy
@@ -1244,7 +1153,6 @@ function testCreateQueueWithPolicy() returns error? {
     string|Error result = sqsClient->createQueue(queueName, config);
     if result is string {
         test:assertTrue(result.endsWith(queueName));
-
         GetQueueAttributesConfig attrConfig = {
             attributeNames: [POLICY]
         };
@@ -1257,5 +1165,23 @@ function testCreateQueueWithPolicy() returns error? {
         }
     } else {
         test:assertFail("Queue creation with policy failed: " + result.toString());
+    }
+}
+
+@test:AfterSuite {}
+
+function testDeleteAllQueues() returns error? {
+    ListQueuesResponse|Error listResult = sqsClient->listQueues();
+    if listResult is ListQueuesResponse {
+        foreach string queueUrl in listResult.queueUrls {
+            Error? delResult = sqsClient->deleteQueue(queueUrl);
+            if delResult is error {
+                io:println("Failed to delete queue: " + queueUrl + " Error: " + delResult.toString());
+            } else {
+                io:println("Deleted queue: " + queueUrl);
+            }
+        }
+    } else {
+        test:assertFail("Failed to list queues: " + listResult.toString());
     }
 }
