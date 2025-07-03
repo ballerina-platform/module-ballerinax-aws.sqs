@@ -81,7 +81,6 @@ public isolated client class Client {
     isolated function externDeleteMessage(string queueUrl, string receiptHandle) returns Error? = @java:Method {
         name: "deleteMessage",
         'class: "io.ballerina.lib.aws.sqs.NativeClientAdaptor"
-
     } external;
 
     # Sends up to 10 messages as a batch to the specified Amazon SQS queue.
@@ -215,7 +214,6 @@ public isolated client class Client {
     returns Error? = @java:Method {
         name: "changeMessageVisibility",
         'class: "io.ballerina.lib.aws.sqs.NativeClientAdaptor"
-
     } external;
 
     # Purges the specified queue, deleting all messages in it. This action is irreversible.
@@ -229,7 +227,6 @@ public isolated client class Client {
     isolated function externPurgeQueue(string queueUrl) returns Error? = @java:Method {
         name: "purgeQueue",
         'class: "io.ballerina.lib.aws.sqs.NativeClientAdaptor"
-
     } external;
 
     # Adds cost allocation tags to the specified Amazon SQS queue.
@@ -249,7 +246,6 @@ public isolated client class Client {
     isolated function externTagQueue(string queueUrl, map<string> tags) returns Error? = @java:Method {
         name: "tagQueue",
         'class: "io.ballerina.lib.aws.sqs.NativeClientAdaptor"
-
     } external;
 
     # Removes cost allocation tags from the specified Amazon SQS queue.
@@ -264,7 +260,6 @@ public isolated client class Client {
     isolated function externUntagQueue(string queueurl, string[] tags) returns Error? = @java:Method {
         name: "untagQueue",
         'class: "io.ballerina.lib.aws.sqs.NativeClientAdaptor"
-
     } external;
 
     # Lists all cost allocation tags added to the specified Amazon SQS queue.
@@ -278,7 +273,6 @@ public isolated client class Client {
     isolated function externListQueueTags(string queueUrl) returns ListQueueTagsResponse|Error = @java:Method {
         name: "listQueueTags",
         'class: "io.ballerina.lib.aws.sqs.NativeClientAdaptor"
-
     } external;
 
     # Starts a message movement task to transfer messages from a dead-letter queue (DLQ) to another queue.
@@ -298,7 +292,6 @@ public isolated client class Client {
     isolated function externStartMessageMoveTask(string sourceARN, *StartMessageMoveTaskConfig startMessageMoveTaskConfig) returns StartMessageMoveTaskResponse|Error = @java:Method {
         name: "startMessageMoveTask",
         'class: "io.ballerina.lib.aws.sqs.NativeClientAdaptor"
-
     } external;
 
     # Cancels an active message movement task for the given task handle.
@@ -316,7 +309,6 @@ public isolated client class Client {
     isolated function externCancelMessageMoveTask(string taskHandle) returns CancelMessageMoveTaskResponse|Error = @java:Method {
         name: "cancelMessageMoveTask",
         'class: "io.ballerina.lib.aws.sqs.NativeClientAdaptor"
-
     } external;
 
     # Gracefully closes the AWS SQS client and releases all associated resources.

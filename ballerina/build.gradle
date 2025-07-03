@@ -55,8 +55,8 @@ configurations {
 
 dependencies {
     externalJars(group: 'software.amazon.awssdk', name: 'sqs', version: "${awsJavaSdkVersion}") {
-    transitive = false
-}
+        transitive = false
+    }
      externalJars(group: 'software.amazon.awssdk', name: 'apache-client', version: "${awsJavaSdkVersion}") {
         transitive = false
     }
