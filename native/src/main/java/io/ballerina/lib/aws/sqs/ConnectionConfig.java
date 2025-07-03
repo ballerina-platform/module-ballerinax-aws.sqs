@@ -49,9 +49,7 @@ public record ConnectionConfig(Region region, Object authConfig) {
     private static final BString CONNECTION_CONFIG_AUTH_CONFIG = StringUtils.fromString("auth");
 
     public ConnectionConfig(BMap<BString, Object> bConnectionConfig) {
-        this(
-                getRegion(bConnectionConfig),
-                getAuthConfig(bConnectionConfig));
+        this(getRegion(bConnectionConfig), getAuthConfig(bConnectionConfig));
     }
 
     private static Region getRegion(BMap<BString, Object> bConnectionConfig) {
