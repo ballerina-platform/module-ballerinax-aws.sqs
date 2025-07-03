@@ -55,6 +55,7 @@ public class GetQueueAttributesMapper {
                         try {
                             attrNames.add(QueueAttributeName.fromValue(attrNameStr));
                         } catch (IllegalArgumentException e) {
+                            System.err.println("Skipping invalid attribute name: " + attrNameStr);
                         }
                     }
                 }
