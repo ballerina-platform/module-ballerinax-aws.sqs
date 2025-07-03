@@ -427,10 +427,8 @@ function testSendMessageBatchWithDuplicatemessageId() returns error? {
     ];
     SendMessageBatchResponse|Error result = sqsClient->sendMessageBatch(queueUrl, entries);
     if result is SendMessageBatchResponse {
-        io:println(result.successful);
-    }
-    test:assertTrue(result is Error);
-    if result is error {
+        test:assertFail("Expected error for duplicate message IDs, but got a successful response: " + result.toString());
+    } else {
         ErrorDetails details = result.detail();
         test:assertEquals(details.httpStatusCode, 400);
         test:assertEquals(details.errorCode, "AWS.SimpleQueueService.BatchEntryIdsNotDistinct");
@@ -1000,7 +998,7 @@ string dlqUrl = "";
 string dlqARN = "";
 string sourceQueueUrl = "";
 string sourceARN = "";
-string moveTaskHandle = ""; 
+string moveTaskHandle = "";
 
 @test:Config {
     groups: ["startMessageMoveTask"]
