@@ -367,8 +367,8 @@ public class NativeClientAdaptor {
                 List<String> tagKeys = new ArrayList<>();
                 for (int i = 0; i < bTagKeys.size(); i++) {
                     Object val = bTagKeys.get(i);
-                    if (val instanceof BString) {
-                        tagKeys.add(((BString) val).getValue());
+                    if (val instanceof BString bString) {
+                        tagKeys.add(bString.getValue());
                     }
                 }
                 UntagQueueRequest request = UntagQueueRequest.builder()

@@ -50,8 +50,8 @@ public class GetQueueAttributesMapper {
                 List<QueueAttributeName> attrNames = new ArrayList<>();
                 for (int i = 0; i < attributenamesArray.size(); i++) {
                     Object val = attributenamesArray.get(i);
-                    if (val instanceof BString) {
-                        String attrNameStr = ((BString) val).getValue();
+                    if (val instanceof BString bString) {
+                        String attrNameStr = bString.getValue();
                         try {
                             attrNames.add(QueueAttributeName.fromValue(attrNameStr));
                         } catch (IllegalArgumentException e) {
