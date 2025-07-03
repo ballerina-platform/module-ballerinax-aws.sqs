@@ -80,7 +80,7 @@ public class ReceiveMessageMapper {
             for (int i = 0; i < sysAttrNamesArr.size(); i++) {
                 sysAttrNames.add(sysAttrNamesArr.getBString(i).getValue());
             }
-            builder.messageAttributeNames(sysAttrNames);
+            builder.messageSystemAttributeNamesWithStrings(sysAttrNames);
         }
         return builder.build();
     }

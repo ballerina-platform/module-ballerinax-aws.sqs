@@ -71,7 +71,7 @@ import software.amazon.awssdk.services.sqs.model.UntagQueueRequest;
  */
 
 public class NativeClientAdaptor {
-    static final String NATIVE_SQS_CLIENT = "nativeCLient";
+    static final String NATIVE_SQS_CLIENT = "nativeClient";
 
     private NativeClientAdaptor() {
     }
@@ -182,7 +182,7 @@ public class NativeClientAdaptor {
                 DeleteMessageBatchRequest request = DeleteMessageBatchMapper
                                 .getNativeDeleteMessageBatchRequest(queueUrl, bEntries);
                 DeleteMessageBatchResponse response = sqsClient.deleteMessageBatch(request);
-                return DeleteMessageBatchMapper.getnativeDeleteMessageBatchResponse(response);
+                return DeleteMessageBatchMapper.getNativeDeleteMessageBatchResponse(response);
             } catch (Exception e) {
                 String msg = "Failed to delete batch message"
                                 + Objects.requireNonNullElse(e.getMessage(), "Unknown Error");

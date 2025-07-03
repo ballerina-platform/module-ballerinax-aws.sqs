@@ -60,7 +60,7 @@ public class DeleteMessageBatchMapper {
                                                 .build();
         }
 
-        public static BMap<BString, Object> getnativeDeleteMessageBatchResponse(DeleteMessageBatchResponse response) {
+        public static BMap<BString, Object> getNativeDeleteMessageBatchResponse(DeleteMessageBatchResponse response) {
                 Type deleteMessageBatchResultEntryType = ValueCreator
                                                 .createRecordValue(ModuleUtils.getModule(),
                                                                                 "DeleteMessageBatchResultEntry")
