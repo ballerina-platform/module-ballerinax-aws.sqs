@@ -112,4 +112,3 @@ dependencies = [
 modules = [
 	{org = "ballerinax", packageName = "aws.sqs", moduleName = "aws.sqs"}
 ]
-

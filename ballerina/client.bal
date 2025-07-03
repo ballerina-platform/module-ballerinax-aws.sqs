@@ -326,4 +326,3 @@ public isolated client class Client {
         'class: "io.ballerina.lib.aws.sqs.NativeClientAdaptor"
     } external;
 }
-
