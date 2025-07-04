@@ -7,8 +7,6 @@ build
 # Ignore vscode workspace settings
 .vscode/
 
-
-
 # Compiled class file
 *.class
 
