@@ -23,7 +23,7 @@ import io.ballerina.runtime.api.creators.ValueCreator;
 import software.amazon.awssdk.services.sqs.model.StartMessageMoveTaskRequest;
 import software.amazon.awssdk.services.sqs.model.StartMessageMoveTaskResponse;
 
-public class StartMessageMoveTaskMapper {
+public final class StartMessageMoveTaskMapper {
     private static final BString DESTINATION_ARN = StringUtils.fromString("destinationARN");
     private static final BString MAX_MESSAGES_PER_SECOND = StringUtils.fromString("maxNumberOfMessagesPerSecond");
     private static final String START_MESSAGE_MOVE_TASK_RESPONSE = "StartMessageMoveTaskResponse";

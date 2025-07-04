@@ -21,7 +21,7 @@ import io.ballerina.runtime.api.values.BMap;
 import io.ballerina.runtime.api.values.BString;
 import software.amazon.awssdk.services.sqs.model.GetQueueUrlRequest;
 
-public class GetQueueUrlMapper {
+public final class GetQueueUrlMapper {
     private static final BString QUEUE_OWNER_AWS_ACCOUNT_ID = StringUtils.fromString("queueOwnerAWSAccountId");
 
     private GetQueueUrlMapper() {

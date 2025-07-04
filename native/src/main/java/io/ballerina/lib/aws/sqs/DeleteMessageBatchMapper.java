@@ -32,7 +32,7 @@ import software.amazon.awssdk.services.sqs.model.DeleteMessageBatchRequestEntry;
 import software.amazon.awssdk.services.sqs.model.DeleteMessageBatchResponse;
 import software.amazon.awssdk.services.sqs.model.DeleteMessageBatchResultEntry;
 
-public class DeleteMessageBatchMapper {
+public final class DeleteMessageBatchMapper {
 
         private static final BString ID = StringUtils.fromString("id");
         private static final BString RECEIPT_HANDLE = StringUtils.fromString("receiptHandle");

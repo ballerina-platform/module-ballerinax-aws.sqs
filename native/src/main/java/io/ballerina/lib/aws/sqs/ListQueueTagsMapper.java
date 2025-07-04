@@ -24,7 +24,7 @@ import software.amazon.awssdk.services.sqs.model.ListQueueTagsResponse;
 
 import java.util.Map;
 
-public class ListQueueTagsMapper {
+public final class ListQueueTagsMapper {
     private static final String LIST_QUEUE_TAGS_RESPONSE = "ListQueueTagsResponse";
     private static final BString TAGS = StringUtils.fromString("tags");
 

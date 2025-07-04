@@ -24,7 +24,7 @@ import io.ballerina.runtime.api.values.BString;
 import software.amazon.awssdk.services.sqs.model.CreateQueueRequest;
 import software.amazon.awssdk.services.sqs.model.QueueAttributeName;
 
-public class CreateQueueMapper {
+public final class CreateQueueMapper {
 
     public static final BString QUEUE_ATTRIBUTES = StringUtils.fromString("queueAttributes");
     public static final BString TAGS = StringUtils.fromString("tags");

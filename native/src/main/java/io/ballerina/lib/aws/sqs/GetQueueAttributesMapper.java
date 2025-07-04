@@ -30,7 +30,7 @@ import software.amazon.awssdk.services.sqs.model.GetQueueAttributesRequest;
 import software.amazon.awssdk.services.sqs.model.GetQueueAttributesResponse;
 import software.amazon.awssdk.services.sqs.model.QueueAttributeName;
 
-public class GetQueueAttributesMapper {
+public final class GetQueueAttributesMapper {
 
     private static final BString ATTRIBUTE_NAMES = StringUtils.fromString("attributeNames");
     private static final String GET_QUEUE_ATTRIBUTES_RESPONSE = "GetQueueAttributesResponse";

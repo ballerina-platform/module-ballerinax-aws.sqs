@@ -35,7 +35,7 @@ import software.amazon.awssdk.services.sqs.model.SendMessageBatchRequestEntry;
 import software.amazon.awssdk.services.sqs.model.SendMessageBatchResponse;
 import software.amazon.awssdk.services.sqs.model.SendMessageBatchResultEntry;
 
-public class SendMessageBatchMapper {
+public final class SendMessageBatchMapper {
 
     private static final String SEND_MESSAGE_BATCH_RESPONSE = "SendMessageBatchResponse";
     private static final BString SUCCESSFUL = StringUtils.fromString("successful");

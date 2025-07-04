@@ -25,7 +25,7 @@ import io.ballerina.runtime.api.values.BString;
 import software.amazon.awssdk.services.sqs.model.QueueAttributeName;
 import software.amazon.awssdk.services.sqs.model.SetQueueAttributesRequest;
 
-public class SetQueueAttributesMapper {
+public final class SetQueueAttributesMapper {
     public static final BString QUEUE_ATTRIBUTES = StringUtils.fromString("queueAttributes");
 
     private SetQueueAttributesMapper() {

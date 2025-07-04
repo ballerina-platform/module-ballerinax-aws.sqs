@@ -28,7 +28,7 @@ import io.ballerina.runtime.api.Module;
  * Module utils for the Ballerina AWS SQS API Client to obtain the module info
  * in the init.
  */
-public class ModuleUtils {
+public final class ModuleUtils {
     private static Module module;
 
     private ModuleUtils() {

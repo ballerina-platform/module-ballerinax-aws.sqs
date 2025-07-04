@@ -28,7 +28,7 @@ import io.ballerina.runtime.api.values.BString;
 import software.amazon.awssdk.services.sqs.model.ListQueuesRequest;
 import software.amazon.awssdk.services.sqs.model.ListQueuesResponse;
 
-public class ListQueuesMapper {
+public final class ListQueuesMapper {
 
     private static final BString MAX_RESULTS = StringUtils.fromString("maxResults");
     private static final BString NEXT_TOKEN = StringUtils.fromString("nextToken");

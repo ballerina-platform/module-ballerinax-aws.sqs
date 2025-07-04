@@ -30,7 +30,7 @@ import software.amazon.awssdk.services.sqs.model.Message;
 import software.amazon.awssdk.services.sqs.model.ReceiveMessageRequest;
 import software.amazon.awssdk.services.sqs.model.ReceiveMessageResponse;
 
-public class ReceiveMessageMapper {
+public final class ReceiveMessageMapper {
 
     private static final BString WAIT_TIME_SECONDS = StringUtils.fromString("waitTimeSeconds");
     private static final BString VISIBILITY_TIMEOUT = StringUtils.fromString("visibilityTimeout");
