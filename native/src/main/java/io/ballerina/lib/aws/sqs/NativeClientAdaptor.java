@@ -449,5 +449,4 @@ public class NativeClientAdaptor {
         }
         return null;
     }
-
 }

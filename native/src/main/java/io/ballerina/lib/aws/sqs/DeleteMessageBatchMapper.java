@@ -101,5 +101,4 @@ public final class DeleteMessageBatchMapper {
                 result.put(FAILED, failedArr);
                 return result;
         }
-
 }

@@ -71,7 +71,5 @@ public final class ListQueuesMapper {
             result.put(NEXT_TOKEN, StringUtils.fromString(response.nextToken()));
         }
         return result;
-
     }
-
 }

@@ -69,9 +69,6 @@ public record ConnectionConfig(Region region, Object authConfig) {
                             .getValue();
             return ProfileAuthConfig.fromConfig(profileName, credentialsFilePath);
         }
-
         throw new IllegalArgumentException("Unsupported authentication configuration");
-
     }
-
 }

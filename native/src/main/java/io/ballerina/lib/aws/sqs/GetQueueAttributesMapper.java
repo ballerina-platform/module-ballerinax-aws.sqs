@@ -81,5 +81,4 @@ public final class GetQueueAttributesMapper {
         result.put(QUEUE_ATTRIBUTES, attrMap);
         return result;
     }
-
 }

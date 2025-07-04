@@ -69,9 +69,7 @@ public final class SetQueueAttributesMapper {
                 }
                 builder.attributes(queueAttrMap);
             }
-
         }
         return builder.build();
-
     }
 }

@@ -153,5 +153,4 @@ public final class SendMessageBatchMapper {
         result.put(FAILED, failedArr);
         return result;
     }
-
 }

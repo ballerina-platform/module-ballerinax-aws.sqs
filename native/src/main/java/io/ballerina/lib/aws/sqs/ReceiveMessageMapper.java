@@ -102,5 +102,4 @@ public final class ReceiveMessageMapper {
         }
         return resultArr;
     }
-
 }

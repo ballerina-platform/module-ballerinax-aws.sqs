@@ -83,8 +83,6 @@ public final class CreateQueueMapper {
                 }
             }
         }
-
         return builder.build();
-
     }
 }

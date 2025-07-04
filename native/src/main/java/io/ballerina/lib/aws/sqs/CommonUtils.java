@@ -65,5 +65,4 @@ public final class CommonUtils {
         return ErrorCreator.createError(
                         ModuleUtils.getModule(), ERROR, StringUtils.fromString(message), cause, errorDetails);
     }
-
 }
