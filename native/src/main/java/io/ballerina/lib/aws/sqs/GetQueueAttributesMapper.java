@@ -54,8 +54,9 @@ public final class GetQueueAttributesMapper {
                         String attrNameStr = bString.getValue();
                         try {
                             attrNames.add(QueueAttributeName.fromValue(attrNameStr));
-                        } catch (IllegalArgumentException e) {
-                            System.err.println("Skipping invalid attribute name: " + attrNameStr);
+                        } catch (IllegalArgumentException ignored) {
+                            // Skipping invalid attribute name: attrNameStr
+                            // This is expected for unknown or unsupported attributes
                         }
                     }
                 }
@@ -81,4 +82,5 @@ public final class GetQueueAttributesMapper {
         result.put(QUEUE_ATTRIBUTES, attrMap);
         return result;
     }
+
 }
