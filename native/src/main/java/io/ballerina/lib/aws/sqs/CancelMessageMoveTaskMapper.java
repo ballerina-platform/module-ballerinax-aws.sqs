@@ -21,7 +21,7 @@ import io.ballerina.runtime.api.values.BMap;
 import io.ballerina.runtime.api.values.BString;
 import software.amazon.awssdk.services.sqs.model.CancelMessageMoveTaskResponse;
 
-public final class  CancelMessageMoveTaskMapper {
+public final class CancelMessageMoveTaskMapper {
     private static final String CANCEL_MESSAGE_MOVE_TASK_RESPONSE = "CancelMessageMoveTaskResponse";
     private static final BString APPROX_NUM_MOVED = StringUtils.fromString("approximateNumberOfMessagesMoved");
 
