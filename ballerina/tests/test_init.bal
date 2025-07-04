@@ -40,12 +40,12 @@ final Client sqsClient = check initClient();
 isolated function initClient() returns Client|error {
     boolean useStatic = authType == "static";
     boolean useProfile = authType == "profile";
-    if (useStatic && accessKeyId != "" && secretAccessKey != "") {
+    if useStatic && accessKeyId != "" && secretAccessKey != "" {
         return new ({
             region: awsRegion,
             auth: staticAuth
         });
-    } else if (useProfile) {
+    } else if useProfile {
         return new ({
             region: awsRegion,
             auth: profileAuth

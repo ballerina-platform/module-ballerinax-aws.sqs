@@ -14,7 +14,6 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import ballerina/io;
 import ballerina/test;
 
 string standardQueueUrl = "";
@@ -50,13 +49,9 @@ isolated function testInitUsingProfileAuth() returns error? {
 }
 function testCreateStandardQueue() returns error? {
     string queueName = "test-queue";
-    string|Error result = sqsClient->createQueue(queueName);
-    if result is string {
-        test:assertTrue(result.endsWith(queueName));
-        standardQueueUrl = result.toString();
-    } else {
-        test:assertFail("Standard Queue creation failed: " + result.toString());
-    }
+    string result = check sqsClient->createQueue(queueName);
+    test:assertTrue(result.endsWith(queueName));
+    standardQueueUrl = result;
 }
 
 @test:Config {
@@ -69,13 +64,9 @@ function testCreateFifoQueue() returns error? {
             fifoQueue: true
         }
     };
-    string|Error result = sqsClient->createQueue(queueName, config);
-    if result is string {
-        test:assertTrue(result.endsWith(queueName));
-        fifoQueueUrl = result.toString();
-    } else {
-        test:assertFail("Queue creation failed: " + result.toString());
-    }
+    string result = check sqsClient->createQueue(queueName, config);
+    test:assertTrue(result.endsWith(queueName));
+    fifoQueueUrl = result;
 }
 
 @test:Config {
@@ -96,13 +87,9 @@ function testCreateQueueWithAttributes() returns error? {
             }
         }
     };
-    string|Error result = sqsClient->createQueue(queueName, config);
-    if result is string {
-        test:assertTrue(result.endsWith(queueName));
-        attrQueueurl = result.toString();
-    } else {
-        test:assertFail("Queue creation with attributes failed: " + result.toString());
-    }
+    string result = check sqsClient->createQueue(queueName, config);
+    test:assertTrue(result.endsWith(queueName));
+    attrQueueurl = result;
 }
 
 @test:Config {
@@ -116,12 +103,8 @@ function testCreateQueueWithTags() returns error? {
             "project": "sqs"
         }
     };
-    string|Error result = sqsClient->createQueue(queueName, config);
-    if result is string {
-        test:assertTrue(result.endsWith(queueName));
-    } else {
-        test:assertFail("Queue creation with tags failed: " + result.toString());
-    }
+    string result = check sqsClient->createQueue(queueName, config);
+    test:assertTrue(result.endsWith(queueName));
 }
 
 @test:Config {
@@ -159,7 +142,6 @@ function testCreateQueueWithInvalidAttributes() returns error? {
     }
 }
 
-//send message 
 @test:Config {
     dependsOn: [testCreateStandardQueue],
     groups: ["sendMessage"]
@@ -167,12 +149,8 @@ function testCreateQueueWithInvalidAttributes() returns error? {
 function testBasicSendMessage() returns error? {
     string queueurl = standardQueueUrl;
     string message = "Hello from Ballerina SQS test!";
-    SendMessageResponse|Error result = sqsClient->sendMessage(queueurl, message);
-    if result is SendMessageResponse {
-        test:assertNotEquals(result.messageId, "", msg = "MessageId should not be empty");
-    } else {
-        test:assertFail("sendMessage failed: " + result.toString());
-    }
+    SendMessageResponse result = check sqsClient->sendMessage(queueurl, message);
+    test:assertNotEquals(result.messageId, "", msg = "MessageId should not be empty");
 }
 
 @test:Config {
@@ -193,12 +171,8 @@ function testSendMessageWithAttributes() returns error? {
             }
         }
     };
-    SendMessageResponse|Error result = sqsClient->sendMessage(standardQueueUrl, message, sendMessageConfig);
-    if result is SendMessageResponse {
-        test:assertNotEquals(result.messageId, "", msg = "MessageId should not be empty");
-    } else {
-        test:assertFail("sendMessage with attributes failed: " + result.toString());
-    }
+    SendMessageResponse result = check sqsClient->sendMessage(standardQueueUrl, message, sendMessageConfig);
+    test:assertNotEquals(result.messageId, "", msg = "MessageId should not be empty");
 }
 
 @test:Config {
@@ -211,12 +185,8 @@ function testSendMessageWithDelay() returns error? {
     SendMessageConfig sendMessageConfig = {
         delaySeconds: 10
     };
-    SendMessageResponse|Error result = sqsClient->sendMessage(queueUrl, message, sendMessageConfig);
-    if result is SendMessageResponse {
-        test:assertNotEquals(result.messageId, "", msg = "MessageId should not be empty");
-    } else {
-        test:assertFail("sendMessage with delay failed: " + result.toString());
-    }
+    SendMessageResponse result = check sqsClient->sendMessage(queueUrl, message, sendMessageConfig);
+    test:assertNotEquals(result.messageId, "", msg = "MessageId should not be empty");
 }
 
 @test:Config {
@@ -229,12 +199,8 @@ function testSendMessageWithSystemAttributes() returns error? {
     SendMessageConfig sendMessageConfig = {
         awsTraceHeader: "Root=1-678e1f8b2-1234567890abcdef12345678;Parent=1234567890abcdef;Sampled=1"
     };
-    SendMessageResponse|Error result = sqsClient->sendMessage(queueUrl, message, sendMessageConfig);
-    if result is SendMessageResponse {
-        test:assertNotEquals(result.messageId, "", msg = "MessageId should not be empty");
-    } else {
-        test:assertFail("sendMessage with system attributes failed: " + result.toString());
-    }
+    SendMessageResponse result = check sqsClient->sendMessage(queueUrl, message, sendMessageConfig);
+    test:assertNotEquals(result.messageId, "", msg = "MessageId should not be empty");
 }
 
 @test:Config {
@@ -248,12 +214,8 @@ function testSendMessageWithDeduplicationAndGroupId() returns error? {
         messageDeduplicationId: "dedup-id-123",
         messageGroupId: "group-id-456"
     };
-    SendMessageResponse|Error result = sqsClient->sendMessage(queueUrl, message, sendMessageConfig);
-    if result is SendMessageResponse {
-        test:assertNotEquals(result.messageId, "", msg = "MessageId should not be empty");
-    } else {
-        test:assertFail("sendMessage with deduplication and group ID failed: " + result.toString());
-    }
+    SendMessageResponse result = check sqsClient->sendMessage(queueUrl, message, sendMessageConfig);
+    test:assertNotEquals(result.messageId, "", msg = "MessageId should not be empty");
 }
 
 @test:Config {
@@ -366,12 +328,8 @@ function testSendMessageWithEmptyAttributes() returns error? {
     SendMessageConfig sendMessageConfig = {
         messageAttributes: {}
     };
-    SendMessageResponse|Error result = sqsClient->sendMessage(queueUrl, message, sendMessageConfig);
-    if result is SendMessageResponse {
-        test:assertNotEquals(result.messageId, "", msg = "MessageId should not be empty");
-    } else {
-        test:assertFail("sendMessage with empty attributes failed: " + result.toString());
-    }
+    SendMessageResponse result = check sqsClient->sendMessage(queueUrl, message, sendMessageConfig);
+    test:assertNotEquals(result.messageId, "", msg = "MessageId should not be empty");
 }
 
 @test:Config {
@@ -384,12 +342,8 @@ function testSendMessageWithNilAttributes() returns error? {
     SendMessageConfig sendMessageConfig = {
         messageAttributes: ()
     };
-    SendMessageResponse|Error result = sqsClient->sendMessage(queueUrl, message, sendMessageConfig);
-    if result is SendMessageResponse {
-        test:assertNotEquals(result.messageId, "", msg = "MessageId should not be empty");
-    } else {
-        test:assertFail("sendMessage with null attributes failed: " + result.toString());
-    }
+    SendMessageResponse result = check sqsClient->sendMessage(queueUrl, message, sendMessageConfig);
+    test:assertNotEquals(result.messageId, "", msg = "MessageId should not be empty");
 }
 
 @test:Config {
@@ -405,14 +359,9 @@ function testSendMessageBatchSuccess() returns error? {
         {id: "id-4", body: "Hello A4"},
         {id: "id-5", body: "Hello A5"}
     ];
-    SendMessageBatchResponse|Error result = sqsClient->sendMessageBatch(queueUrl, entries);
-    if result is SendMessageBatchResponse {
-        io:println(result.successful);
-        test:assertEquals(result.failed.length(), 0, msg = "All messages should succeed");
-        test:assertEquals(result.successful.length(), 5);
-    } else {
-        test:assertFail("Expected batch send to succeed, got: " + result.toString());
-    }
+    SendMessageBatchResponse result = check sqsClient->sendMessageBatch(queueUrl, entries);
+    test:assertEquals(result.failed.length(), 0, msg = "All messages should succeed");
+    test:assertEquals(result.successful.length(), 5);
 }
 
 @test:Config {
@@ -447,10 +396,6 @@ function testSendMessageBatchPartialFailure() returns error? {
         {id: "2", body: ""}
     ];
     SendMessageBatchResponse|Error result = sqsClient->sendMessageBatch(queueUrl, entries);
-    if result is SendMessageBatchResponse {
-        io:println("Failed entry list: ", result.failed);
-        io:println("Successful list: ", result.successful);
-    }
     if result is error {
         test:assertFail("Expected partial success, but got full error: " + result.toString());
     } else {
@@ -472,7 +417,6 @@ function testSendMessageBatchExceedsLimit() returns error? {
     foreach int i in 1 ... 11 {
         entries.push({id: i.toString(), body: "body1" + i.toBalString()});
     }
-
     SendMessageBatchResponse|Error result = sqsClient->sendMessageBatch(queueUrl, entries);
     test:assertTrue(result is Error);
     if result is error {
@@ -608,12 +552,8 @@ function testReceiveMessageWithAllOptionalConfigs() returns error? {
         messageAttributeNames: ["All"],
         messageSystemAttributeNames: ["All"]
     };
-    Message[]|Error result = sqsClient->receiveMessage(queueUrl, config);
-    if result is error {
-        test:assertFail("Unexpected error: " + result.toString());
-    } else {
-        test:assertTrue(result.length() >= 0);
-    }
+    Message[] result = check sqsClient->receiveMessage(queueUrl, config);
+    test:assertTrue(result.length() >= 0);
 }
 
 @test:Config {
@@ -622,21 +562,11 @@ function testReceiveMessageWithAllOptionalConfigs() returns error? {
 }
 function testDeleteMessage() returns error? {
     string queueUrl = standardQueueUrl;
-
-    Message[]|Error receiveResult = sqsClient->receiveMessage(queueUrl);
-    if receiveResult is error {
-        test:assertFail("Failed to receive message: " + receiveResult.toString());
-    }
-    if receiveResult.length() == 0 {
-        test:assertFail("Expected to receive at least one message but got none.");
-    }
-
-    Message message = receiveResult[0];
+    Message[] received = check sqsClient->receiveMessage(queueUrl);
+    test:assertTrue(received.length() > 0, msg = "Expected at least one message");
+    Message message = received[0];
     string receiptHandle = check message.receiptHandle.ensureType();
-    Error? deleteResult = sqsClient->deleteMessage(queueUrl, receiptHandle);
-    if deleteResult is error {
-        test:assertFail("Failed to delete message: " + deleteResult.toString());
-    }
+    check sqsClient->deleteMessage(queueUrl, receiptHandle);
 }
 
 @test:Config {
@@ -665,25 +595,16 @@ function testDeleteMessageBatchSuccess() returns error? {
         {id: "id-a", body: "Message A"},
         {id: "id-b", body: "Message B"}
     ];
-    SendMessageBatchResponse|Error sendResult = sqsClient->sendMessageBatch(queueUrl, batch);
-    if sendResult is error {
-        test:assertFail("Failed to send batch messages: " + sendResult.toString());
-    }
-    Message[]|error received = sqsClient->receiveMessage(queueUrl, {maxNumberOfMessages: 2, waitTimeSeconds: 10});
-    if received is error || received.length() < 2 {
-        test:assertFail("Expected 2 messages, but received fewer");
-    }
+    _ = check sqsClient->sendMessageBatch(queueUrl, batch);
+    Message[] received = check sqsClient->receiveMessage(queueUrl, {maxNumberOfMessages: 2, waitTimeSeconds: 10});
+    test:assertTrue(received.length() >= 2);
     DeleteMessageBatchEntry[] deleteBatch = [
         {id: "msg-id-1", receiptHandle: check received[0].receiptHandle.ensureType()},
         {id: "msg-id-2", receiptHandle: check received[1].receiptHandle.ensureType()}
     ];
-    DeleteMessageBatchResponse|Error deleteResult = sqsClient->deleteMessageBatch(queueUrl, deleteBatch);
-    if deleteResult is DeleteMessageBatchResponse {
-        test:assertEquals(deleteResult.successful.length(), 2);
-        test:assertEquals(deleteResult.failed.length(), 0);
-    } else {
-        test:assertFail("Expected successful batch delete, got: " + deleteResult.toString());
-    }
+    DeleteMessageBatchResponse deleteResult = check sqsClient->deleteMessageBatch(queueUrl, deleteBatch);
+    test:assertEquals(deleteResult.successful.length(), 2);
+    test:assertEquals(deleteResult.failed.length(), 0);
 }
 
 @test:Config {
@@ -768,9 +689,7 @@ function testSetQueueAttribues() returns error? {
             redrivePermission: DENY_ALL
         }
     };
-    Error? result = sqsClient->setQueueAttributes(queueUrl, attributes);
-    io:print(result);
-    test:assertTrue(result is ());
+    check sqsClient->setQueueAttributes(queueUrl, attributes);
 }
 
 @test:Config {
@@ -783,7 +702,6 @@ function testSetQueueAttribuesWithInvalidDelay() returns error? {
         delaySeconds: 901
     };
     Error? result = sqsClient->setQueueAttributes(queueUrl, attributes);
-    io:print(result);
     test:assertTrue(result is Error);
     if result is error {
         ErrorDetails details = result.detail();
@@ -802,8 +720,7 @@ function testGetQueueAttributesAll() returns error? {
     GetQueueAttributesConfig config = {
         attributeNames: ["All"]
     };
-    GetQueueAttributesResponse|Error result = sqsClient->getQueueAttributes(queueUrl, config);
-    test:assertTrue(result is GetQueueAttributesResponse);
+    GetQueueAttributesResponse _ = check sqsClient->getQueueAttributes(queueUrl, config);
 }
 
 @test:Config {
@@ -812,8 +729,7 @@ function testGetQueueAttributesAll() returns error? {
 }
 function testGetQueueAttributesWithoutConfig() returns error? {
     string queueUrl = attrQueueurl;
-    GetQueueAttributesResponse|Error result = sqsClient->getQueueAttributes(queueUrl);
-    test:assertTrue(result is GetQueueAttributesResponse);
+    GetQueueAttributesResponse _ = check sqsClient->getQueueAttributes(queueUrl);
 }
 
 @test:Config {
@@ -869,8 +785,7 @@ isolated function testListQueuesWithPrefix() returns error? {
     ListQueuesConfig config = {
         queueNamePrefix: "test"
     };
-    ListQueuesResponse|Error result = sqsClient->listQueues(config);
-    test:assertTrue(result is ListQueuesResponse);
+    ListQueuesResponse _ = check sqsClient->listQueues(config);
 }
 
 @test:Config {
@@ -880,8 +795,7 @@ isolated function testListQueuesWithMaxResult() returns error? {
     ListQueuesConfig config = {
         maxResults: 2
     };
-    ListQueuesResponse|Error result = sqsClient->listQueues(config);
-    test:assertTrue(result is ListQueuesResponse);
+    ListQueuesResponse _ = check sqsClient->listQueues(config);
 }
 
 @test:Config {
@@ -918,11 +832,8 @@ isolated function testListQueuesPagination() returns error? {
 function testGetQueueUrl() returns error? {
     string queueName = "test-queue";
     string expectedQueueUrl = standardQueueUrl;
-    string|Error? result = sqsClient->getQueueUrl(queueName);
-    test:assertTrue(result is string);
-    if result is string {
-        test:assertEquals(result, expectedQueueUrl, msg = "Returned queue URL does not match the expected value.");
-    }
+    string result = check sqsClient->getQueueUrl(queueName);
+    test:assertEquals(result, expectedQueueUrl, msg = "Returned queue URL does not match the expected value.");
 }
 
 @test:Config {
@@ -1023,15 +934,9 @@ function testStartMessageMoveTask() returns error? {
     GetQueueAttributesConfig config = {
         attributeNames: [QUEUE_ARN]
     };
-    GetQueueAttributesResponse|Error dlqArnresult = sqsClient->getQueueAttributes(dlqUrl, config);
-    if dlqArnresult is GetQueueAttributesResponse {
-        map<string> attrs = dlqArnresult.queueAttributes;
-        dlqARN = <string>attrs["QueueArn"];
-        io:println("DLQ ARN: " + dlqARN);
-        io:println("DLQArnResult :" + dlqArnresult.toString());
-    } else {
-        test:assertFail("Failed to get DLQ ARN: " + dlqArnresult.toString());
-    }
+    GetQueueAttributesResponse dlqArnresult = check sqsClient->getQueueAttributes(dlqUrl, config);
+    map<string> attrs = dlqArnresult.queueAttributes;
+    dlqARN = <string>attrs["QueueArn"];
 
     // Create Source Queue with redrivePolicy to DLQ
     CreateQueueConfig sourceQueueConfig = {
@@ -1042,13 +947,7 @@ function testStartMessageMoveTask() returns error? {
             }
         }
     };
-    string|Error sourceQueueResult = sqsClient->createQueue("Source-Queue", sourceQueueConfig);
-    if sourceQueueResult is string {
-        sourceQueueUrl = sourceQueueResult.toString();
-        io:println("Source Queue URL: " + sourceQueueUrl);
-    } else {
-        test:assertFail("Failed to create Source Queue: " + sourceQueueResult.toString());
-    }
+    string sourceQueueUrl = check sqsClient->createQueue("Source-Queue", sourceQueueConfig);
 
     // Send messages to the source queue
     string testMsg = "MoveTaskTestMessage";
@@ -1070,14 +969,9 @@ function testStartMessageMoveTask() returns error? {
     }
 
     // Call startMessageMoveTask
-    StartMessageMoveTaskResponse|Error moveTaskResult = sqsClient->startMessageMoveTask(dlqARN, {maxNumberOfMessagesPerSecond: 1});
-    if moveTaskResult is StartMessageMoveTaskResponse {
-        moveTaskHandle = moveTaskResult.taskHandle;
-        io:println("Started message move task: " + moveTaskHandle);
-        test:assertTrue(moveTaskHandle != "", msg = "Task handle should not be empty");
-    } else {
-        test:assertFail("Failed to start message move task: " + moveTaskResult.toString());
-    }
+    StartMessageMoveTaskResponse moveTaskResult = check sqsClient->startMessageMoveTask(dlqARN, {maxNumberOfMessagesPerSecond: 1});
+    moveTaskHandle = moveTaskResult.taskHandle;
+    test:assertTrue(moveTaskHandle != "", msg = "Task handle should not be empty");
 }
 
 @test:Config {
@@ -1088,15 +982,9 @@ function testCancelMessageMoveTask() returns error? {
     if moveTaskHandle == "" {
         test:assertFail("No move task handle available to cancel.");
     }
-    CancelMessageMoveTaskResponse|Error cancelResult = sqsClient->cancelMessageMoveTask(moveTaskHandle);
-    if cancelResult is CancelMessageMoveTaskResponse {
-        io:println("Cancelled message move task. Approximate number of messages moved: " +
-                cancelResult.approximateNumberOfMessagesMoved.toString());
-        test:assertTrue(cancelResult.approximateNumberOfMessagesMoved >= 0,
-                msg = "Approximate number of messages moved should be non-negative");
-    } else {
-        test:assertFail("Failed to cancel message move task: " + cancelResult.toString());
-    }
+    CancelMessageMoveTaskResponse cancelResult = check sqsClient->cancelMessageMoveTask(moveTaskHandle);
+    test:assertTrue(cancelResult.approximateNumberOfMessagesMoved >= 0,
+            msg = "Approximate number of messages moved should be non-negative");
 }
 
 @test:Config {
@@ -1114,7 +1002,6 @@ function testPurgeQueue() returns error? {
     dependsOn: [testCreateFifoQueue],
     groups: ["deleteQueue"]
 }
-
 function testDeleteQueue() returns error? {
     string queueUrl = fifoQueueUrl;
     Error? result = sqsClient->deleteQueue(queueUrl);
@@ -1148,38 +1035,21 @@ function testCreateQueueWithPolicy() returns error? {
             policy: policy
         }
     };
-    string|Error result = sqsClient->createQueue(queueName, config);
-    if result is string {
-        test:assertTrue(result.endsWith(queueName));
-        GetQueueAttributesConfig attrConfig = {
-            attributeNames: [POLICY]
-        };
-        GetQueueAttributesResponse|Error attrResult = sqsClient->getQueueAttributes(result, attrConfig);
-        if attrResult is GetQueueAttributesResponse {
-            string? returnedPolicy = attrResult.queueAttributes["Policy"];
-            test:assertEquals(returnedPolicy, policy, msg = "Policy should match the set value");
-        } else {
-            test:assertFail("Failed to get queue attributes: " + attrResult.toString());
-        }
-    } else {
-        test:assertFail("Queue creation with policy failed: " + result.toString());
-    }
+    string result = check sqsClient->createQueue(queueName, config);
+    test:assertTrue(result.endsWith(queueName));
+    GetQueueAttributesConfig attrConfig = {
+        attributeNames: [POLICY]
+    };
+    GetQueueAttributesResponse attrResult = check sqsClient->getQueueAttributes(result, attrConfig);
+    string? returnedPolicy = attrResult.queueAttributes["Policy"];
+    test:assertEquals(returnedPolicy, policy, msg = "Policy should match the set value");
+
 }
 
 @test:AfterSuite {}
-
 function testDeleteAllQueues() returns error? {
-    ListQueuesResponse|Error listResult = sqsClient->listQueues();
-    if listResult is ListQueuesResponse {
-        foreach string queueUrl in listResult.queueUrls {
-            Error? delResult = sqsClient->deleteQueue(queueUrl);
-            if delResult is error {
-                io:println("Failed to delete queue: " + queueUrl + " Error: " + delResult.toString());
-            } else {
-                io:println("Deleted queue: " + queueUrl);
-            }
-        }
-    } else {
-        test:assertFail("Failed to list queues: " + listResult.toString());
+    ListQueuesResponse listResult = check sqsClient->listQueues();
+    foreach string queueUrl in listResult.queueUrls {
+        check sqsClient->deleteQueue(queueUrl);
     }
 }
