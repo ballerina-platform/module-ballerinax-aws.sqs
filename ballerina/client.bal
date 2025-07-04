@@ -54,7 +54,7 @@ public isolated client class Client {
     # + receiveMessageConfig - Optional parameters for receiving messages
     # + return - An array of `sqs:Message` records, or an `sqs:Error` on failure
     remote isolated function receiveMessage(string queueUrl, *ReceiveMessageConfig receiveMessageConfig)
-        returns Message[]|Error= @java:Method {
+        returns Message[]|Error = @java:Method {
         name: "receiveMessage",
         'class: "io.ballerina.lib.aws.sqs.NativeClientAdaptor"
     } external;
@@ -230,7 +230,7 @@ public isolated client class Client {
     #
     # + taskHandle - Identifier of the message movement task
     # + return - A `sqs:CancelMessageMoveTaskResponse` with the number of messages moved before cancellation, or an `sqs:Error`
-    isolated remote function cancelMessageMoveTask(string taskHandle) returns CancelMessageMoveTaskResponse|Error  = @java:Method {
+    isolated remote function cancelMessageMoveTask(string taskHandle) returns CancelMessageMoveTaskResponse|Error = @java:Method {
         name: "cancelMessageMoveTask",
         'class: "io.ballerina.lib.aws.sqs.NativeClientAdaptor"
     } external;
