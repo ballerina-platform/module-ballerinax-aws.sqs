@@ -83,7 +83,6 @@ public isolated client class Client {
     # + return - A `sqs:DeleteMessageBatchResponse` indicating which deletions succeeded or failed, or an `sqs:Error` on failure
     isolated remote function deleteMessageBatch(string queueUrl, DeleteMessageBatchEntry[] entries)
         returns DeleteMessageBatchResponse|Error = @java:Method {
-        name: "deleteMessageBatch",
         'class: "io.ballerina.lib.aws.sqs.NativeClientAdaptor"
     } external;
 
