@@ -32,7 +32,6 @@ public isolated client class Client {
 
     isolated function externInit(ConnectionConfig connectionConfig)
     returns Error? = @java:Method {
-        name: "init",
         'class: "io.ballerina.lib.aws.sqs.NativeClientAdaptor"
     } external;
 
@@ -44,7 +43,6 @@ public isolated client class Client {
     # + return - A `sqs:SendMessageResponse` on success, or an `sqs:Error` on failure
     remote isolated function sendMessage(string queueUrl, string messageBody, *SendMessageConfig sendMessageConfig)
     returns SendMessageResponse|Error = @java:Method {
-        name: "sendMessage",
         'class: "io.ballerina.lib.aws.sqs.NativeClientAdaptor"
     } external;
 
@@ -55,7 +53,6 @@ public isolated client class Client {
     # + return - An array of `sqs:Message` records, or an `sqs:Error` on failure
     remote isolated function receiveMessage(string queueUrl, *ReceiveMessageConfig receiveMessageConfig)
         returns Message[]|Error = @java:Method {
-        name: "receiveMessage",
         'class: "io.ballerina.lib.aws.sqs.NativeClientAdaptor"
     } external;
 
@@ -65,7 +62,6 @@ public isolated client class Client {
     # + receiptHandle - Receipt handle associated with the message to delete
     # + return - An `sqs:Error` if the operation fails
     remote isolated function deleteMessage(string queueUrl, string receiptHandle) returns Error? = @java:Method {
-        name: "deleteMessage",
         'class: "io.ballerina.lib.aws.sqs.NativeClientAdaptor"
     } external;
 
@@ -76,7 +72,6 @@ public isolated client class Client {
     # + return - A `sqs:SendMessageBatchResponse` indicating which messages succeeded or failed, or an `sqs:Error` on failure
     isolated remote function sendMessageBatch(string queueUrl, SendMessageBatchEntry[] entries)
         returns SendMessageBatchResponse|Error = @java:Method {
-        name: "sendMessageBatch",
         'class: "io.ballerina.lib.aws.sqs.NativeClientAdaptor"
     } external;
 
@@ -99,7 +94,6 @@ public isolated client class Client {
     # + createQueueConfig - Optional configuration such as `queueAttributes` and `tags`
     # + return - URL of the created queue, or an `sqs:Error` on failure
     isolated remote function createQueue(string queueName, *CreateQueueConfig createQueueConfig) returns string|Error = @java:Method {
-        name: "createQueue",
         'class: "io.ballerina.lib.aws.sqs.NativeClientAdaptor"
     } external;
 
@@ -119,7 +113,6 @@ public isolated client class Client {
     # + return - URL of the requested queue, or an `sqs:Error` on failure
     isolated remote function getQueueUrl(string queueName, *GetQueueUrlConfig getQueueUrlConfig)
         returns string|Error = @java:Method {
-        name: "getQueueUrl",
         'class: "io.ballerina.lib.aws.sqs.NativeClientAdaptor"
     } external;
 
@@ -128,7 +121,6 @@ public isolated client class Client {
     # + listQueuesConfig - Optional parameters such as `queueNamePrefix`, `maxResults`, and `nextToken`
     # + return - A `sqs:ListQueuesResponse` containing queue URLs and an optional `nextToken`, or an `sqs:Error` on failure
     isolated remote function listQueues(*ListQueuesConfig listQueuesConfig) returns ListQueuesResponse|Error = @java:Method {
-        name: "listQueues",
         'class: "io.ballerina.lib.aws.sqs.NativeClientAdaptor"
     } external;
 
@@ -139,7 +131,6 @@ public isolated client class Client {
     # + return - A `sqs:GetQueueAttributesResponse` containing the queue attributes, or an `sqs:Error` on failure
     isolated remote function getQueueAttributes(string queueUrl, *GetQueueAttributesConfig getQueueAttributesConfig)
         returns GetQueueAttributesResponse|Error = @java:Method {
-        name: "getQueueAttributes",
         'class: "io.ballerina.lib.aws.sqs.NativeClientAdaptor"
     } external;
 
@@ -149,7 +140,6 @@ public isolated client class Client {
     # + queueAttributes - Attributes to set for the queue
     # + return - An `sqs:Error` on failure
     isolated remote function setQueueAttributes(string queueUrl, QueueAttributes queueAttributes) returns Error? = @java:Method {
-        name: "setQueueAttributes",
         'class: "io.ballerina.lib.aws.sqs.NativeClientAdaptor"
     } external;
 
@@ -160,7 +150,6 @@ public isolated client class Client {
     # + visibilityTimeout - New visibility timeout value in seconds (minimum 0, maximum 43,200)
     # + return - An `sqs:Error` on failure
     isolated remote function changeMessageVisibility(string queueUrl, string receiptHandle, int visibilityTimeout) returns Error? = @java:Method {
-        name: "changeMessageVisibility",
         'class: "io.ballerina.lib.aws.sqs.NativeClientAdaptor"
     } external;
 
@@ -169,7 +158,6 @@ public isolated client class Client {
     # + queueUrl - TURL of the queue to purge
     # + return - An `sqs:Error` on failure
     isolated remote function purgeQueue(string queueUrl) returns Error? = @java:Method {
-        name: "purgeQueue",
         'class: "io.ballerina.lib.aws.sqs.NativeClientAdaptor"
     } external;
 
@@ -184,7 +172,6 @@ public isolated client class Client {
     # + return - An `sqs:Error` on failure
     isolated remote function tagQueue(string queueUrl, map<string> tags
     ) returns Error? = @java:Method {
-        name: "tagQueue",
         'class: "io.ballerina.lib.aws.sqs.NativeClientAdaptor"
     } external;
 
@@ -194,7 +181,6 @@ public isolated client class Client {
     # + tags - List of tag keys to remove
     # + return - An `sqs:Error` on failure
     isolated remote function untagQueue(string queueUrl, string[] tags) returns Error? = @java:Method {
-        name: "untagQueue",
         'class: "io.ballerina.lib.aws.sqs.NativeClientAdaptor"
     } external;
 
@@ -203,7 +189,6 @@ public isolated client class Client {
     # + queueUrl - URL of the queue whose tags are listed
     # + return - A `sqs:ListQueueTagsResponse` with associated tags, or an `sqs:Error` on failure
     isolated remote function listQueueTags(string queueUrl) returns ListQueueTagsResponse|Error = @java:Method {
-        name: "listQueueTags",
         'class: "io.ballerina.lib.aws.sqs.NativeClientAdaptor"
     } external;
 
@@ -218,7 +203,6 @@ public isolated client class Client {
     # + return - A `sqs:StartMessageMoveTaskResponse` if successful, or an `sqs:Error` on failure
     isolated remote function startMessageMoveTask(string sourceARN, *StartMessageMoveTaskConfig startMessageMoveTaskConfig)
         returns StartMessageMoveTaskResponse|Error = @java:Method {
-        name: "startMessageMoveTask",
         'class: "io.ballerina.lib.aws.sqs.NativeClientAdaptor"
     } external;
 
@@ -231,7 +215,6 @@ public isolated client class Client {
     # + taskHandle - Identifier of the message movement task
     # + return - A `sqs:CancelMessageMoveTaskResponse` with the number of messages moved before cancellation, or an `sqs:Error`
     isolated remote function cancelMessageMoveTask(string taskHandle) returns CancelMessageMoveTaskResponse|Error = @java:Method {
-        name: "cancelMessageMoveTask",
         'class: "io.ballerina.lib.aws.sqs.NativeClientAdaptor"
     } external;
 
