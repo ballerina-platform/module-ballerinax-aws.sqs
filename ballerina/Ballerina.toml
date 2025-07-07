@@ -93,11 +93,11 @@ artifactId = "identity-spi"
 version = "2.31.66"
 path = "./lib/identity-spi-2.31.66.jar"
 
-# [[platform.java21.dependency]]
-# groupId = "software.amazon.awssdk"
-# artifactId = "json-utils"
-# version = "2.31.66"
-# path = "./lib/json-utils-2.31.66.jar"
+[[platform.java21.dependency]]
+groupId = "software.amazon.awssdk"
+artifactId = "json-utils"
+version = "2.31.66"
+path = "./lib/json-utils-2.31.66.jar"
 
 [[platform.java21.dependency]]
 groupId = "software.amazon.awssdk"
@@ -141,11 +141,11 @@ artifactId = "sdk-core"
 version = "2.31.66"
 path = "./lib/sdk-core-2.31.66.jar"
 
-[[platform.java21.dependency]]
-groupId = "software.amazon.awssdk"
-artifactId = "third-party-jackson-core"
-version = "2.31.66"
-path = "./lib/third-party-jackson-core-2.31.66.jar"
+# [[platform.java21.dependency]]
+# groupId = "software.amazon.awssdk"
+# artifactId = "third-party-jackson-core"
+# version = "2.31.66"
+# path = "./lib/third-party-jackson-core-2.31.66.jar"
 
 [[platform.java21.dependency]]
 groupId = "software.amazon.awssdk"
