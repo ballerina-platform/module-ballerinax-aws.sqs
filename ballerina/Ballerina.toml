@@ -165,8 +165,8 @@ path = "./lib/utils-2.31.66.jar"
 # version = "4.5.14"
 # path = "./lib/httpclient-4.5.14.jar"
 
-# [[platform.java21.dependency]]
-# groupId = "org.reactivestreams"
-# artifactId = "reactive-streams"
-# version = "1.0.4"
-# path = "./lib/reactive-streams-1.0.4.jar"
+[[platform.java21.dependency]]
+groupId = "org.reactivestreams"
+artifactId = "reactive-streams"
+version = "1.0.4"
+path = "./lib/reactive-streams-1.0.4.jar"
