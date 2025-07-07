@@ -111,11 +111,11 @@ artifactId = "profiles"
 version = "2.31.66"
 path = "./lib/profiles-2.31.66.jar"
 
-# [[platform.java21.dependency]]
-# groupId = "software.amazon.awssdk"
-# artifactId = "protocol-core"
-# version = "2.31.66"
-# path = "./lib/protocol-core-2.31.66.jar"
+[[platform.java21.dependency]]
+groupId = "software.amazon.awssdk"
+artifactId = "protocol-core"
+version = "2.31.66"
+path = "./lib/protocol-core-2.31.66.jar"
 
 [[platform.java21.dependency]]
 groupId = "software.amazon.awssdk"
