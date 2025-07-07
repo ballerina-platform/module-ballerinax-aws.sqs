@@ -30,10 +30,12 @@ public isolated client class Client {
         return self.externInit(connectionConfig);
     }
 
-    isolated function externInit(ConnectionConfig connectionConfig)
-    returns Error? = @java:Method {
+    isolated function externInit(ConnectionConfig connectionConfig) returns Error? = @java:Method {
+        name: "init",
         'class: "io.ballerina.lib.aws.sqs.NativeClientAdaptor"
     } external;
+
+    
 
     # Delivers a message to the specified SQS queue.
     #
