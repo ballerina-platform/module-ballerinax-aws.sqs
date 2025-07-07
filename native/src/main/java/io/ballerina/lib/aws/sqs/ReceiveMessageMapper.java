@@ -50,33 +50,33 @@ public final class ReceiveMessageMapper {
     }
 
     public static ReceiveMessageRequest getNativeReceiveMessageRequest(BString queueUrl,
-                    BMap<BString, Object> receiveMessageConfig) {
+            BMap<BString, Object> receiveMessageConfig) {
         ReceiveMessageRequest.Builder builder = ReceiveMessageRequest.builder()
-                        .queueUrl(queueUrl.getValue());
+                .queueUrl(queueUrl.getValue());
 
         if (receiveMessageConfig.containsKey(WAIT_TIME_SECONDS)) {
-            builder.waitTimeSeconds(((Long) receiveMessageConfig.get(WAIT_TIME_SECONDS)).intValue());
+            builder.waitTimeSeconds(receiveMessageConfig.getIntValue(WAIT_TIME_SECONDS).intValue());
         }
         if (receiveMessageConfig.containsKey(VISIBILITY_TIMEOUT)) {
-            builder.visibilityTimeout(((Long) receiveMessageConfig.get(VISIBILITY_TIMEOUT)).intValue());
+            builder.visibilityTimeout(receiveMessageConfig.getIntValue(VISIBILITY_TIMEOUT).intValue());
         }
         if (receiveMessageConfig.containsKey(MAX_NUMBER_OF_MESSAGES)) {
-            builder.maxNumberOfMessages(((Long) receiveMessageConfig.get(MAX_NUMBER_OF_MESSAGES)).intValue());
+            builder.maxNumberOfMessages(receiveMessageConfig.getIntValue(MAX_NUMBER_OF_MESSAGES).intValue());
         }
         if (receiveMessageConfig.containsKey(RECEIVE_REQUEST_ATTEMPT_ID)) {
             builder.receiveRequestAttemptId(receiveMessageConfig.getStringValue(RECEIVE_REQUEST_ATTEMPT_ID).getValue());
         }
         if (receiveMessageConfig.containsKey(MESSAGE_ATTRIBUTE_NAMES)) {
-            BArray attrNamesArr = (BArray) receiveMessageConfig.get(MESSAGE_ATTRIBUTE_NAMES);
-            List<String> attrNames = new ArrayList<>();
+            BArray attrNamesArr = receiveMessageConfig.getArrayValue(MESSAGE_ATTRIBUTE_NAMES);
+            List<String> attrNames = new ArrayList<>(attrNamesArr.size());
             for (int i = 0; i < attrNamesArr.size(); i++) {
                 attrNames.add(attrNamesArr.getBString(i).getValue());
             }
             builder.messageAttributeNames(attrNames);
         }
         if (receiveMessageConfig.containsKey(MESSAGE_SYSTEM_ATTRIBUTE_NAMES)) {
-            BArray sysAttrNamesArr = (BArray) receiveMessageConfig.get(MESSAGE_SYSTEM_ATTRIBUTE_NAMES);
-            List<String> sysAttrNames = new ArrayList<>();
+            BArray sysAttrNamesArr = receiveMessageConfig.getArrayValue(MESSAGE_SYSTEM_ATTRIBUTE_NAMES);
+            List<String> sysAttrNames = new ArrayList<>(sysAttrNamesArr.size());
             for (int i = 0; i < sysAttrNamesArr.size(); i++) {
                 sysAttrNames.add(sysAttrNamesArr.getBString(i).getValue());
             }

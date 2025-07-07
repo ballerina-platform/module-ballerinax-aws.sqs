@@ -47,6 +47,8 @@ import static io.ballerina.lib.aws.sqs.StaticAuthConfig.AWS_ACCESS_KEY_ID;
 public record ConnectionConfig(Region region, Object authConfig) {
     private static final BString CONNECTION_CONFIG_REGION = StringUtils.fromString("region");
     private static final BString CONNECTION_CONFIG_AUTH_CONFIG = StringUtils.fromString("auth");
+    private static final BString PROFILE_NAME = StringUtils.fromString("profileName");
+    private static final BString CREDENTIALS_FILE_PATH = StringUtils.fromString("credentialsFilePath");
 
     public ConnectionConfig(BMap<BString, Object> bConnectionConfig) {
         this(getRegion(bConnectionConfig), getAuthConfig(bConnectionConfig));
@@ -59,14 +61,13 @@ public record ConnectionConfig(Region region, Object authConfig) {
     @SuppressWarnings("unchecked")
     private static Object getAuthConfig(BMap<BString, Object> bConnectionConfig) {
         BMap<BString, Object> bAuthConfig = (BMap<BString, Object>) bConnectionConfig
-                        .getMapValue(CONNECTION_CONFIG_AUTH_CONFIG);
+                .getMapValue(CONNECTION_CONFIG_AUTH_CONFIG);
         if (bAuthConfig.containsKey(AWS_ACCESS_KEY_ID)) {
             return new StaticAuthConfig(bAuthConfig);
         }
-        if (bAuthConfig.containsKey(StringUtils.fromString("profileName"))) {
-            String profileName = bAuthConfig.getStringValue(StringUtils.fromString("profileName")).getValue();
-            String credentialsFilePath = bAuthConfig.getStringValue(StringUtils.fromString("credentialsFilePath"))
-                            .getValue();
+        if (bAuthConfig.containsKey(PROFILE_NAME)) {
+            String profileName = bAuthConfig.getStringValue(PROFILE_NAME).getValue();
+            String credentialsFilePath = bAuthConfig.getStringValue(CREDENTIALS_FILE_PATH).getValue();
             return ProfileAuthConfig.fromConfig(profileName, credentialsFilePath);
         }
         throw new IllegalArgumentException("Unsupported authentication configuration");

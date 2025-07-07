@@ -36,21 +36,21 @@ public final class CreateQueueMapper {
         CreateQueueRequest.Builder builder = CreateQueueRequest.builder().queueName(queueName.getValue());
 
         final Map<String, String> ATTRIBUTE_NAME_MAP = Map.ofEntries(
-                        Map.entry("delaySeconds", "DelaySeconds"),
-                        Map.entry("maximumMessageSize", "MaximumMessageSize"),
-                        Map.entry("messageRetentionPeriod", "MessageRetentionPeriod"),
-                        Map.entry("policy", "Policy"),
-                        Map.entry("receiveMessageWaitTimeSeconds", "ReceiveMessageWaitTimeSeconds"),
-                        Map.entry("visibilityTimeout", "VisibilityTimeout"),
-                        Map.entry("redrivePolicy", "RedrivePolicy"),
-                        Map.entry("redriveAllowPolicy", "RedriveAllowPolicy"),
-                        Map.entry("kmsMasterKeyId", "KmsMasterKeyId"),
-                        Map.entry("kmsDataKeyReusePeriodSeconds", "KmsDataKeyReusePeriodSeconds"),
-                        Map.entry("sqsManagedSseEnabled", "SqsManagedSseEnabled"),
-                        Map.entry("fifoQueue", "FifoQueue"),
-                        Map.entry("contentBasedDeduplication", "ContentBasedDeduplication"),
-                        Map.entry("deduplicationScope", "DeduplicationScope"),
-                        Map.entry("fifoThroughputLimit", "FifoThroughputLimit"));
+                Map.entry("delaySeconds", "DelaySeconds"),
+                Map.entry("maximumMessageSize", "MaximumMessageSize"),
+                Map.entry("messageRetentionPeriod", "MessageRetentionPeriod"),
+                Map.entry("policy", "Policy"),
+                Map.entry("receiveMessageWaitTimeSeconds", "ReceiveMessageWaitTimeSeconds"),
+                Map.entry("visibilityTimeout", "VisibilityTimeout"),
+                Map.entry("redrivePolicy", "RedrivePolicy"),
+                Map.entry("redriveAllowPolicy", "RedriveAllowPolicy"),
+                Map.entry("kmsMasterKeyId", "KmsMasterKeyId"),
+                Map.entry("kmsDataKeyReusePeriodSeconds", "KmsDataKeyReusePeriodSeconds"),
+                Map.entry("sqsManagedSseEnabled", "SqsManagedSseEnabled"),
+                Map.entry("fifoQueue", "FifoQueue"),
+                Map.entry("contentBasedDeduplication", "ContentBasedDeduplication"),
+                Map.entry("deduplicationScope", "DeduplicationScope"),
+                Map.entry("fifoThroughputLimit", "FifoThroughputLimit"));
 
         if (bConfig != null) {
             if (bConfig.containsKey(QUEUE_ATTRIBUTES)) {
@@ -74,7 +74,9 @@ public final class CreateQueueMapper {
                 if (tags != null) {
                     Map<String, String> tagMap = new HashMap<>();
                     for (var entrySet : tags.entrySet()) {
-                        tagMap.put(((BString) entrySet.getKey()).getValue(), entrySet.getValue().toString());
+                        BString tagKey = (BString) entrySet.getKey();
+                        Object value = entrySet.getValue();
+                        tagMap.put(tagKey.getValue(), value.toString());
                     }
                     builder.tags(tagMap);
                 }

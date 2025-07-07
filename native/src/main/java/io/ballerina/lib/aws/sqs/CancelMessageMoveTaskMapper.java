@@ -30,7 +30,7 @@ public final class CancelMessageMoveTaskMapper {
 
     public static BMap<BString, Object> getNativeCancelMessageMoveTaskResponse(CancelMessageMoveTaskResponse response) {
         BMap<BString, Object> result = ValueCreator.createRecordValue(ModuleUtils.getModule(),
-                        CANCEL_MESSAGE_MOVE_TASK_RESPONSE);
+                CANCEL_MESSAGE_MOVE_TASK_RESPONSE);
         result.put(APPROX_NUM_MOVED, response.approximateNumberOfMessagesMoved());
         return result;
     }

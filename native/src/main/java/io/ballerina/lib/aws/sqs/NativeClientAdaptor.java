@@ -81,13 +81,13 @@ public class NativeClientAdaptor {
             ConnectionConfig connectionConfig = new ConnectionConfig(bConnectionConfig);
             AwsCredentialsProvider credentialsProvider = getCredentialsProvider(connectionConfig.authConfig());
             SqsClient nativeClient = SqsClient.builder()
-                            .region(connectionConfig.region())
-                            .credentialsProvider(credentialsProvider)
-                            .build();
+                    .region(connectionConfig.region())
+                    .credentialsProvider(credentialsProvider)
+                    .build();
             bClient.addNativeData(NATIVE_SQS_CLIENT, nativeClient);
         } catch (Exception e) {
             String errorMsg = String.format("Error occurred while initializing the SQS client: %s",
-                            e.getMessage());
+                    e.getMessage());
             return CommonUtils.createError(errorMsg, e);
         }
         return null;
@@ -96,8 +96,8 @@ public class NativeClientAdaptor {
     private static AwsCredentialsProvider getCredentialsProvider(Object authConfig) {
         if (authConfig instanceof StaticAuthConfig staticAuth) {
             AwsCredentials credentials = Objects.nonNull(staticAuth.sessionToken()) ? AwsSessionCredentials.create(
-                            staticAuth.accessKeyId(), staticAuth.secretAccessKey(), staticAuth.sessionToken())
-                            : AwsBasicCredentials.create(staticAuth.accessKeyId(), staticAuth.secretAccessKey());
+                    staticAuth.accessKeyId(), staticAuth.secretAccessKey(), staticAuth.sessionToken())
+                    : AwsBasicCredentials.create(staticAuth.accessKeyId(), staticAuth.secretAccessKey());
             return StaticCredentialsProvider.create(credentials);
         }
         if (authConfig instanceof AwsCredentialsProvider) {
@@ -107,13 +107,13 @@ public class NativeClientAdaptor {
     }
 
     public static Object sendMessage(Environment env, BObject bClient, BString queueUrl, BString messageBody,
-                    BMap<BString, Object> bConfig) {
+            BMap<BString, Object> bConfig) {
         SqsClient sqsClient = (SqsClient) bClient.getNativeData(NATIVE_SQS_CLIENT);
 
         return env.yieldAndRun(() -> {
             try {
                 SendMessageRequest request = SendMessageMapper.getNativeSendMessageRequest(queueUrl, messageBody,
-                                bConfig);
+                        bConfig);
                 SendMessageResponse response = sqsClient.sendMessage(request);
                 return SendMessageMapper.getNativeSendMessageResponse(response);
             } catch (Exception e) {
@@ -124,7 +124,7 @@ public class NativeClientAdaptor {
     }
 
     public static Object receiveMessage(Environment env, BObject bClient, BString queueUrl,
-                    BMap<BString, Object> bConfig) {
+            BMap<BString, Object> bConfig) {
         SqsClient sqsClient = (SqsClient) bClient.getNativeData(NATIVE_SQS_CLIENT);
 
         return env.yieldAndRun(() -> {
@@ -134,7 +134,7 @@ public class NativeClientAdaptor {
                 return ReceiveMessageMapper.getNativeReceiveMessageResponse(response);
             } catch (Exception e) {
                 String msg = "Failed to receive message: "
-                                + Objects.requireNonNullElse(e.getMessage(), "Unknown error");
+                        + Objects.requireNonNullElse(e.getMessage(), "Unknown error");
                 return CommonUtils.createError(msg, e);
             }
         });
@@ -146,9 +146,9 @@ public class NativeClientAdaptor {
         return env.yieldAndRun(() -> {
             try {
                 DeleteMessageRequest request = DeleteMessageRequest.builder()
-                                .queueUrl(queueUrl.getValue())
-                                .receiptHandle(receiptHandle.getValue())
-                                .build();
+                        .queueUrl(queueUrl.getValue())
+                        .receiptHandle(receiptHandle.getValue())
+                        .build();
                 sqsClient.deleteMessage(request);
                 return null;
             } catch (Exception e) {
@@ -163,12 +163,12 @@ public class NativeClientAdaptor {
         return env.yieldAndRun(() -> {
             try {
                 SendMessageBatchRequest request = SendMessageBatchMapper.getNativeSendMessageBatchRequest(queueurl,
-                                bEntries);
+                        bEntries);
                 SendMessageBatchResponse response = sqsClient.sendMessageBatch(request);
                 return SendMessageBatchMapper.getNativeSendMessageBatchResponse(response);
             } catch (Exception e) {
                 String msg = "Failed to send batch message"
-                                + Objects.requireNonNullElse(e.getMessage(), "Unknown error");
+                        + Objects.requireNonNullElse(e.getMessage(), "Unknown error");
                 return CommonUtils.createError(msg, e);
             }
         });
@@ -180,19 +180,19 @@ public class NativeClientAdaptor {
         return env.yieldAndRun(() -> {
             try {
                 DeleteMessageBatchRequest request = DeleteMessageBatchMapper
-                                .getNativeDeleteMessageBatchRequest(queueUrl, bEntries);
+                        .getNativeDeleteMessageBatchRequest(queueUrl, bEntries);
                 DeleteMessageBatchResponse response = sqsClient.deleteMessageBatch(request);
                 return DeleteMessageBatchMapper.getNativeDeleteMessageBatchResponse(response);
             } catch (Exception e) {
                 String msg = "Failed to delete batch message"
-                                + Objects.requireNonNullElse(e.getMessage(), "Unknown Error");
+                        + Objects.requireNonNullElse(e.getMessage(), "Unknown Error");
                 return CommonUtils.createError(msg, e);
             }
         });
     }
 
     public static Object createQueue(Environment env, BObject bClient, BString queueName,
-                    BMap<BString, Object> bConfig) {
+            BMap<BString, Object> bConfig) {
         SqsClient sqsClient = (SqsClient) bClient.getNativeData(NATIVE_SQS_CLIENT);
 
         return env.yieldAndRun(() -> {
@@ -214,8 +214,8 @@ public class NativeClientAdaptor {
         return env.yieldAndRun(() -> {
             try {
                 DeleteQueueRequest request = DeleteQueueRequest.builder()
-                                .queueUrl(queueUrl.getValue())
-                                .build();
+                        .queueUrl(queueUrl.getValue())
+                        .build();
                 sqsClient.deleteQueue(request);
                 return null;
             } catch (Exception e) {
@@ -225,7 +225,7 @@ public class NativeClientAdaptor {
     }
 
     public static Object getQueueUrl(Environment env, BObject bClient, BString queueName,
-                    BMap<BString, Object> bConfig) {
+            BMap<BString, Object> bConfig) {
         SqsClient sqsClient = (SqsClient) bClient.getNativeData(NATIVE_SQS_CLIENT);
 
         return env.yieldAndRun(() -> {
@@ -256,36 +256,36 @@ public class NativeClientAdaptor {
     }
 
     public static Object getQueueAttributes(Environment env, BObject bClient, BString queueUrl,
-                    BMap<BString, Object> bConfig) {
+            BMap<BString, Object> bConfig) {
         SqsClient sqsClient = (SqsClient) bClient.getNativeData(NATIVE_SQS_CLIENT);
 
         return env.yieldAndRun(() -> {
             try {
                 GetQueueAttributesRequest request = GetQueueAttributesMapper
-                                .getNativeGetQueueAttributesRequest(queueUrl, bConfig);
+                        .getNativeGetQueueAttributesRequest(queueUrl, bConfig);
                 GetQueueAttributesResponse response = sqsClient.getQueueAttributes(request);
                 return GetQueueAttributesMapper.getNativeGetQueueAttributesResponse(response);
             } catch (Exception e) {
                 String msg = "Failed to get queue attributes: "
-                                + Objects.requireNonNullElse(e.getMessage(), "Unknown error");
+                        + Objects.requireNonNullElse(e.getMessage(), "Unknown error");
                 return CommonUtils.createError(msg, e);
             }
         });
     }
 
     public static Object setQueueAttributes(Environment env, BObject bClient, BString queueUrl,
-                    BMap<BString, Object> bQueueAttributes) {
+            BMap<BString, Object> bQueueAttributes) {
         SqsClient sqsClient = (SqsClient) bClient.getNativeData(NATIVE_SQS_CLIENT);
 
         return env.yieldAndRun(() -> {
             try {
                 SetQueueAttributesRequest request = SetQueueAttributesMapper
-                                .getNativeSetQueueAttributesRequest(queueUrl, bQueueAttributes);
+                        .getNativeSetQueueAttributesRequest(queueUrl, bQueueAttributes);
                 sqsClient.setQueueAttributes(request);
                 return null;
             } catch (Exception e) {
                 String msg = "Failed to set queue attributes: "
-                                + Objects.requireNonNullElse(e.getMessage(), "Unknown Error");
+                        + Objects.requireNonNullElse(e.getMessage(), "Unknown Error");
                 return CommonUtils.createError(msg, e);
             }
         });
@@ -293,22 +293,22 @@ public class NativeClientAdaptor {
     }
 
     public static Object changeMessageVisibility(Environment env, BObject bClient, BString queueUrl,
-                    BString receiptHandle, long visibilityTimeout) {
+            BString receiptHandle, long visibilityTimeout) {
         SqsClient sqsClient = (SqsClient) bClient.getNativeData(NATIVE_SQS_CLIENT);
 
         return env.yieldAndRun(() -> {
             try {
                 ChangeMessageVisibilityRequest request = ChangeMessageVisibilityRequest.builder()
-                                .queueUrl(queueUrl.getValue())
-                                .receiptHandle(receiptHandle.getValue())
-                                .visibilityTimeout((int) visibilityTimeout)
-                                .build();
+                        .queueUrl(queueUrl.getValue())
+                        .receiptHandle(receiptHandle.getValue())
+                        .visibilityTimeout((int) visibilityTimeout)
+                        .build();
                 sqsClient.changeMessageVisibility(request);
                 return null;
 
             } catch (Exception e) {
                 String msg = "Failed to change message visibility: "
-                                + Objects.requireNonNullElse(e.getMessage(), "Unknown Error");
+                        + Objects.requireNonNullElse(e.getMessage(), "Unknown Error");
                 return CommonUtils.createError(msg, e);
             }
         });
@@ -320,8 +320,8 @@ public class NativeClientAdaptor {
         return env.yieldAndRun(() -> {
             try {
                 PurgeQueueRequest request = PurgeQueueRequest.builder()
-                                .queueUrl(queueurl.getValue())
-                                .build();
+                        .queueUrl(queueurl.getValue())
+                        .build();
                 sqsClient.purgeQueue(request);
                 return null;
             } catch (Exception e) {
@@ -337,19 +337,18 @@ public class NativeClientAdaptor {
 
         return env.yieldAndRun(() -> {
             try {
-                // Convert BMap<BString, Object> to Map<String, String>
                 Map<String, String> tags = new HashMap<>();
-                for (Object key : bTags.getKeys()) {
-                    BString tagKey = (BString) key;
-                    Object value = bTags.get(tagKey);
+                for (var entrySet : bTags.entrySet()) {
+                    BString tagKey = (BString) entrySet.getKey();
+                    Object value = entrySet.getValue();
                     if (value != null) {
                         tags.put(tagKey.getValue(), value.toString());
                     }
                 }
                 TagQueueRequest request = TagQueueRequest.builder()
-                                .queueUrl(queueUrl.getValue())
-                                .tags(tags)
-                                .build();
+                        .queueUrl(queueUrl.getValue())
+                        .tags(tags)
+                        .build();
                 sqsClient.tagQueue(request);
                 return null;
             } catch (Exception e) {
@@ -372,9 +371,9 @@ public class NativeClientAdaptor {
                     }
                 }
                 UntagQueueRequest request = UntagQueueRequest.builder()
-                                .queueUrl(queueUrl.getValue())
-                                .tagKeys(tagKeys)
-                                .build();
+                        .queueUrl(queueUrl.getValue())
+                        .tagKeys(tagKeys)
+                        .build();
                 sqsClient.untagQueue(request);
                 return null;
             } catch (Exception e) {
@@ -390,31 +389,31 @@ public class NativeClientAdaptor {
         return env.yieldAndRun(() -> {
             try {
                 ListQueueTagsRequest request = ListQueueTagsRequest.builder()
-                                .queueUrl(queueUrl.getValue())
-                                .build();
+                        .queueUrl(queueUrl.getValue())
+                        .build();
                 ListQueueTagsResponse response = sqsClient.listQueueTags(request);
                 return ListQueueTagsMapper.getNativeListQueueTagsResponse(response);
             } catch (Exception e) {
                 String msg = "Failed to list queue tags: "
-                                + Objects.requireNonNullElse(e.getMessage(), "Unknown error");
+                        + Objects.requireNonNullElse(e.getMessage(), "Unknown error");
                 return CommonUtils.createError(msg, e);
             }
         });
     }
 
     public static Object startMessageMoveTask(Environment env, BObject bClient, BString sourceArn,
-                    BMap<BString, Object> bConfig) {
+            BMap<BString, Object> bConfig) {
         SqsClient sqsClient = (SqsClient) bClient.getNativeData(NATIVE_SQS_CLIENT);
 
         return env.yieldAndRun(() -> {
             try {
                 StartMessageMoveTaskRequest request = StartMessageMoveTaskMapper
-                                .getNativeStartMessageMoveTaskRequest(sourceArn, bConfig);
+                        .getNativeStartMessageMoveTaskRequest(sourceArn, bConfig);
                 StartMessageMoveTaskResponse response = sqsClient.startMessageMoveTask(request);
                 return StartMessageMoveTaskMapper.getNativeStartMessageMoveTaskResponse(response);
             } catch (Exception e) {
                 String msg = "Failed to start message move task: "
-                                + Objects.requireNonNullElse(e.getMessage(), "Unknown error");
+                        + Objects.requireNonNullElse(e.getMessage(), "Unknown error");
                 return CommonUtils.createError(msg, e);
             }
         });
@@ -426,13 +425,13 @@ public class NativeClientAdaptor {
         return env.yieldAndRun(() -> {
             try {
                 CancelMessageMoveTaskRequest request = CancelMessageMoveTaskRequest.builder()
-                                .taskHandle(taskHandle.getValue())
-                                .build();
+                        .taskHandle(taskHandle.getValue())
+                        .build();
                 CancelMessageMoveTaskResponse response = sqsClient.cancelMessageMoveTask(request);
                 return CancelMessageMoveTaskMapper.getNativeCancelMessageMoveTaskResponse(response);
             } catch (Exception e) {
                 String msg = "Failed to cancel message move task: "
-                                + Objects.requireNonNullElse(e.getMessage(), "Unknown error");
+                        + Objects.requireNonNullElse(e.getMessage(), "Unknown error");
                 return CommonUtils.createError(msg, e);
             }
         });
@@ -444,7 +443,7 @@ public class NativeClientAdaptor {
             nativeClient.close();
         } catch (Exception e) {
             String errorMsg = String.format("Error occurred while closing the SQS client: %s",
-                            Objects.requireNonNullElse(e.getMessage(), "Unknown error"));
+                    Objects.requireNonNullElse(e.getMessage(), "Unknown error"));
             return CommonUtils.createError(errorMsg, e);
         }
         return null;

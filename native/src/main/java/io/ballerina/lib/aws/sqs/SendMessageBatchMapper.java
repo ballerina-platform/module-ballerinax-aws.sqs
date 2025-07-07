@@ -55,6 +55,8 @@ public final class SendMessageBatchMapper {
     private static final BString MESSAGE_DEDUPLICATION_ID = StringUtils.fromString("messageDeduplicationId");
     private static final BString MESSAGE_GROUP_ID = StringUtils.fromString("messageGroupId");
     private static final BString BODY = StringUtils.fromString("body");
+    private static final BString DATA_TYPE = StringUtils.fromString("dataType");
+    private static final BString STRING_VALUE = StringUtils.fromString("stringValue");
 
     private SendMessageBatchMapper() {
 
@@ -66,11 +68,11 @@ public final class SendMessageBatchMapper {
         for (int i = 0; i < bEntries.size(); i++) {
             BMap<BString, Object> entry = (BMap<BString, Object>) bEntries.get(i);
             SendMessageBatchRequestEntry.Builder builder = SendMessageBatchRequestEntry.builder()
-                            .id(entry.getStringValue(ID).getValue())
-                            .messageBody(entry.getStringValue(BODY).getValue());
+                    .id(entry.getStringValue(ID).getValue())
+                    .messageBody(entry.getStringValue(BODY).getValue());
 
             if (entry.containsKey(DELAY_SECONDS)) {
-                builder.delaySeconds(((Long) entry.get(DELAY_SECONDS)).intValue());
+                builder.delaySeconds(entry.getIntValue(DELAY_SECONDS).intValue());
             }
             if (entry.containsKey(MESSAGE_DEDUPLICATION_ID)) {
                 builder.messageDeduplicationId(entry.getStringValue(MESSAGE_DEDUPLICATION_ID).getValue());
@@ -80,22 +82,21 @@ public final class SendMessageBatchMapper {
             }
             if (entry.containsKey(AWS_TRACE_HEADER)) {
                 builder.messageAttributes(Map.of("AWSTraceHeader",
-                                MessageAttributeValue.builder()
-                                                .dataType("String")
-                                                .stringValue(entry.getStringValue(AWS_TRACE_HEADER).getValue())
-                                                .build()));
+                        MessageAttributeValue.builder()
+                                .dataType("String")
+                                .stringValue(entry.getStringValue(AWS_TRACE_HEADER).getValue())
+                                .build()));
             }
             if (entry.containsKey(MESSAGE_ATTRIBUTES)) {
-                BMap<BString, Object> attrs = (BMap<BString, Object>) entry.get(MESSAGE_ATTRIBUTES);
+                var attrs = entry.getMapValue(MESSAGE_ATTRIBUTES);
                 Map<String, MessageAttributeValue> attrMap = new HashMap<>();
-                for (Object key : attrs.getKeys()) {
-                    BString attrKey = (BString) key;
-                    BMap<BString, Object> attrVal = (BMap<BString, Object>) attrs.get(attrKey);
+                for (var entrySet : attrs.entrySet()) {
+                    BString attrKey = (BString) entrySet.getKey();
+                    BMap<BString, Object> attrVal = (BMap<BString, Object>) entrySet.getValue();
                     MessageAttributeValue mav = MessageAttributeValue.builder()
-                                    .dataType(attrVal.getStringValue(StringUtils.fromString("dataType")).getValue())
-                                    .stringValue(attrVal.getStringValue(StringUtils.fromString("stringValue"))
-                                                    .getValue())
-                                    .build();
+                            .dataType(attrVal.getStringValue(DATA_TYPE).getValue())
+                            .stringValue(attrVal.getStringValue(STRING_VALUE).getValue())
+                            .build();
                     attrMap.put(attrKey.getValue(), mav);
                 }
                 builder.messageAttributes(attrMap);
@@ -103,19 +104,19 @@ public final class SendMessageBatchMapper {
             entries.add(builder.build());
         }
         return SendMessageBatchRequest.builder()
-                        .queueUrl(queueUrl.getValue())
-                        .entries(entries)
-                        .build();
+                .queueUrl(queueUrl.getValue())
+                .entries(entries)
+                .build();
     }
 
     public static BMap<BString, Object> getNativeSendMessageBatchResponse(SendMessageBatchResponse response) {
         Type sendMessageBatchResultEntryType = ValueCreator
-                        .createRecordValue(ModuleUtils.getModule(), "SendMessageBatchResultEntry").getType();
+                .createRecordValue(ModuleUtils.getModule(), "SendMessageBatchResultEntry").getType();
         BArray successfulArr = ValueCreator
-                        .createArrayValue(TypeCreator.createArrayType(sendMessageBatchResultEntryType));
+                .createArrayValue(TypeCreator.createArrayType(sendMessageBatchResultEntryType));
         for (SendMessageBatchResultEntry entry : response.successful()) {
             BMap<BString, Object> entryRecord = ValueCreator.createRecordValue(ModuleUtils.getModule(),
-                            "SendMessageBatchResultEntry");
+                    "SendMessageBatchResultEntry");
             entryRecord.put(ID, StringUtils.fromString(entry.id()));
             entryRecord.put(MD5_OF_BODY, StringUtils.fromString(entry.md5OfMessageBody()));
             entryRecord.put(MESSAGE_ID, StringUtils.fromString(entry.messageId()));
@@ -132,12 +133,12 @@ public final class SendMessageBatchMapper {
         }
 
         Type batchResultErrorEntryType = ValueCreator
-                        .createRecordValue(ModuleUtils.getModule(), "BatchResultErrorEntry").getType();
+                .createRecordValue(ModuleUtils.getModule(), "BatchResultErrorEntry").getType();
         BArray failedArr = ValueCreator.createArrayValue(TypeCreator.createArrayType(batchResultErrorEntryType));
 
         for (BatchResultErrorEntry entry : response.failed()) {
             BMap<BString, Object> entryRecord = ValueCreator.createRecordValue(ModuleUtils.getModule(),
-                            "BatchResultErrorEntry");
+                    "BatchResultErrorEntry");
             entryRecord.put(ID, StringUtils.fromString(entry.id()));
             entryRecord.put(CODE, StringUtils.fromString(entry.code()));
             entryRecord.put(SENDER_FAULT, entry.senderFault());
@@ -148,7 +149,7 @@ public final class SendMessageBatchMapper {
         }
 
         BMap<BString, Object> result = ValueCreator.createRecordValue(ModuleUtils.getModule(),
-                        SEND_MESSAGE_BATCH_RESPONSE);
+                SEND_MESSAGE_BATCH_RESPONSE);
         result.put(SUCCESSFUL, successfulArr);
         result.put(FAILED, failedArr);
         return result;

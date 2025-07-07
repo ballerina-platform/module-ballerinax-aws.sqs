@@ -40,11 +40,11 @@ public final class ListQueuesMapper {
     }
 
     public static ListQueuesRequest getNativeListQueuesRequest(BMap<BString, Object> listQueuesConfig)
-                    throws Exception {
+            throws Exception {
         ListQueuesRequest.Builder builder = ListQueuesRequest.builder();
         if (listQueuesConfig != null) {
             if (listQueuesConfig.containsKey(MAX_RESULTS)) {
-                builder.maxResults(((Long) listQueuesConfig.get(MAX_RESULTS)).intValue());
+                builder.maxResults(listQueuesConfig.getIntValue(MAX_RESULTS).intValue());
             }
             if (listQueuesConfig.containsKey(NEXT_TOKEN)) {
                 builder.nextToken(listQueuesConfig.getStringValue(NEXT_TOKEN).getValue());

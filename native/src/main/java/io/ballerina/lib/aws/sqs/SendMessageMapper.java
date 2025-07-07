@@ -40,20 +40,21 @@ public final class SendMessageMapper {
     private static final BString AWS_TRACE_HEADER = StringUtils.fromString("awsTraceHeader");
     private static final BString MESSAGE_DEDUPLICATION_ID = StringUtils.fromString("messageDeduplicationId");
     private static final BString MESSAGE_GROUP_ID = StringUtils.fromString("messageGroupId");
+    private static final BString DATA_TYPE = StringUtils.fromString("dataType");
+    private static final BString STRING_VALUE = StringUtils.fromString("stringValue");
 
     private SendMessageMapper() {
     }
 
-    @SuppressWarnings("unchecked")
     public static SendMessageRequest getNativeSendMessageRequest(BString queueUrl, BString messageBody,
-                    BMap<BString, Object> sendMessageConfig) throws Exception {
+            BMap<BString, Object> sendMessageConfig) throws Exception {
 
         SendMessageRequest.Builder builder = SendMessageRequest.builder()
-                        .queueUrl(queueUrl.getValue())
-                        .messageBody(messageBody.getValue());
+                .queueUrl(queueUrl.getValue())
+                .messageBody(messageBody.getValue());
 
         if (sendMessageConfig.containsKey(DELAY_SECONDS)) {
-            builder.delaySeconds(((Long) sendMessageConfig.get(DELAY_SECONDS)).intValue());
+            builder.delaySeconds(sendMessageConfig.getIntValue(DELAY_SECONDS).intValue());
         }
         if (sendMessageConfig.containsKey(MESSAGE_DEDUPLICATION_ID)) {
             builder.messageDeduplicationId(sendMessageConfig.getStringValue(MESSAGE_DEDUPLICATION_ID).getValue());
@@ -63,21 +64,22 @@ public final class SendMessageMapper {
         }
         if (sendMessageConfig.containsKey(AWS_TRACE_HEADER)) {
             builder.messageAttributes(Map.of("AWSTraceHeader",
-                            MessageAttributeValue.builder()
-                                            .dataType("String")
-                                            .stringValue(sendMessageConfig.getStringValue(AWS_TRACE_HEADER).getValue())
-                                            .build()));
+                    MessageAttributeValue.builder()
+                            .dataType("String")
+                            .stringValue(sendMessageConfig.getStringValue(AWS_TRACE_HEADER).getValue())
+                            .build()));
         }
         if (sendMessageConfig.containsKey(MESSAGE_ATTRIBUTES)) {
-            BMap<BString, Object> attrs = (BMap<BString, Object>) sendMessageConfig.get(MESSAGE_ATTRIBUTES);
+            var attrs = sendMessageConfig.getMapValue(MESSAGE_ATTRIBUTES);
             Map<String, MessageAttributeValue> attrMap = new HashMap<>();
-            for (Object key : attrs.getKeys()) {
-                BString attrKey = (BString) key;
-                BMap<BString, Object> attrVal = (BMap<BString, Object>) attrs.get(attrKey);
+            for (var entrySet : attrs.entrySet()) {
+                BString attrKey = (BString) entrySet.getKey();
+                @SuppressWarnings("unchecked")
+                BMap<BString, Object> attrVal = (BMap<BString, Object>) entrySet.getValue();
                 MessageAttributeValue mav = MessageAttributeValue.builder()
-                                .dataType(attrVal.getStringValue(StringUtils.fromString("dataType")).getValue())
-                                .stringValue(attrVal.getStringValue(StringUtils.fromString("stringValue")).getValue())
-                                .build();
+                        .dataType(attrVal.getStringValue(DATA_TYPE).getValue())
+                        .stringValue(attrVal.getStringValue(STRING_VALUE).getValue())
+                        .build();
                 attrMap.put(attrKey.getValue(), mav);
             }
             builder.messageAttributes(attrMap);
@@ -88,7 +90,7 @@ public final class SendMessageMapper {
 
     public static BMap<BString, Object> getNativeSendMessageResponse(SendMessageResponse response) {
         BMap<BString, Object> result = ValueCreator.createRecordValue(
-                        ModuleUtils.getModule(), SEND_MESSAGE_RESPONSE);
+                ModuleUtils.getModule(), SEND_MESSAGE_RESPONSE);
         result.put(MESSAGE_ID, StringUtils.fromString(response.messageId()));
         result.put(MD5_OF_BODY, StringUtils.fromString(response.md5OfMessageBody()));
         if (response.md5OfMessageAttributes() != null) {
