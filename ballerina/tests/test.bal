@@ -624,7 +624,7 @@ function testDeleteMessageBatchWithInvalidReceiptHandle() returns error? {
     test:assertEquals(result.successful.length(), 1);
     test:assertEquals(result.failed.length(), 1);
     test:assertEquals(result.failed[0].id, "id-1");
-    
+
 }
 
 @test:Config {
