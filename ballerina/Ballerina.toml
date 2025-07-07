@@ -69,11 +69,11 @@ path = "./lib/endpoints-spi-2.31.66.jar"
 # version = "2.31.66"
 # path = "./lib/http-auth-2.31.66.jar"
 
-# [[platform.java21.dependency]]
-# groupId = "software.amazon.awssdk"
-# artifactId = "http-auth-aws"
-# version = "2.31.66"
-# path = "./lib/http-auth-aws-2.31.66.jar"
+[[platform.java21.dependency]]
+groupId = "software.amazon.awssdk"
+artifactId = "http-auth-aws"
+version = "2.31.66"
+path = "./lib/http-auth-aws-2.31.66.jar"
 
 [[platform.java21.dependency]]
 groupId = "software.amazon.awssdk"
