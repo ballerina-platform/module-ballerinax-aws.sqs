@@ -147,11 +147,11 @@ path = "./lib/regions-2.31.66.jar"
 # version = "2.31.66"
 # path = "./lib/third-party-jackson-core-2.31.66.jar"
 
-# [[platform.java21.dependency]]
-# groupId = "software.amazon.awssdk"
-# artifactId = "utils"
-# version = "2.31.66"
-# path = "./lib/utils-2.31.66.jar"
+[[platform.java21.dependency]]
+groupId = "software.amazon.awssdk"
+artifactId = "utils"
+version = "2.31.66"
+path = "./lib/utils-2.31.66.jar"
 
 # [[platform.java21.dependency]]
 # groupId = "org.apache.httpcomponents"
