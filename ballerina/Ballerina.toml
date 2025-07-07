@@ -129,11 +129,11 @@ artifactId = "retries"
 version = "2.31.66"
 path = "./lib/retries-2.31.66.jar"
 
-# [[platform.java21.dependency]]
-# groupId = "software.amazon.awssdk"
-# artifactId = "retries-spi"
-# version = "2.31.66"
-# path = "./lib/retries-spi-2.31.66.jar"
+[[platform.java21.dependency]]
+groupId = "software.amazon.awssdk"
+artifactId = "retries-spi"
+version = "2.31.66"
+path = "./lib/retries-spi-2.31.66.jar"
 
 [[platform.java21.dependency]]
 groupId = "software.amazon.awssdk"
