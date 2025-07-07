@@ -32,7 +32,6 @@ public final class CreateQueueMapper {
     private CreateQueueMapper() {
     }
 
-    @SuppressWarnings("unchecked")
     public static CreateQueueRequest getNativeCreateQueueRequest(BString queueName, BMap<BString, Object> bConfig) {
         CreateQueueRequest.Builder builder = CreateQueueRequest.builder().queueName(queueName.getValue());
 
@@ -55,12 +54,12 @@ public final class CreateQueueMapper {
 
         if (bConfig != null) {
             if (bConfig.containsKey(QUEUE_ATTRIBUTES)) {
-                BMap<BString, Object> attrs = (BMap<BString, Object>) bConfig.get(QUEUE_ATTRIBUTES);
+                var attrs = bConfig.getMapValue(QUEUE_ATTRIBUTES);
                 if (attrs != null) {
                     Map<QueueAttributeName, String> attrMap = new HashMap<>();
-                    for (Object key : attrs.getKeys()) {
-                        BString attrkey = (BString) key;
-                        Object value = attrs.get(attrkey);
+                    for (var entrySet : attrs.entrySet()) {
+                        BString attrkey = (BString) entrySet.getKey();
+                        Object value = entrySet.getValue();
                         String awsAttrName = ATTRIBUTE_NAME_MAP.get(attrkey.getValue());
                         if (awsAttrName != null && value != null) {
                             attrMap.put(QueueAttributeName.fromValue(awsAttrName), value.toString());
@@ -71,13 +70,11 @@ public final class CreateQueueMapper {
             }
 
             if (bConfig.containsKey(TAGS)) {
-                BMap<BString, Object> tags = (BMap<BString, Object>) bConfig.get(TAGS);
+                var tags = bConfig.getMapValue(TAGS);
                 if (tags != null) {
                     Map<String, String> tagMap = new HashMap<>();
-                    for (Object key : tags.getKeys()) {
-                        BString tagKey = (BString) key;
-                        Object value = tags.get(tagKey);
-                        tagMap.put(tagKey.getValue(), value.toString());
+                    for (var entrySet : tags.entrySet()) {
+                        tagMap.put(((BString) entrySet.getKey()).getValue(), entrySet.getValue().toString());
                     }
                     builder.tags(tagMap);
                 }
