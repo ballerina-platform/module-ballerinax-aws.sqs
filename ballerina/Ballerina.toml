@@ -33,11 +33,11 @@ artifactId = "auth"
 version = "2.31.66"
 path = "./lib/auth-2.31.66.jar"
 
-# [[platform.java21.dependency]]
-# groupId = "software.amazon.awssdk"
-# artifactId = "aws-core"
-# version = "2.31.66"
-# path = "./lib/aws-core-2.31.66.jar"
+[[platform.java21.dependency]]
+groupId = "software.amazon.awssdk"
+artifactId = "aws-core"
+version = "2.31.66"
+path = "./lib/aws-core-2.31.66.jar"
 
 # [[platform.java21.dependency]]
 # groupId = "software.amazon.awssdk"
