@@ -15,11 +15,11 @@ artifactId = "aws.sqs-native"
 version = "0.1.0-SNAPSHOT"
 path = "../native/build/libs/aws.sqs-native-0.1.0-SNAPSHOT.jar"
 
-# [[platform.java21.dependency]]
-# groupId = "software.amazon.awssdk"
-# artifactId = "sqs"
-# version = "2.31.66"
-# path = "./lib/sqs-2.31.66.jar"
+[[platform.java21.dependency]]
+groupId = "software.amazon.awssdk"
+artifactId = "sqs"
+version = "2.31.66"
+path = "./lib/sqs-2.31.66.jar"
 
 # [[platform.java21.dependency]]
 # groupId = "software.amazon.awssdk"
