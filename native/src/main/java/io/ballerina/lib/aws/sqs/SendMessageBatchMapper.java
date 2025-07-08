@@ -59,7 +59,6 @@ public final class SendMessageBatchMapper {
     private static final BString STRING_VALUE = StringUtils.fromString("stringValue");
 
     private SendMessageBatchMapper() {
-
     }
 
     @SuppressWarnings("unchecked")
@@ -70,7 +69,6 @@ public final class SendMessageBatchMapper {
             SendMessageBatchRequestEntry.Builder builder = SendMessageBatchRequestEntry.builder()
                     .id(entry.getStringValue(ID).getValue())
                     .messageBody(entry.getStringValue(BODY).getValue());
-
             if (entry.containsKey(DELAY_SECONDS)) {
                 builder.delaySeconds(entry.getIntValue(DELAY_SECONDS).intValue());
             }
@@ -147,7 +145,6 @@ public final class SendMessageBatchMapper {
             }
             failedArr.append(entryRecord);
         }
-
         BMap<BString, Object> result = ValueCreator.createRecordValue(ModuleUtils.getModule(),
                 SEND_MESSAGE_BATCH_RESPONSE);
         result.put(SUCCESSFUL, successfulArr);

@@ -68,8 +68,7 @@ public final class DeleteMessageBatchMapper {
                                 .createRecordValue(ModuleUtils.getModule(), "DeleteMessageBatchResultEntry")
                                 .getType();
                 BArray successfulArr = ValueCreator
-                                .createArrayValue(TypeCreator.createArrayType(
-                                                deleteMessageBatchResultEntryType));
+                                .createArrayValue(TypeCreator.createArrayType(deleteMessageBatchResultEntryType));
                 for (DeleteMessageBatchResultEntry entry : response.successful()) {
                         BMap<BString, Object> entryRecord = ValueCreator.createRecordValue(ModuleUtils.getModule(),
                                         "DeleteMessageBatchResultEntry");

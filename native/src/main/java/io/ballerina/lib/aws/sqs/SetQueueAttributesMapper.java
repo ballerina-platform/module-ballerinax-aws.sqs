@@ -26,6 +26,24 @@ import software.amazon.awssdk.services.sqs.model.QueueAttributeName;
 import software.amazon.awssdk.services.sqs.model.SetQueueAttributesRequest;
 
 public final class SetQueueAttributesMapper {
+
+    private static final Map<String, String> ATTRIBUTE_NAME_MAP = Map.ofEntries(
+            Map.entry("delaySeconds", "DelaySeconds"),
+            Map.entry("maximumMessageSize", "MaximumMessageSize"),
+            Map.entry("messageRetentionPeriod", "MessageRetentionPeriod"),
+            Map.entry("policy", "Policy"),
+            Map.entry("receiveMessageWaitTimeSeconds", "ReceiveMessageWaitTimeSeconds"),
+            Map.entry("visibilityTimeout", "VisibilityTimeout"),
+            Map.entry("redrivePolicy", "RedrivePolicy"),
+            Map.entry("redriveAllowPolicy", "RedriveAllowPolicy"),
+            Map.entry("kmsMasterKeyId", "KmsMasterKeyId"),
+            Map.entry("kmsDataKeyReusePeriodSeconds", "KmsDataKeyReusePeriodSeconds"),
+            Map.entry("sqsManagedSseEnabled", "SqsManagedSseEnabled"),
+            Map.entry("fifoQueue", "FifoQueue"),
+            Map.entry("contentBasedDeduplication", "ContentBasedDeduplication"),
+            Map.entry("deduplicationScope", "DeduplicationScope"),
+            Map.entry("fifoThroughputLimit", "FifoThroughputLimit"));
+
     public static final BString QUEUE_ATTRIBUTES = StringUtils.fromString("queueAttributes");
 
     private SetQueueAttributesMapper() {
@@ -34,23 +52,6 @@ public final class SetQueueAttributesMapper {
     public static SetQueueAttributesRequest getNativeSetQueueAttributesRequest(BString queueUrl,
             BMap<BString, Object> attrs) {
         SetQueueAttributesRequest.Builder builder = SetQueueAttributesRequest.builder().queueUrl(queueUrl.getValue());
-
-        final Map<String, String> ATTRIBUTE_NAME_MAP = Map.ofEntries(
-                Map.entry("delaySeconds", "DelaySeconds"),
-                Map.entry("maximumMessageSize", "MaximumMessageSize"),
-                Map.entry("messageRetentionPeriod", "MessageRetentionPeriod"),
-                Map.entry("policy", "Policy"),
-                Map.entry("receiveMessageWaitTimeSeconds", "ReceiveMessageWaitTimeSeconds"),
-                Map.entry("visibilityTimeout", "VisibilityTimeout"),
-                Map.entry("redrivePolicy", "RedrivePolicy"),
-                Map.entry("redriveAllowPolicy", "RedriveAllowPolicy"),
-                Map.entry("kmsMasterKeyId", "KmsMasterKeyId"),
-                Map.entry("kmsDataKeyReusePeriodSeconds", "KmsDataKeyReusePeriodSeconds"),
-                Map.entry("sqsManagedSseEnabled", "SqsManagedSseEnabled"),
-                Map.entry("fifoQueue", "FifoQueue"),
-                Map.entry("contentBasedDeduplication", "ContentBasedDeduplication"),
-                Map.entry("deduplicationScope", "DeduplicationScope"),
-                Map.entry("fifoThroughputLimit", "FifoThroughputLimit"));
 
         if (attrs != null && !attrs.isEmpty()) {
             Map<String, String> attrMap = new HashMap<>();

@@ -89,7 +89,6 @@ public final class ReceiveMessageMapper {
         List<Message> messages = response.messages();
         Type recordType = ValueCreator.createRecordValue(ModuleUtils.getModule(), MESSAGE_RECORD).getType();
         BArray resultArr = ValueCreator.createArrayValue(TypeCreator.createArrayType(recordType));
-
         int i = 0;
         for (Message msg : messages) {
             BMap<BString, Object> msgRecord = ValueCreator.createRecordValue(ModuleUtils.getModule(), MESSAGE_RECORD);

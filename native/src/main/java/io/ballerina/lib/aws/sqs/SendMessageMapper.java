@@ -85,7 +85,6 @@ public final class SendMessageMapper {
             builder.messageAttributes(attrMap);
         }
         return builder.build();
-
     }
 
     public static BMap<BString, Object> getNativeSendMessageResponse(SendMessageResponse response) {
