@@ -1,46 +1,37 @@
-# Ballerina Amazon SQS Connector
+# Ballerina AWS SQS Library
 
-[![Build Status](https://travis-ci.org/ballerina-platform/module-ballerinax-aws.sqs.svg?branch=master)](https://travis-ci.org/ballerina-platform/module-ballerinax-aws.sqs)
+[![Build](https://github.com/ballerina-platform/module-ballerinax-aws.sqs/actions/workflows/ci.yml/badge.svg)](https://github.com/ballerina-platform/module-ballerinax-aws.sqs/actions/workflows/build-timestamped-master.yml)
 [![codecov](https://codecov.io/gh/ballerina-platform/module-ballerinax-aws.sqs/branch/master/graph/badge.svg)](https://codecov.io/gh/ballerina-platform/module-ballerinax-aws.sqs)
+[![Trivy](https://github.com/ballerina-platform/module-ballerinax-aws.sqs/actions/workflows/trivy-scan.yml/badge.svg)](https://github.com/ballerina-platform/module-ballerinax-aws.sqs/actions/workflows/trivy-scan.yml)
+[![GraalVM Check](https://github.com/ballerina-platform/module-ballerinax-aws.sqs/actions/workflows/build-with-bal-test-graalvm.yml/badge.svg)](https://github.com/ballerina-platform/module-ballerinax-aws.sqs/actions/workflows/build-with-bal-test-native.yml)
 [![GitHub Last Commit](https://img.shields.io/github/last-commit/ballerina-platform/module-ballerinax-aws.sqs.svg)](https://github.com/ballerina-platform/module-ballerinax-aws.sqs/commits/master)
-[![GraalVM Check](https://github.com/ballerina-platform/module-ballerinax-aws.sqs/actions/workflows/build-with-bal-test-native.yml/badge.svg)](https://github.com/ballerina-platform/module-ballerinax-aws.sqs/actions/workflows/build-with-bal-test-native.yml)
-[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
-[Amazon SQS](https://aws.amazon.com/sqs/) is a message queuing service developed by Amazon.
+This library provides an implementation to interact with Amazon Simple Queue Service (SQS) using the AWS SDK.
 
-This connector provides operations for connecting and interacting with Amazon SQS endpoints over the network. 
+Amazon SQS is a fully managed message queuing service that enables you to decouple and scale microservices, distributed systems, and serverless applications. SQS eliminates the complexity and overhead associated with managing and operating message-oriented middleware.
 
-- [`aws.sqs`](sqs/Module.md)
+This library supports AWS SQS API version 2012-11-05 and is compatible with AWS SDK for Java v2.
 
-## Building from the source
-### Setting up the prerequisites
+### SQS Client
+#### Initialize SQS client
 
-1. Download and install Java SE Development Kit (JDK) version 11. You can install either [OpenJDK](https://adoptopenjdk.net/) or [Oracle JDK](https://www.oracle.com/java/technologies/javase-jdk11-downloads.html).
+#### Create and manage queues
+### Message Operations
+### Queue attributes and tags
+## Prerequisites
+## Issues and projects 
+## Build from the source
+### Set up the prerequisites
+### Build the source
 
-    > **Note:** Set the JAVA_HOME environment variable to the path name of the directory in which you installed JDK.
+## Contribute to Ballerina
 
-2. Download and install [Ballerina Swan Lake](https://ballerina.io/). 
-
-### Building the source
-Execute the following commands to build from the source:
-
-* To build the package:
-    ```    
-    bal build ./ballerina
-    ```
-* To run the package after build:
-    ```
-    bal test ./ballerina
-    ```
-## Contributing to Ballerina
 As an open source project, Ballerina welcomes contributions from the community. 
 
-For more information, see the [Contribution Guidelines](https://github.com/ballerina-platform/ballerina-lang/blob/master/CONTRIBUTING.md).
+For more information, go to the [contribution guidelines](https://github.com/ballerina-platform/ballerina-lang/blob/master/CONTRIBUTING.md).
 
 ## Code of conduct
-All contributors are encouraged to read the [Ballerina Code of Conduct](https://ballerina.io/code-of-conduct).
+
+All the contributors are encouraged to read the [Ballerina Code of Conduct](https://ballerina.io/code-of-conduct).
 
 ## Useful links
-* Discuss about code changes of the Ballerina project via [ballerina-dev@googlegroups.com](mailto:ballerina-dev@googlegroups.com).
-* Chat live with us via our [Discord server](https://discord.gg/ballerinalang).
-* Post all technical questions on Stack Overflow with the [#ballerina](https://stackoverflow.com/questions/tagged/ballerina) tag.

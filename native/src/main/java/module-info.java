@@ -1,4 +1,4 @@
-// Copyright (c) 2025, WSO2 LLC. (http://www.wso2.com).
+// Copyright (c) 2025 WSO2 LLC. (http://www.wso2.com).
 //
 // WSO2 LLC. licenses this file to you under the Apache License,
 // Version 2.0 (the "License"); you may not use this file except
@@ -14,17 +14,15 @@
 // specific language governing permissions and limitations
 // under the License.
 
-# Represents a AWS SQS  distinct error.
-public type Error distinct error<ErrorDetails>;
+module io.ballerina.stdlib.java.aws.sqs {
+    requires transitive software.amazon.awssdk.services.sqs;
+    requires transitive software.amazon.awssdk.auth;
+    requires software.amazon.awssdk.http;
+    requires software.amazon.awssdk.regions;
+    requires software.amazon.awssdk.awscore;
+    requires transitive io.ballerina.runtime;
+    requires software.amazon.awssdk.profiles;
+    requires software.amazon.awssdk.core;
 
-# The error details type for the AWS SQS  module.
-public type ErrorDetails record {|
-    # The HTTP status code for the error
-    int httpStatusCode?;
-    # The HTTP status text returned from the service
-    string httpStatusText?;
-    # The error code associated with the response
-    string errorCode?;
-    # The human-readable error message provided by the service
-    string errorMessage?;
-|};
+    exports io.ballerina.lib.aws.sqs;
+}

@@ -1,7 +1,7 @@
 [package]
 org = "ballerinax"
 name = "aws.sqs"
-version = "0.1.0"
+version = "@toml.version@"
 authors=["ballerina"]
 keywords=["IT Operations/Message Brokers", "Cost/Freemium", "Vendor/Amazon"]
 repository= "https://github.com/ballerina-platform/module-ballerinax-aws.sqs"
@@ -12,161 +12,161 @@ distribution = "2201.12.0"
 [[platform.java21.dependency]]
 groupId = "io.ballerina.lib"
 artifactId = "aws.sqs-native"
-version = "0.1.0-SNAPSHOT"
-path = "../native/build/libs/aws.sqs-native-0.1.0-SNAPSHOT.jar"
+version = "@project.version@"
+path = "../native/build/libs/aws.sqs-native-@project.version@.jar"
 
 [[platform.java21.dependency]]
 groupId = "software.amazon.awssdk"
 artifactId = "sqs"
-version = "2.31.66"
-path = "./lib/sqs-2.31.66.jar"
+version = "@aws.sdk.version@"
+path = "./lib/sqs-@aws.sdk.version@.jar"
 
 [[platform.java21.dependency]]
 groupId = "software.amazon.awssdk"
 artifactId = "apache-client"
-version = "2.31.66"
-path = "./lib/apache-client-2.31.66.jar"
+version = "@aws.sdk.version@"
+path = "./lib/apache-client-@aws.sdk.version@.jar"
 
 [[platform.java21.dependency]]
 groupId = "software.amazon.awssdk"
 artifactId = "auth"
-version = "2.31.66"
-path = "./lib/auth-2.31.66.jar"
+version = "@aws.sdk.version@"
+path = "./lib/auth-@aws.sdk.version@.jar"
 
 [[platform.java21.dependency]]
 groupId = "software.amazon.awssdk"
 artifactId = "aws-core"
-version = "2.31.66"
-path = "./lib/aws-core-2.31.66.jar"
+version = "@aws.sdk.version@"
+path = "./lib/aws-core-@aws.sdk.version@.jar"
 
 [[platform.java21.dependency]]
 groupId = "software.amazon.awssdk"
 artifactId = "aws-json-protocol"
-version = "2.31.66"
-path = "./lib/aws-json-protocol-2.31.66.jar"
+version = "@aws.sdk.version@"
+path = "./lib/aws-json-protocol-@aws.sdk.version@.jar"
 
 [[platform.java21.dependency]]
 groupId = "software.amazon.awssdk"
 artifactId = "checksums"
-version = "2.31.66"
-path = "./lib/checksums-2.31.66.jar"
+version = "@aws.sdk.version@"
+path = "./lib/checksums-@aws.sdk.version@.jar"
 
 [[platform.java21.dependency]]
 groupId = "software.amazon.awssdk"
 artifactId = "checksums-spi"
-version = "2.31.66"
-path = "./lib/checksums-spi-2.31.66.jar"
+version = "@aws.sdk.version@"
+path = "./lib/checksums-spi-@aws.sdk.version@.jar"
 
 [[platform.java21.dependency]]
 groupId = "software.amazon.awssdk"
 artifactId = "endpoints-spi"
-version = "2.31.66"
-path = "./lib/endpoints-spi-2.31.66.jar"
+version = "@aws.sdk.version@"
+path = "./lib/endpoints-spi-@aws.sdk.version@.jar"
 
 [[platform.java21.dependency]]
 groupId = "software.amazon.awssdk"
 artifactId = "http-auth"
-version = "2.31.66"
-path = "./lib/http-auth-2.31.66.jar"
+version = "@aws.sdk.version@"
+path = "./lib/http-auth-@aws.sdk.version@.jar"
 
 [[platform.java21.dependency]]
 groupId = "software.amazon.awssdk"
 artifactId = "http-auth-aws"
-version = "2.31.66"
-path = "./lib/http-auth-aws-2.31.66.jar"
+version = "@aws.sdk.version@"
+path = "./lib/http-auth-aws-@aws.sdk.version@.jar"
 
 [[platform.java21.dependency]]
 groupId = "software.amazon.awssdk"
 artifactId = "http-auth-spi"
-version = "2.31.66"
-path = "./lib/http-auth-spi-2.31.66.jar"
+version = "@aws.sdk.version@"
+path = "./lib/http-auth-spi-@aws.sdk.version@.jar"
 
 [[platform.java21.dependency]]
 groupId = "software.amazon.awssdk"
 artifactId = "http-client-spi"
-version = "2.31.66"
-path = "./lib/http-client-spi-2.31.66.jar"
+version = "@aws.sdk.version@"
+path = "./lib/http-client-spi-@aws.sdk.version@.jar"
 
 [[platform.java21.dependency]]
 groupId = "software.amazon.awssdk"
 artifactId = "identity-spi"
-version = "2.31.66"
-path = "./lib/identity-spi-2.31.66.jar"
+version = "@aws.sdk.version@"
+path = "./lib/identity-spi-@aws.sdk.version@.jar"
 
 [[platform.java21.dependency]]
 groupId = "software.amazon.awssdk"
 artifactId = "json-utils"
-version = "2.31.66"
-path = "./lib/json-utils-2.31.66.jar"
+version = "@aws.sdk.version@"
+path = "./lib/json-utils-@aws.sdk.version@.jar"
 
 [[platform.java21.dependency]]
 groupId = "software.amazon.awssdk"
 artifactId = "metrics-spi"
-version = "2.31.66"
-path = "./lib/metrics-spi-2.31.66.jar"
+version = "@aws.sdk.version@"
+path = "./lib/metrics-spi-@aws.sdk.version@.jar"
 
 [[platform.java21.dependency]]
 groupId = "software.amazon.awssdk"
 artifactId = "profiles"
-version = "2.31.66"
-path = "./lib/profiles-2.31.66.jar"
+version = "@aws.sdk.version@"
+path = "./lib/profiles-@aws.sdk.version@.jar"
 
 [[platform.java21.dependency]]
 groupId = "software.amazon.awssdk"
 artifactId = "protocol-core"
-version = "2.31.66"
-path = "./lib/protocol-core-2.31.66.jar"
+version = "@aws.sdk.version@"
+path = "./lib/protocol-core-@aws.sdk.version@.jar"
 
 [[platform.java21.dependency]]
 groupId = "software.amazon.awssdk"
 artifactId = "regions"
-version = "2.31.66"
-path = "./lib/regions-2.31.66.jar"
+version = "@aws.sdk.version@"
+path = "./lib/regions-@aws.sdk.version@.jar"
 
 [[platform.java21.dependency]]
 groupId = "software.amazon.awssdk"
 artifactId = "retries"
-version = "2.31.66"
-path = "./lib/retries-2.31.66.jar"
+version = "@aws.sdk.version@"
+path = "./lib/retries-@aws.sdk.version@.jar"
 
 [[platform.java21.dependency]]
 groupId = "software.amazon.awssdk"
 artifactId = "retries-spi"
-version = "2.31.66"
-path = "./lib/retries-spi-2.31.66.jar"
+version = "@aws.sdk.version@"
+path = "./lib/retries-spi-@aws.sdk.version@.jar"
 
 [[platform.java21.dependency]]
 groupId = "software.amazon.awssdk"
 artifactId = "sdk-core"
-version = "2.31.66"
-path = "./lib/sdk-core-2.31.66.jar"
+version = "@aws.sdk.version@"
+path = "./lib/sdk-core-@aws.sdk.version@.jar"
 
 [[platform.java21.dependency]]
 groupId = "software.amazon.awssdk"
 artifactId = "third-party-jackson-core"
-version = "2.31.66"
-path = "./lib/third-party-jackson-core-2.31.66.jar"
+version = "@aws.sdk.version@"
+path = "./lib/third-party-jackson-core-@aws.sdk.version@.jar"
 
 [[platform.java21.dependency]]
 groupId = "software.amazon.awssdk"
 artifactId = "utils"
-version = "2.31.66"
-path = "./lib/utils-2.31.66.jar"
+version = "@aws.sdk.version@"
+path = "./lib/utils-@aws.sdk.version@.jar"
 
 [[platform.java21.dependency]]
 groupId = "org.apache.httpcomponents"
 artifactId = "httpcore"
-version = "4.4.16"
-path = "./lib/httpcore-4.4.16.jar"
+version = "@apache.httpcore.version@"
+path = "./lib/httpcore-@apache.httpcore.version@.jar"
 
 [[platform.java21.dependency]]
 groupId = "org.apache.httpcomponents"
 artifactId = "httpclient"
-version = "4.5.14"
-path = "./lib/httpclient-4.5.14.jar"
+version = "@apache.httpclient.version@"
+path = "./lib/httpclient-@apache.httpclient.version@.jar"
 
 [[platform.java21.dependency]]
 groupId = "org.reactivestreams"
 artifactId = "reactive-streams"
-version = "1.0.4"
-path = "./lib/reactive-streams-1.0.4.jar"
+version = "@reactivestreams.version@"
+path = "./lib/reactive-streams-@reactivestreams.version@.jar"
