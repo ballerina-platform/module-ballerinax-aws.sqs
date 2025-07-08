@@ -642,7 +642,7 @@ function testDeleteMessageBatchWithDuplicateIds() returns error? {
         test:assertFail("Failed to send batch messages: " + sendResult.toString());
     }
     ReceiveMessageConfig receiveConfig = {
-        waitTimeSeconds: 12,
+        waitTimeSeconds: 15,
         maxNumberOfMessages: 10
     };
     Message[]|Error received = sqsClient->receiveMessage(queueUrl, receiveConfig);
@@ -946,7 +946,7 @@ function testStartMessageMoveTask() returns error? {
         }
     }
 
-    // Receive the messages more than maxReceiveCount times 
+    // Receive the messages more than maxReceiveCount times
     int receiveAttempts = 3;
     foreach int attempt in 1 ... receiveAttempts {
         Message[]|Error received = sqsClient->receiveMessage(sourceQueueUrl, {maxNumberOfMessages: 10});
