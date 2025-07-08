@@ -35,8 +35,6 @@ public isolated client class Client {
         'class: "io.ballerina.lib.aws.sqs.NativeClientAdaptor"
     } external;
 
-    
-
     # Delivers a message to the specified SQS queue.
     #
     # + queueUrl - URL of the Amazon SQS queue to which the message is sent

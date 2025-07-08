@@ -624,7 +624,6 @@ function testDeleteMessageBatchWithInvalidReceiptHandle() returns error? {
     test:assertEquals(result.successful.length(), 1);
     test:assertEquals(result.failed.length(), 1);
     test:assertEquals(result.failed[0].id, "id-1");
-
 }
 
 @test:Config {
@@ -1031,7 +1030,6 @@ function testCreateQueueWithPolicy() returns error? {
     GetQueueAttributesResponse attrResult = check sqsClient->getQueueAttributes(result, attrConfig);
     string? returnedPolicy = attrResult.queueAttributes["Policy"];
     test:assertEquals(returnedPolicy, policy, "Policy should match the set value");
-
 }
 
 @test:AfterSuite {}
