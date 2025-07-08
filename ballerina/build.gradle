@@ -164,3 +164,7 @@ clean {
     delete 'build'
 }
 
+build.dependsOn ":aws.sqs-native:build"
+test.dependsOn ":aws.sqs-native:build"
+build.dependsOn copyToLib
+publish.dependsOn build
