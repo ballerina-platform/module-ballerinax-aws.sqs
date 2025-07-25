@@ -14,11 +14,13 @@
 // specific language governing permissions and limitations
 // under the License.
 
+import ballerina/lang.runtime;
 import ballerina/test;
 
 string standardQueueUrl = "";
 string fifoQueueUrl = "";
 string attrQueueurl = "";
+string testAttributesQueueUrl = "";
 
 @test:Config {
     groups: ["init"]
@@ -52,6 +54,16 @@ function testCreateStandardQueue() returns error? {
     string result = check sqsClient->createQueue(queueName);
     test:assertTrue(result.endsWith(queueName));
     standardQueueUrl = result;
+}
+
+@test:Config {
+    groups: ["createQueue"]
+}
+function testCreateQueueForAttributeTest() returns error? {
+    string queueName = "test-attributesqueue";
+    string result = check sqsClient->createQueue(queueName);
+    test:assertTrue(result.endsWith(queueName));
+    testAttributesQueueUrl = result;
 }
 
 @test:Config {
@@ -171,7 +183,7 @@ function testSendMessageWithAttributes() returns error? {
             }
         }
     };
-    SendMessageResponse result = check sqsClient->sendMessage(standardQueueUrl, message, sendMessageConfig);
+    SendMessageResponse result = check sqsClient->sendMessage(testAttributesQueueUrl, message, sendMessageConfig);
     test:assertNotEquals(result.messageId, "", "MessageId should not be empty");
 }
 
@@ -485,6 +497,23 @@ function testBasicReceiveMessage() returns error? {
 }
 
 @test:Config {
+    dependsOn: [testSendMessageWithAttributes],
+    groups: ["receiveMessage"]
+}
+function testReceiveMessageWithAttributes() returns error? {
+    runtime:sleep(30);
+    Message[] result = check sqsClient->receiveMessage(testAttributesQueueUrl, {
+        maxNumberOfMessages: 1,
+        messageAttributeNames: ["All"],
+        messageSystemAttributeNames: ["All"]
+    });
+    test:assertTrue(result.length() > 0, "Expected at least one message");
+    Message msg = result[0];
+    test:assertNotEquals(msg.messageAttributes, (), "Message attributes should not be nil");
+    test:assertNotEquals(msg.messageSystemAttributes, (), "System attributes should not be nil");
+}
+
+@test:Config {
     dependsOn: [testCreateStandardQueue],
     groups: ["receiveMessage"]
 }
@@ -553,7 +582,7 @@ function testReceiveMessageWithAllOptionalConfigs() returns error? {
 }
 function testDeleteMessage() returns error? {
     string queueUrl = standardQueueUrl;
-    Message[] received = check sqsClient->receiveMessage(queueUrl);
+    Message[] received = check sqsClient->receiveMessage(queueUrl, waitTimeSeconds = 20);
     test:assertTrue(received.length() > 0, "Expected at least one message");
     Message message = received[0];
     string receiptHandle = check message.receiptHandle.ensureType();
@@ -581,13 +610,21 @@ function testDeleteMessageWithInvalidReceiptHandle() returns error? {
     groups: ["deleteMessageBatch"]
 }
 function testDeleteMessageBatchSuccess() returns error? {
+
     string queueUrl = standardQueueUrl;
     SendMessageBatchEntry[] batch = [
         {id: "id-a", body: "Message A"},
-        {id: "id-b", body: "Message B"}
+        {id: "id-b", body: "Message B"},
+        {id: "id-c", body: "Message C"},
+        {id: "id-d", body: "Message D"},
+        {id: "id-e", body: "Message E"},
+        {id: "id-f", body: "Message F"},
+        {id: "id-g", body: "Message G"},
+        {id: "id-h", body: "Message H"},
+        {id: "id-i", body: "Message I"}
     ];
     _ = check sqsClient->sendMessageBatch(queueUrl, batch);
-    Message[] received = check sqsClient->receiveMessage(queueUrl, {maxNumberOfMessages: 2, waitTimeSeconds: 10});
+    Message[] received = check sqsClient->receiveMessage(queueUrl, maxNumberOfMessages = 10, waitTimeSeconds = 20);
     test:assertTrue(received.length() >= 2);
     DeleteMessageBatchEntry[] deleteBatch = [
         {id: "msg-id-1", receiptHandle: check received[0].receiptHandle.ensureType()},
@@ -612,7 +649,7 @@ function testDeleteMessageBatchWithInvalidReceiptHandle() returns error? {
     if sendResult is error {
         test:assertFail("Failed to send batch messages: " + sendResult.toString());
     }
-    Message[]|Error received = sqsClient->receiveMessage(queueUrl, {maxNumberOfMessages: 8, waitTimeSeconds: 15});
+    Message[]|Error received = sqsClient->receiveMessage(queueUrl, maxNumberOfMessages = 10, waitTimeSeconds = 20);
     if received is error || received.length() < 2 {
         test:assertFail("Expected 2 messages, but received fewer");
     }
@@ -635,14 +672,18 @@ function testDeleteMessageBatchWithDuplicateIds() returns error? {
     SendMessageBatchEntry[] batch = [
         {id: "id1", body: "Message A"},
         {id: "id2", body: "Message B"},
-        {id: "id3", body: "Message C"}
+        {id: "id3", body: "Message C"},
+        {id: "id4", body: "Message D"},
+        {id: "id5", body: "Message E"},
+        {id: "id6", body: "Message F"},
+        {id: "id7", body: "Message G"}
     ];
     SendMessageBatchResponse|Error sendResult = sqsClient->sendMessageBatch(queueUrl, batch);
     if sendResult is error {
         test:assertFail("Failed to send batch messages: " + sendResult.toString());
     }
     ReceiveMessageConfig receiveConfig = {
-        waitTimeSeconds: 12,
+        waitTimeSeconds: 2,
         maxNumberOfMessages: 10
     };
     Message[]|Error received = sqsClient->receiveMessage(queueUrl, receiveConfig);
@@ -946,7 +987,7 @@ function testStartMessageMoveTask() returns error? {
         }
     }
 
-    // Receive the messages more than maxReceiveCount times 
+    // Receive the messages more than maxReceiveCount times
     int receiveAttempts = 3;
     foreach int attempt in 1 ... receiveAttempts {
         Message[]|Error received = sqsClient->receiveMessage(sourceQueueUrl, {maxNumberOfMessages: 10});
@@ -969,9 +1010,32 @@ function testCancelMessageMoveTask() returns error? {
     if moveTaskHandle == "" {
         test:assertFail("No move task handle available to cancel.");
     }
-    CancelMessageMoveTaskResponse cancelResult = check sqsClient->cancelMessageMoveTask(moveTaskHandle);
-    test:assertTrue(cancelResult.approximateNumberOfMessagesMoved >= 0,
-            "Approximate number of messages moved should be non-negative");
+
+    int attempts = 0;
+    int maxAttempts = 3;
+
+    while (attempts < maxAttempts) {
+        CancelMessageMoveTaskResponse|error cancelResult = sqsClient->cancelMessageMoveTask(moveTaskHandle);
+        if cancelResult is CancelMessageMoveTaskResponse {
+            test:assertTrue(cancelResult.approximateNumberOfMessagesMoved >= 0,
+                    "Approximate number of messages moved should be non-negative");
+            return;
+        } else {
+            string errMsg = cancelResult.toString();
+            if errMsg.startsWith("Failed") {
+                // Retry after short delay if task already completed
+                runtime:sleep(1);
+                attempts += 1;
+            } else {
+                // Unexpected error, fail immediately
+                return cancelResult;
+            }
+        }
+    }
+
+    // If retries exhausted, fail test
+    test:assertFail("Failed to cancel message move task after " + attempts.toString() +
+            " attempts: Task may have already completed.");
 }
 
 @test:Config {
