@@ -1,0 +1,10 @@
+[package]
+org = "wso2"
+name = "enhanced_messaging"
+version = "0.1.0"
+
+[[dependency]]
+org = "ballerinax"
+name = "aws.sqs"
+version = "0.1.0"
+repository = "local"
