@@ -32,7 +32,7 @@ public isolated client class Client {
 
     isolated function externInit(ConnectionConfig connectionConfig) returns Error? = @java:Method {
         name: "init",
-        'class: "io.ballerina.lib.aws.sqs.NativeClientAdaptor"
+        'class: "io.ballerina.lib.aws.sqs.client.NativeClientAdaptor"
     } external;
 
     # Delivers a message to the specified SQS queue.
@@ -43,7 +43,7 @@ public isolated client class Client {
     # + return - A `sqs:SendMessageResponse` on success, or an `sqs:Error` on failure
     remote isolated function sendMessage(string queueUrl, string messageBody, *SendMessageConfig sendMessageConfig)
     returns SendMessageResponse|Error = @java:Method {
-        'class: "io.ballerina.lib.aws.sqs.NativeClientAdaptor"
+        'class: "io.ballerina.lib.aws.sqs.client.NativeClientAdaptor"
     } external;
 
     # Retrieves one or more messages from the specified queue.
@@ -53,7 +53,7 @@ public isolated client class Client {
     # + return - An array of `sqs:Message` records, or an `sqs:Error` on failure
     remote isolated function receiveMessage(string queueUrl, *ReceiveMessageConfig receiveMessageConfig)
         returns Message[]|Error = @java:Method {
-        'class: "io.ballerina.lib.aws.sqs.NativeClientAdaptor"
+        'class: "io.ballerina.lib.aws.sqs.client.NativeClientAdaptor"
     } external;
 
     # Deletes a specified message from an Amazon SQS queue using the given receipt handle.
@@ -62,7 +62,7 @@ public isolated client class Client {
     # + receiptHandle - Receipt handle associated with the message to delete
     # + return - An `sqs:Error` if the operation fails
     remote isolated function deleteMessage(string queueUrl, string receiptHandle) returns Error? = @java:Method {
-        'class: "io.ballerina.lib.aws.sqs.NativeClientAdaptor"
+        'class: "io.ballerina.lib.aws.sqs.client.NativeClientAdaptor"
     } external;
 
     # Sends up to 10 messages as a batch to the specified Amazon SQS queue.
@@ -72,10 +72,10 @@ public isolated client class Client {
     # + return - A `sqs:SendMessageBatchResponse` indicating which messages succeeded or failed, or an `sqs:Error` on failure
     isolated remote function sendMessageBatch(string queueUrl, SendMessageBatchEntry[] entries)
         returns SendMessageBatchResponse|Error = @java:Method {
-        'class: "io.ballerina.lib.aws.sqs.NativeClientAdaptor"
+        'class: "io.ballerina.lib.aws.sqs.client.NativeClientAdaptor"
     } external;
 
-    # Deletes up to ten messages from the specified queue. This is a batch version of `sqs:deleteMessage`. 
+    # Deletes up to ten messages from the specified queue. This is a batch version of `sqs:deleteMessage`.
     # The result of the action on each message is reported individually in the response.
     #
     # + queueUrl - URL of the Amazon SQS queue from which messages are deleted
@@ -83,17 +83,17 @@ public isolated client class Client {
     # + return - A `sqs:DeleteMessageBatchResponse` indicating which deletions succeeded or failed, or an `sqs:Error` on failure
     isolated remote function deleteMessageBatch(string queueUrl, DeleteMessageBatchEntry[] entries)
         returns DeleteMessageBatchResponse|Error = @java:Method {
-        'class: "io.ballerina.lib.aws.sqs.NativeClientAdaptor"
+        'class: "io.ballerina.lib.aws.sqs.client.NativeClientAdaptor"
     } external;
 
     # Creates a new Amazon SQS queue with the specified attributes and tags.
     #
-    # + queueName - Name of the new queue; valid values include alphanumeric characters, hyphens (-), and underscores 
+    # + queueName - Name of the new queue; valid values include alphanumeric characters, hyphens (-), and underscores
     # (_), and can be up to 80 characters long. FIFO queue names must end with the `.fifo` suffix
     # + createQueueConfig - Optional configuration such as `queueAttributes` and `tags`
     # + return - URL of the created queue, or an `sqs:Error` on failure
     isolated remote function createQueue(string queueName, *CreateQueueConfig createQueueConfig) returns string|Error = @java:Method {
-        'class: "io.ballerina.lib.aws.sqs.NativeClientAdaptor"
+        'class: "io.ballerina.lib.aws.sqs.client.NativeClientAdaptor"
     } external;
 
     # Deletes the specified Amazon SQS queue.
@@ -102,7 +102,7 @@ public isolated client class Client {
     # + return - An `sqs:Error` on failure
     isolated remote function deleteQueue(string queueUrl) returns Error? = @java:Method {
         name: "deleteQueue",
-        'class: "io.ballerina.lib.aws.sqs.NativeClientAdaptor"
+        'class: "io.ballerina.lib.aws.sqs.client.NativeClientAdaptor"
     } external;
 
     # Retrieves the URL of the specified Amazon SQS queue.
@@ -112,7 +112,7 @@ public isolated client class Client {
     # + return - URL of the requested queue, or an `sqs:Error` on failure
     isolated remote function getQueueUrl(string queueName, *GetQueueUrlConfig getQueueUrlConfig)
         returns string|Error = @java:Method {
-        'class: "io.ballerina.lib.aws.sqs.NativeClientAdaptor"
+        'class: "io.ballerina.lib.aws.sqs.client.NativeClientAdaptor"
     } external;
 
     # Lists the Amazon SQS queues in the current region. Supports filtering by name prefix and paginated results.
@@ -120,7 +120,7 @@ public isolated client class Client {
     # + listQueuesConfig - Optional parameters such as `queueNamePrefix`, `maxResults`, and `nextToken`
     # + return - A `sqs:ListQueuesResponse` containing queue URLs and an optional `nextToken`, or an `sqs:Error` on failure
     isolated remote function listQueues(*ListQueuesConfig listQueuesConfig) returns ListQueuesResponse|Error = @java:Method {
-        'class: "io.ballerina.lib.aws.sqs.NativeClientAdaptor"
+        'class: "io.ballerina.lib.aws.sqs.client.NativeClientAdaptor"
     } external;
 
     # Retrieves the attributes of the specified Amazon SQS queue.
@@ -130,7 +130,7 @@ public isolated client class Client {
     # + return - A `sqs:GetQueueAttributesResponse` containing the queue attributes, or an `sqs:Error` on failure
     isolated remote function getQueueAttributes(string queueUrl, *GetQueueAttributesConfig getQueueAttributesConfig)
         returns GetQueueAttributesResponse|Error = @java:Method {
-        'class: "io.ballerina.lib.aws.sqs.NativeClientAdaptor"
+        'class: "io.ballerina.lib.aws.sqs.client.NativeClientAdaptor"
     } external;
 
     # Sets one or more attributes for the specified Amazon SQS queue.
@@ -139,7 +139,7 @@ public isolated client class Client {
     # + queueAttributes - Attributes to set for the queue
     # + return - An `sqs:Error` on failure
     isolated remote function setQueueAttributes(string queueUrl, QueueAttributes queueAttributes) returns Error? = @java:Method {
-        'class: "io.ballerina.lib.aws.sqs.NativeClientAdaptor"
+        'class: "io.ballerina.lib.aws.sqs.client.NativeClientAdaptor"
     } external;
 
     # Changes the visibility timeout of a specific message in a queue.
@@ -149,7 +149,7 @@ public isolated client class Client {
     # + visibilityTimeout - New visibility timeout value in seconds (minimum 0, maximum 43,200)
     # + return - An `sqs:Error` on failure
     isolated remote function changeMessageVisibility(string queueUrl, string receiptHandle, int visibilityTimeout) returns Error? = @java:Method {
-        'class: "io.ballerina.lib.aws.sqs.NativeClientAdaptor"
+        'class: "io.ballerina.lib.aws.sqs.client.NativeClientAdaptor"
     } external;
 
     # Purges the specified queue, deleting all messages in it. This action is irreversible.
@@ -157,21 +157,21 @@ public isolated client class Client {
     # + queueUrl - TURL of the queue to purge
     # + return - An `sqs:Error` on failure
     isolated remote function purgeQueue(string queueUrl) returns Error? = @java:Method {
-        'class: "io.ballerina.lib.aws.sqs.NativeClientAdaptor"
+        'class: "io.ballerina.lib.aws.sqs.client.NativeClientAdaptor"
     } external;
 
     # Adds cost allocation tags to the specified Amazon SQS queue.
     #
-    # - A maximum of 50 tags per queue is recommended  
-    # - Tags are case-sensitive and treated as plain character strings  
-    # - New tags with duplicate keys overwrite existing ones  
+    # - A maximum of 50 tags per queue is recommended
+    # - Tags are case-sensitive and treated as plain character strings
+    # - New tags with duplicate keys overwrite existing ones
     #
     # + queueUrl - URL of the queue to which tags are added
     # + tags - Map of tags to add, where each tag is a key-value pair
     # + return - An `sqs:Error` on failure
     isolated remote function tagQueue(string queueUrl, map<string> tags
     ) returns Error? = @java:Method {
-        'class: "io.ballerina.lib.aws.sqs.NativeClientAdaptor"
+        'class: "io.ballerina.lib.aws.sqs.client.NativeClientAdaptor"
     } external;
 
     # Removes cost allocation tags from the specified Amazon SQS queue.
@@ -180,7 +180,7 @@ public isolated client class Client {
     # + tags - List of tag keys to remove
     # + return - An `sqs:Error` on failure
     isolated remote function untagQueue(string queueUrl, string[] tags) returns Error? = @java:Method {
-        'class: "io.ballerina.lib.aws.sqs.NativeClientAdaptor"
+        'class: "io.ballerina.lib.aws.sqs.client.NativeClientAdaptor"
     } external;
 
     # Lists all cost allocation tags added to the specified Amazon SQS queue.
@@ -188,39 +188,39 @@ public isolated client class Client {
     # + queueUrl - URL of the queue whose tags are listed
     # + return - A `sqs:ListQueueTagsResponse` with associated tags, or an `sqs:Error` on failure
     isolated remote function listQueueTags(string queueUrl) returns ListQueueTagsResponse|Error = @java:Method {
-        'class: "io.ballerina.lib.aws.sqs.NativeClientAdaptor"
+        'class: "io.ballerina.lib.aws.sqs.client.NativeClientAdaptor"
     } external;
 
     # Starts a message movement task to transfer messages from a dead-letter queue (DLQ) to another queue.
     #
-    # - Only supported for DLQs whose sources are other Amazon SQS queues  
-    # - Not supported for non-SQS sources (e.g., AWS Lambda, Amazon SNS)  
-    # - Only one active task is allowed per queue at any time  
+    # - Only supported for DLQs whose sources are other Amazon SQS queues
+    # - Not supported for non-SQS sources (e.g., AWS Lambda, Amazon SNS)
+    # - Only one active task is allowed per queue at any time
     #
     # + sourceARN - ARN of the DLQ from which messages are moved
     # + startMessageMoveTaskConfig - Optional parameters such as `destinationARN` and `maxNumberOfMessagesPerSecond`
     # + return - A `sqs:StartMessageMoveTaskResponse` if successful, or an `sqs:Error` on failure
     isolated remote function startMessageMoveTask(string sourceARN, *StartMessageMoveTaskConfig startMessageMoveTaskConfig)
         returns StartMessageMoveTaskResponse|Error = @java:Method {
-        'class: "io.ballerina.lib.aws.sqs.NativeClientAdaptor"
+        'class: "io.ballerina.lib.aws.sqs.client.NativeClientAdaptor"
     } external;
 
     # Cancels an active message movement task for the given task handle.
     #
-    # - Only applicable when the task status is `RUNNING`  
-    # - Already moved messages will not be reverted  
-    # - Only one active task is allowed per queue at any time  
+    # - Only applicable when the task status is `RUNNING`
+    # - Already moved messages will not be reverted
+    # - Only one active task is allowed per queue at any time
     #
     # + taskHandle - Identifier of the message movement task
     # + return - A `sqs:CancelMessageMoveTaskResponse` with the number of messages moved before cancellation, or an `sqs:Error`
     isolated remote function cancelMessageMoveTask(string taskHandle) returns CancelMessageMoveTaskResponse|Error = @java:Method {
-        'class: "io.ballerina.lib.aws.sqs.NativeClientAdaptor"
+        'class: "io.ballerina.lib.aws.sqs.client.NativeClientAdaptor"
     } external;
 
     # Gracefully closes the AWS SQS client and releases all associated resources.
     #
     # + return - An `sqs:Error` if closing fails, or else nil
     remote isolated function close() returns Error? = @java:Method {
-        'class: "io.ballerina.lib.aws.sqs.NativeClientAdaptor"
+        'class: "io.ballerina.lib.aws.sqs.client.NativeClientAdaptor"
     } external;
 }
