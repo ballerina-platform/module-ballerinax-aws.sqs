@@ -14,13 +14,14 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package io.ballerina.lib.aws.sqs;
+package io.ballerina.lib.aws.sqs.mappers;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import io.ballerina.lib.aws.sqs.ModuleUtils;
 import io.ballerina.runtime.api.creators.ValueCreator;
 import io.ballerina.runtime.api.utils.StringUtils;
 import io.ballerina.runtime.api.values.BArray;

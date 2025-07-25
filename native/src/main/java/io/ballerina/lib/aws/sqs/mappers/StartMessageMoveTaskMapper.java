@@ -14,11 +14,12 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package io.ballerina.lib.aws.sqs;
+package io.ballerina.lib.aws.sqs.mappers;
 
 import io.ballerina.runtime.api.utils.StringUtils;
 import io.ballerina.runtime.api.values.BMap;
 import io.ballerina.runtime.api.values.BString;
+import io.ballerina.lib.aws.sqs.ModuleUtils;
 import io.ballerina.runtime.api.creators.ValueCreator;
 import software.amazon.awssdk.services.sqs.model.StartMessageMoveTaskRequest;
 import software.amazon.awssdk.services.sqs.model.StartMessageMoveTaskResponse;

@@ -14,7 +14,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package io.ballerina.lib.aws.sqs;
+package io.ballerina.lib.aws.sqs.client;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -22,6 +22,21 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import io.ballerina.lib.aws.sqs.CommonUtils;
+import io.ballerina.lib.aws.sqs.auth.ConnectionConfig;
+import io.ballerina.lib.aws.sqs.auth.StaticAuthConfig;
+import io.ballerina.lib.aws.sqs.mappers.CancelMessageMoveTaskMapper;
+import io.ballerina.lib.aws.sqs.mappers.CreateQueueMapper;
+import io.ballerina.lib.aws.sqs.mappers.DeleteMessageBatchMapper;
+import io.ballerina.lib.aws.sqs.mappers.GetQueueAttributesMapper;
+import io.ballerina.lib.aws.sqs.mappers.GetQueueUrlMapper;
+import io.ballerina.lib.aws.sqs.mappers.ListQueueTagsMapper;
+import io.ballerina.lib.aws.sqs.mappers.ListQueuesMapper;
+import io.ballerina.lib.aws.sqs.mappers.ReceiveMessageMapper;
+import io.ballerina.lib.aws.sqs.mappers.SendMessageBatchMapper;
+import io.ballerina.lib.aws.sqs.mappers.SendMessageMapper;
+import io.ballerina.lib.aws.sqs.mappers.SetQueueAttributesMapper;
+import io.ballerina.lib.aws.sqs.mappers.StartMessageMoveTaskMapper;
 import io.ballerina.runtime.api.Environment;
 import io.ballerina.runtime.api.utils.StringUtils;
 import io.ballerina.runtime.api.values.BArray;
@@ -71,19 +86,23 @@ import software.amazon.awssdk.services.sqs.model.UntagQueueRequest;
  */
 
 public class NativeClientAdaptor {
-    static final String NATIVE_SQS_CLIENT = "nativeClient";
+    public static final String NATIVE_SQS_CLIENT = "nativeClient";
 
     private NativeClientAdaptor() {
     }
 
+    public static SqsClient createSqsClient(BMap<BString, Object> bConnectionConfig) {
+        ConnectionConfig connectionConfig = new ConnectionConfig(bConnectionConfig);
+        AwsCredentialsProvider credentialsProvider = getCredentialsProvider(connectionConfig.authConfig());
+        return SqsClient.builder()
+                .region(connectionConfig.region())
+                .credentialsProvider(credentialsProvider)
+                .build();
+    }
+
     public static Object init(BObject bClient, BMap<BString, Object> bConnectionConfig) {
         try {
-            ConnectionConfig connectionConfig = new ConnectionConfig(bConnectionConfig);
-            AwsCredentialsProvider credentialsProvider = getCredentialsProvider(connectionConfig.authConfig());
-            SqsClient nativeClient = SqsClient.builder()
-                    .region(connectionConfig.region())
-                    .credentialsProvider(credentialsProvider)
-                    .build();
+            SqsClient nativeClient = createSqsClient(bConnectionConfig);
             bClient.addNativeData(NATIVE_SQS_CLIENT, nativeClient);
         } catch (Exception e) {
             String errorMsg = String.format("Error occurred while initializing the SQS client: %s",

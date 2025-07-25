@@ -13,7 +13,7 @@
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-package io.ballerina.lib.aws.sqs;
+package io.ballerina.lib.aws.sqs.mappers;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -26,6 +26,23 @@ import software.amazon.awssdk.services.sqs.model.QueueAttributeName;
 
 public final class CreateQueueMapper {
 
+    private static final Map<String, String> ATTRIBUTE_NAME_MAP = Map.ofEntries(
+            Map.entry("delaySeconds", "DelaySeconds"),
+            Map.entry("maximumMessageSize", "MaximumMessageSize"),
+            Map.entry("messageRetentionPeriod", "MessageRetentionPeriod"),
+            Map.entry("policy", "Policy"),
+            Map.entry("receiveMessageWaitTimeSeconds", "ReceiveMessageWaitTimeSeconds"),
+            Map.entry("visibilityTimeout", "VisibilityTimeout"),
+            Map.entry("redrivePolicy", "RedrivePolicy"),
+            Map.entry("redriveAllowPolicy", "RedriveAllowPolicy"),
+            Map.entry("kmsMasterKeyId", "KmsMasterKeyId"),
+            Map.entry("kmsDataKeyReusePeriodSeconds", "KmsDataKeyReusePeriodSeconds"),
+            Map.entry("sqsManagedSseEnabled", "SqsManagedSseEnabled"),
+            Map.entry("fifoQueue", "FifoQueue"),
+            Map.entry("contentBasedDeduplication", "ContentBasedDeduplication"),
+            Map.entry("deduplicationScope", "DeduplicationScope"),
+            Map.entry("fifoThroughputLimit", "FifoThroughputLimit"));
+
     public static final BString QUEUE_ATTRIBUTES = StringUtils.fromString("queueAttributes");
     public static final BString TAGS = StringUtils.fromString("tags");
 
@@ -34,24 +51,6 @@ public final class CreateQueueMapper {
 
     public static CreateQueueRequest getNativeCreateQueueRequest(BString queueName, BMap<BString, Object> bConfig) {
         CreateQueueRequest.Builder builder = CreateQueueRequest.builder().queueName(queueName.getValue());
-
-        final Map<String, String> ATTRIBUTE_NAME_MAP = Map.ofEntries(
-                Map.entry("delaySeconds", "DelaySeconds"),
-                Map.entry("maximumMessageSize", "MaximumMessageSize"),
-                Map.entry("messageRetentionPeriod", "MessageRetentionPeriod"),
-                Map.entry("policy", "Policy"),
-                Map.entry("receiveMessageWaitTimeSeconds", "ReceiveMessageWaitTimeSeconds"),
-                Map.entry("visibilityTimeout", "VisibilityTimeout"),
-                Map.entry("redrivePolicy", "RedrivePolicy"),
-                Map.entry("redriveAllowPolicy", "RedriveAllowPolicy"),
-                Map.entry("kmsMasterKeyId", "KmsMasterKeyId"),
-                Map.entry("kmsDataKeyReusePeriodSeconds", "KmsDataKeyReusePeriodSeconds"),
-                Map.entry("sqsManagedSseEnabled", "SqsManagedSseEnabled"),
-                Map.entry("fifoQueue", "FifoQueue"),
-                Map.entry("contentBasedDeduplication", "ContentBasedDeduplication"),
-                Map.entry("deduplicationScope", "DeduplicationScope"),
-                Map.entry("fifoThroughputLimit", "FifoThroughputLimit"));
-
         if (bConfig != null) {
             if (bConfig.containsKey(QUEUE_ATTRIBUTES)) {
                 var attrs = bConfig.getMapValue(QUEUE_ATTRIBUTES);
@@ -68,7 +67,6 @@ public final class CreateQueueMapper {
                     builder.attributes(attrMap);
                 }
             }
-
             if (bConfig.containsKey(TAGS)) {
                 var tags = bConfig.getMapValue(TAGS);
                 if (tags != null) {

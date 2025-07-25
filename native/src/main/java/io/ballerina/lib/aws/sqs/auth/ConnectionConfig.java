@@ -13,14 +13,14 @@
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-package io.ballerina.lib.aws.sqs;
+package io.ballerina.lib.aws.sqs.auth;
 
 import io.ballerina.runtime.api.utils.StringUtils;
 import io.ballerina.runtime.api.values.BMap;
 import io.ballerina.runtime.api.values.BString;
 import software.amazon.awssdk.regions.Region;
 
-import static io.ballerina.lib.aws.sqs.StaticAuthConfig.AWS_ACCESS_KEY_ID;
+import static io.ballerina.lib.aws.sqs.auth.StaticAuthConfig.AWS_ACCESS_KEY_ID;
 
 /**
  * {@code ConnectionConfig} represents the connection configuration required for

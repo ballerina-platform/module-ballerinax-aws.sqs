@@ -13,35 +13,26 @@
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
+package io.ballerina.lib.aws.sqs.mappers;
 
-package io.ballerina.lib.aws.sqs;
-
+import io.ballerina.lib.aws.sqs.ModuleUtils;
 import io.ballerina.runtime.api.creators.ValueCreator;
 import io.ballerina.runtime.api.utils.StringUtils;
 import io.ballerina.runtime.api.values.BMap;
 import io.ballerina.runtime.api.values.BString;
-import software.amazon.awssdk.services.sqs.model.ListQueueTagsResponse;
+import software.amazon.awssdk.services.sqs.model.CancelMessageMoveTaskResponse;
 
-import java.util.Map;
+public final class CancelMessageMoveTaskMapper {
+    private static final String CANCEL_MESSAGE_MOVE_TASK_RESPONSE = "CancelMessageMoveTaskResponse";
+    private static final BString APPROX_NUM_MOVED = StringUtils.fromString("approximateNumberOfMessagesMoved");
 
-public final class ListQueueTagsMapper {
-    private static final String LIST_QUEUE_TAGS_RESPONSE = "ListQueueTagsResponse";
-    private static final BString TAGS = StringUtils.fromString("tags");
-
-    private ListQueueTagsMapper() {
+    private CancelMessageMoveTaskMapper() {
     }
 
-    public static BMap<BString, Object> getNativeListQueueTagsResponse(ListQueueTagsResponse response) {
+    public static BMap<BString, Object> getNativeCancelMessageMoveTaskResponse(CancelMessageMoveTaskResponse response) {
         BMap<BString, Object> result = ValueCreator.createRecordValue(ModuleUtils.getModule(),
-                LIST_QUEUE_TAGS_RESPONSE);
-        Map<String, String> tags = response.tags();
-        BMap<BString, Object> tagMap = ValueCreator.createMapValue();
-        if (tags != null) {
-            for (Map.Entry<String, String> entry : tags.entrySet()) {
-                tagMap.put(StringUtils.fromString(entry.getKey()), StringUtils.fromString(entry.getValue()));
-            }
-        }
-        result.put(TAGS, tagMap);
+                CANCEL_MESSAGE_MOVE_TASK_RESPONSE);
+        result.put(APPROX_NUM_MOVED, response.approximateNumberOfMessagesMoved());
         return result;
     }
 }

@@ -14,13 +14,14 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package io.ballerina.lib.aws.sqs;
+package io.ballerina.lib.aws.sqs.mappers;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import io.ballerina.lib.aws.sqs.ModuleUtils;
 import io.ballerina.runtime.api.creators.TypeCreator;
 import io.ballerina.runtime.api.creators.ValueCreator;
 import io.ballerina.runtime.api.types.Type;
@@ -59,7 +60,6 @@ public final class SendMessageBatchMapper {
     private static final BString STRING_VALUE = StringUtils.fromString("stringValue");
 
     private SendMessageBatchMapper() {
-
     }
 
     @SuppressWarnings("unchecked")
@@ -70,7 +70,6 @@ public final class SendMessageBatchMapper {
             SendMessageBatchRequestEntry.Builder builder = SendMessageBatchRequestEntry.builder()
                     .id(entry.getStringValue(ID).getValue())
                     .messageBody(entry.getStringValue(BODY).getValue());
-
             if (entry.containsKey(DELAY_SECONDS)) {
                 builder.delaySeconds(entry.getIntValue(DELAY_SECONDS).intValue());
             }
@@ -147,7 +146,6 @@ public final class SendMessageBatchMapper {
             }
             failedArr.append(entryRecord);
         }
-
         BMap<BString, Object> result = ValueCreator.createRecordValue(ModuleUtils.getModule(),
                 SEND_MESSAGE_BATCH_RESPONSE);
         result.put(SUCCESSFUL, successfulArr);

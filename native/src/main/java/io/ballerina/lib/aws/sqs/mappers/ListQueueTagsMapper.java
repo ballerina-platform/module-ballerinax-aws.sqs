@@ -13,25 +13,36 @@
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-package io.ballerina.lib.aws.sqs;
 
+package io.ballerina.lib.aws.sqs.mappers;
+
+import io.ballerina.lib.aws.sqs.ModuleUtils;
 import io.ballerina.runtime.api.creators.ValueCreator;
 import io.ballerina.runtime.api.utils.StringUtils;
 import io.ballerina.runtime.api.values.BMap;
 import io.ballerina.runtime.api.values.BString;
-import software.amazon.awssdk.services.sqs.model.CancelMessageMoveTaskResponse;
+import software.amazon.awssdk.services.sqs.model.ListQueueTagsResponse;
 
-public final class CancelMessageMoveTaskMapper {
-    private static final String CANCEL_MESSAGE_MOVE_TASK_RESPONSE = "CancelMessageMoveTaskResponse";
-    private static final BString APPROX_NUM_MOVED = StringUtils.fromString("approximateNumberOfMessagesMoved");
+import java.util.Map;
 
-    private CancelMessageMoveTaskMapper() {
+public final class ListQueueTagsMapper {
+    private static final String LIST_QUEUE_TAGS_RESPONSE = "ListQueueTagsResponse";
+    private static final BString TAGS = StringUtils.fromString("tags");
+
+    private ListQueueTagsMapper() {
     }
 
-    public static BMap<BString, Object> getNativeCancelMessageMoveTaskResponse(CancelMessageMoveTaskResponse response) {
+    public static BMap<BString, Object> getNativeListQueueTagsResponse(ListQueueTagsResponse response) {
         BMap<BString, Object> result = ValueCreator.createRecordValue(ModuleUtils.getModule(),
-                CANCEL_MESSAGE_MOVE_TASK_RESPONSE);
-        result.put(APPROX_NUM_MOVED, response.approximateNumberOfMessagesMoved());
+                LIST_QUEUE_TAGS_RESPONSE);
+        Map<String, String> tags = response.tags();
+        BMap<BString, Object> tagMap = ValueCreator.createMapValue();
+        if (tags != null) {
+            for (Map.Entry<String, String> entry : tags.entrySet()) {
+                tagMap.put(StringUtils.fromString(entry.getKey()), StringUtils.fromString(entry.getValue()));
+            }
+        }
+        result.put(TAGS, tagMap);
         return result;
     }
 }

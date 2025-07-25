@@ -14,11 +14,12 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package io.ballerina.lib.aws.sqs;
+package io.ballerina.lib.aws.sqs.mappers;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import io.ballerina.lib.aws.sqs.ModuleUtils;
 import io.ballerina.runtime.api.creators.TypeCreator;
 import io.ballerina.runtime.api.creators.ValueCreator;
 import io.ballerina.runtime.api.types.Type;
@@ -68,8 +69,7 @@ public final class DeleteMessageBatchMapper {
                                 .createRecordValue(ModuleUtils.getModule(), "DeleteMessageBatchResultEntry")
                                 .getType();
                 BArray successfulArr = ValueCreator
-                                .createArrayValue(TypeCreator.createArrayType(
-                                                deleteMessageBatchResultEntryType));
+                                .createArrayValue(TypeCreator.createArrayType(deleteMessageBatchResultEntryType));
                 for (DeleteMessageBatchResultEntry entry : response.successful()) {
                         BMap<BString, Object> entryRecord = ValueCreator.createRecordValue(ModuleUtils.getModule(),
                                         "DeleteMessageBatchResultEntry");

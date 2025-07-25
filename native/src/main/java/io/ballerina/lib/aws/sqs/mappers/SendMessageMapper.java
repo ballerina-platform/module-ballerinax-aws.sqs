@@ -14,11 +14,12 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package io.ballerina.lib.aws.sqs;
+package io.ballerina.lib.aws.sqs.mappers;
 
 import java.util.HashMap;
 import java.util.Map;
 
+import io.ballerina.lib.aws.sqs.ModuleUtils;
 import io.ballerina.runtime.api.creators.ValueCreator;
 import io.ballerina.runtime.api.utils.StringUtils;
 import io.ballerina.runtime.api.values.BMap;
@@ -85,7 +86,6 @@ public final class SendMessageMapper {
             builder.messageAttributes(attrMap);
         }
         return builder.build();
-
     }
 
     public static BMap<BString, Object> getNativeSendMessageResponse(SendMessageResponse response) {
