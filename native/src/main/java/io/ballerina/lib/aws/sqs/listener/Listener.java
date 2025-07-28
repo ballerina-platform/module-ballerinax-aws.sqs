@@ -132,7 +132,7 @@ public final class Listener {
                 sqsClient.getQueueUrl(builder -> builder.queueName(queueName));
             } catch (QueueDoesNotExistException qex) {
                 sqsClient.close();
-                return CommonUtils.createError("Queue does not exist: " + cfg.queueUrl, qex);
+                return CommonUtils.createError("Configured queue does not exist: " + cfg.queueUrl, qex);
             }
         }
         Map<String, ReceiveMessageRequest> receiveRequests = new ConcurrentHashMap<>();
