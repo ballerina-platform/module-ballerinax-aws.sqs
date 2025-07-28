@@ -32,7 +32,6 @@ import software.amazon.awssdk.services.sqs.model.ReceiveMessageResponse;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.logging.Logger;
 
 /**
  * Native implementation of the Ballerina AWS SQS Listener.
@@ -46,8 +45,6 @@ public final class Listener {
     private static final String NATIVE_STOPPED = "native.stopped";
     private static final String NATIVE_POLLING_THREAD = "native.polling.thread";
 
-    private static final Logger logger = Logger.getLogger(Listener.class.getName());
-
     private Listener() {
     }
 
@@ -58,8 +55,8 @@ public final class Listener {
      */
     public static Object init(Environment env,
             BObject bListener,
-            BMap<BString, Object> pollingConfig,
-            BMap<BString, Object> connectionConfig) {
+            BMap<BString, Object> connectionConfig,
+            BMap<BString, Object> pollingConfig) {
         try {
             // Initialize the SQS client
             NativeClientAdaptor.init(bListener, connectionConfig);
@@ -128,20 +125,35 @@ public final class Listener {
         PollingConfig pollingConfig = (PollingConfig) bListener.getNativeData(NATIVE_POLLING_CONFIG);
         Map<String, Service> services = getServices(bListener);
 
+        for (Service svc : services.values()) {
+            ServiceConfig cfg = svc.getServiceConfig();
+            String queueName = extractQueueName(cfg.queueUrl);
+            try {
+                sqsClient.getQueueUrl(builder -> builder.queueName(queueName));
+            } catch (QueueDoesNotExistException qex) {
+                sqsClient.close();
+                return CommonUtils.createError("Queue does not exist: " + cfg.queueUrl, qex);
+            }
+        }
+        Map<String, ReceiveMessageRequest> receiveRequests = new ConcurrentHashMap<>();
+        for (Service svc : services.values()) {
+            ServiceConfig cfg = svc.getServiceConfig();
+            PollingConfig effectivePollingConfig = cfg.pollingConfig != null ? cfg.pollingConfig : pollingConfig;
+            ReceiveMessageRequest req = ReceiveMessageRequest.builder()
+                    .queueUrl(cfg.queueUrl)
+                    .maxNumberOfMessages(1)
+                    .waitTimeSeconds(effectivePollingConfig.waitTime())
+                    .visibilityTimeout(effectivePollingConfig.visibilityTimeout())
+                    .build();
+            receiveRequests.put(cfg.queueUrl, req);
+        }
+
         Thread pollingThread = Thread.startVirtualThread(() -> {
-            int retryCount = 0;
             while (!stopped.get()) {
                 for (Service svc : services.values()) {
                     try {
                         ServiceConfig cfg = svc.getServiceConfig();
-                        PollingConfig effectivePollingConfig = cfg.pollingConfig != null ? cfg.pollingConfig
-                                : pollingConfig;
-                        ReceiveMessageRequest req = ReceiveMessageRequest.builder()
-                                .queueUrl(cfg.queueUrl)
-                                .maxNumberOfMessages(1)
-                                .waitTimeSeconds(effectivePollingConfig.waitTime())
-                                .visibilityTimeout(effectivePollingConfig.visibilityTimeout())
-                                .build();
+                        ReceiveMessageRequest req = receiveRequests.get(cfg.queueUrl);
                         ReceiveMessageResponse resp = sqsClient.receiveMessage(req);
                         if (resp.hasMessages()) {
                             new MessageDispatcher(env, svc)
@@ -155,15 +167,14 @@ public final class Listener {
                         stopped.set(true);
                         Thread.currentThread().interrupt();
                     } catch (AbortedException ae) {
-                        logger.warning("Thread was interrupted");
-                    } catch (QueueDoesNotExistException qex) {
-                        retryCount++;
-                        logger.warning("Queue does not exist: " + qex.awsErrorDetails().errorMessage()
-                                + ". Retrying attempt: " + retryCount);
-                    } catch (Exception e) {
-                        logger.severe("Error polling messages from SQS: " + e.getMessage());
-                        e.printStackTrace();
                         stopped.set(true);
+                    } catch (QueueDoesNotExistException qex) {
+                        stopped.set(true);
+                        throw CommonUtils.createError(
+                                "Queue deleted during polling: " + qex.awsErrorDetails().errorMessage(), qex);
+                    } catch (Exception e) {
+                        stopped.set(true);
+                        throw CommonUtils.createError("Error polling messages from SQS: " + e.getMessage(), e);
                     }
                 }
             }
@@ -213,5 +224,13 @@ public final class Listener {
     @SuppressWarnings("unchecked")
     private static Map<String, Service> getServices(BObject bListener) {
         return (Map<String, Service>) bListener.getNativeData(NATIVE_SERVICES);
+    }
+
+    private static String extractQueueName(String queueUrl) {
+        if (queueUrl == null || queueUrl.isEmpty()) {
+            return "";
+        }
+        String[] parts = queueUrl.split("/");
+        return parts[parts.length - 1];
     }
 }

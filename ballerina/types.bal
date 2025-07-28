@@ -481,10 +481,10 @@ public type CancelMessageMoveTaskResponse record {|
 # Polling configuration for message retrieval.
 #
 # + pollInterval - Interval between polling attempts in seconds. If set to 0, the listener will poll back-to-back without delay. Use with caution as it may cause high CPU usage.
-# + waitTime - The duration in seconds for which the polling waits for messages (0-20)
-# + visibilityTimeout - The duration in seconds that messages are hidden after retrieval
+# + waitTime - The duration, in seconds, for which the polling waits for messages
+# + visibilityTimeout - The duration, in seconds, for which the received message remains invisible to other consumers
 public type PollingConfig record {|
-    decimal pollInterval = 0.5;
+    decimal pollInterval = 1;
     int waitTime = 20;
     int visibilityTimeout = 30;
 |};
@@ -495,7 +495,7 @@ public type Service distinct service object {};
 # The service configuration type for the `sqs:Service`.
 # + queueUrl - The URL of the SQS queue to consume messages from
 # + config - Optional per-service polling behavior
-# + autoDelete - Whether to automatically delete messages after successful processing or retry.
+# + autoDelete - Whether to automatically delete messages after receiving
 public type ServiceConfigType record {|
     string queueUrl;
     PollingConfig config?;

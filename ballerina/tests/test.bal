@@ -643,7 +643,11 @@ function testDeleteMessageBatchWithInvalidReceiptHandle() returns error? {
     string queueUrl = standardQueueUrl;
     SendMessageBatchEntry[] batch = [
         {id: "id1", body: "Message A"},
-        {id: "id2", body: "Message B"}
+        {id: "id2", body: "Message B"},
+        {id: "id3", body: "Message C"},
+        {id: "id4", body: "Message D"},
+        {id: "id5", body: "Message E"},
+        {id: "id6", body: "Message F"}
     ];
     SendMessageBatchResponse|Error sendResult = sqsClient->sendMessageBatch(queueUrl, batch);
     if sendResult is error {
@@ -676,15 +680,18 @@ function testDeleteMessageBatchWithDuplicateIds() returns error? {
         {id: "id4", body: "Message D"},
         {id: "id5", body: "Message E"},
         {id: "id6", body: "Message F"},
-        {id: "id7", body: "Message G"}
+        {id: "id7", body: "Message G"},
+        {id: "id8", body: "Message H"},
+        {id: "id9", body: "Message I"},
+        {id: "id10", body: "Message J"}
     ];
     SendMessageBatchResponse|Error sendResult = sqsClient->sendMessageBatch(queueUrl, batch);
     if sendResult is error {
         test:assertFail("Failed to send batch messages: " + sendResult.toString());
     }
     ReceiveMessageConfig receiveConfig = {
-        waitTimeSeconds: 2,
-        maxNumberOfMessages: 10
+        waitTimeSeconds: 20,
+        maxNumberOfMessages: 2
     };
     Message[]|Error received = sqsClient->receiveMessage(queueUrl, receiveConfig);
     if received is error || received.length() < 2 {
@@ -1003,6 +1010,7 @@ function testStartMessageMoveTask() returns error? {
 }
 
 @test:Config {
+    after:  testStartMessageMoveTask,
     dependsOn: [testStartMessageMoveTask],
     groups: ["cancelMessageMoveTask"]
 }
@@ -1032,7 +1040,6 @@ function testCancelMessageMoveTask() returns error? {
             }
         }
     }
-
     // If retries exhausted, fail test
     test:assertFail("Failed to cancel message move task after " + attempts.toString() +
             " attempts: Task may have already completed.");

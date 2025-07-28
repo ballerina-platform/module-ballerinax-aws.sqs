@@ -25,7 +25,7 @@ import io.ballerina.runtime.api.values.BString;
  * Maps the Ballerina ServiceConfig annotation values to Java.
  * Handles queue URL, polling configuration, and acknowledgment behavior.
  */
-public class ServiceConfig {
+public final class ServiceConfig {
     // Configuration keys from Ballerina ServiceConfig
     private static final BString QUEUE_URL = StringUtils.fromString("queueUrl");
     private static final BString CONFIG = StringUtils.fromString("config");

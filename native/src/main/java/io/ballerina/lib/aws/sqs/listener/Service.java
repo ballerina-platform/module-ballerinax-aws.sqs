@@ -16,6 +16,7 @@
 
 package io.ballerina.lib.aws.sqs.listener;
 
+import io.ballerina.lib.aws.sqs.CommonUtils;
 import io.ballerina.runtime.api.types.Parameter;
 import io.ballerina.runtime.api.types.RemoteMethodType;
 import io.ballerina.runtime.api.types.ServiceType;
@@ -23,6 +24,7 @@ import io.ballerina.runtime.api.types.Type;
 import io.ballerina.runtime.api.types.TypeTags;
 import io.ballerina.runtime.api.utils.StringUtils;
 import io.ballerina.runtime.api.utils.TypeUtils;
+import io.ballerina.runtime.api.values.BError;
 import io.ballerina.runtime.api.values.BMap;
 import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.api.values.BString;
@@ -37,7 +39,7 @@ import java.util.Objects;
  * Native representation of the Ballerina SQS service object.
  * Handles configuration and service validation for SQS services.
  */
-public class Service {
+public final class Service {
     /// Full annotation name including organization and version
     private static final BString SERVICE_CONFIG_ANNOTATION = StringUtils.fromString(
             getModule().getOrg() + ORG_NAME_SEPARATOR +
@@ -46,11 +48,14 @@ public class Service {
                     "ServiceConfig");
 
     // Core service components
-    private final BObject consumerService; // The Ballerina service object
-    private final ServiceType serviceType; // Type information for the service
-    private final ServiceConfig serviceConfig; // Parsed service configuration
-    private final RemoteMethodType onMessage; // The required onMessage method
-    private final RemoteMethodType onError; // Optional onError method
+    private final BObject consumerService;
+    private final ServiceType serviceType;
+    private final ServiceConfig serviceConfig;
+    private final RemoteMethodType onMessage;
+    private final RemoteMethodType onError;
+
+    private static final String ON_MESSAGE_METHOD = "onMessage";
+    private static final String ON_ERROR_METHOD = "onError";
 
     /**
      * Creates a new Service instance from a Ballerina service object.
@@ -71,13 +76,12 @@ public class Service {
         RemoteMethodType foundOnError = null;
 
         for (RemoteMethodType method : serviceType.getRemoteMethods()) {
-            if ("onMessage".equals(method.getName())) {
+            if (ON_MESSAGE_METHOD.equals(method.getName())) {
                 foundOnMessage = method;
-            } else if ("onError".equals(method.getName())) {
+            } else if (ON_ERROR_METHOD.equals(method.getName())) {
                 foundOnError = method;
             }
         }
-
         this.onMessage = foundOnMessage;
         this.onError = foundOnError;
     }
@@ -86,30 +90,42 @@ public class Service {
      * Validates that a service meets all SQS requirements:
      * - Has ServiceConfig annotation
      * - Has no resource methods
+     * - Has exactly one or two remote methods (onMessage, optional onError)
      * - Has correctly typed onMessage method
+     * - Has correctly typed onError method (if present)
      *
      * @param consumerService The service to validate
-     * @throws RuntimeException if validation fails
+     * @throws BError if validation fails
      */
     public static void validateService(BObject consumerService) {
         ServiceType serviceType = (ServiceType) TypeUtils.getType(consumerService);
         Object svcConfig = serviceType.getAnnotation(SERVICE_CONFIG_ANNOTATION);
         if (Objects.isNull(svcConfig)) {
-            throw new RuntimeException("Service configuration annotation is required.");
+            throw CommonUtils.createError("Failed to attach service : Service configuration annotation is required.");
         }
         if (serviceType.getResourceMethods().length > 0) {
-            throw new RuntimeException("SQS service cannot have resource methods.");
+            throw CommonUtils.createError("Failed to attach service : SQS service cannot have resource methods.");
         }
         RemoteMethodType[] remoteMethods = serviceType.getRemoteMethods();
+        if (remoteMethods.length < 1 || remoteMethods.length > 2) {
+            throw CommonUtils
+                    .createError("Failed to attach service : SQS service must have exactly one or two remote methods.");
+        }
         boolean hasOnMessage = false;
         for (RemoteMethodType method : remoteMethods) {
-            if ("onMessage".equals(method.getName())) {
+            String methodName = method.getName();
+            if (ON_MESSAGE_METHOD.equals(methodName)) {
                 hasOnMessage = true;
                 validateOnMessageMethod(method);
+            } else if (ON_ERROR_METHOD.equals(methodName)) {
+                validateOnErrorMethod(method);
+            } else {
+                throw CommonUtils.createError("Failed to attach service : Invalid remote method name: " + methodName);
             }
         }
         if (!hasOnMessage) {
-            throw new RuntimeException("SQS service must have an 'onMessage' remote method.");
+            throw CommonUtils
+                    .createError("Failed to attach service : SQS service must have an 'onMessage' remote method.");
         }
     }
 
@@ -120,32 +136,63 @@ public class Service {
      * - Second parameter (if present) must be Caller
      *
      * @param onMessageMethod The method to validate
-     * @throws RuntimeException if validation fails
+     * @throws BError if validation fails
      */
     private static void validateOnMessageMethod(RemoteMethodType onMessageMethod) {
         Parameter[] parameters = onMessageMethod.getParameters();
         if (parameters.length < 1 || parameters.length > 2) {
-            throw new RuntimeException("onMessage method must have one or two parameters");
+            throw CommonUtils.createError(
+                    "Failed to attach service : onMessage method can have only have either one or two parameters.");
         }
+        Parameter messageParam = null;
+        boolean hasCaller = false;
 
-        // Validate first parameter is Messagge
-        Type firstParam = TypeUtils.getReferredType(parameters[0].type);
-        if (firstParam.getTag() != TypeTags.RECORD_TYPE_TAG) {
-            throw new RuntimeException("First parameter of onMessage must be Message record");
-        }
-
-        // If there's a second parameter, validate it's a Caller
-        if (parameters.length == 2) {
-            Type secondParam = TypeUtils.getReferredType(parameters[1].type);
-            if (secondParam.getTag() != TypeTags.OBJECT_TYPE_TAG) {
-                throw new RuntimeException("Second parameter of onMessage must be a Caller");
+        for (Parameter param : parameters) {
+            Type paramType = TypeUtils.getReferredType(param.type);
+            if (paramType.getTag() == TypeTags.RECORD_TYPE_TAG) {
+                messageParam = param;
+            } else if (paramType.getTag() == TypeTags.OBJECT_TYPE_TAG) {
+                hasCaller = true;
+            } else {
+                throw CommonUtils.createError(
+                        "Failed to attach service : onMessage method parameters must be of type 'sqs:Message' or 'sqs:Caller'.");
             }
+        }
+        if (messageParam == null) {
+            throw CommonUtils
+                    .createError("Failed to attach service : Required parameter 'sqs:Message' cannot be found.");
+        }
+        // If two parameters, one must be Caller
+        if (parameters.length == 2 && !hasCaller) {
+            throw CommonUtils.createError(
+                    "Failed to attach service : If two parameters are present, one must be of the type 'sqs:Caller'.");
+        }
+    }
+
+    /**
+     * Validates the onError method signature:
+     * - Must have exactly one parameter
+     * - Parameter must be of type Error
+     *
+     * @param onErrorMethod The method to validate
+     * @throws BError if validation fails
+     */
+    private static void validateOnErrorMethod(RemoteMethodType onErrorMethod) throws BError {
+        if (onErrorMethod.getParameters().length != 1) {
+            throw CommonUtils.createError(
+                    "Failed to attach service : onError method must have exactly one parameter of type 'sqs:Error'.");
+        }
+        Parameter param = onErrorMethod.getParameters()[0];
+        Type paramType = TypeUtils.getReferredType(param.type);
+        if (paramType.getTag() != TypeTags.ERROR_TAG) {
+            throw CommonUtils
+                    .createError("Failed to attach service : onError method parameter must be of type 'sqs:Error'.");
         }
     }
 
     public RemoteMethodType getOnMessageMethod() {
         if (onMessage == null) {
-            throw new RuntimeException("onMessage method not found");
+            throw new RuntimeException("Failed to attach service : onMessage method not found");
         }
         return onMessage;
     }

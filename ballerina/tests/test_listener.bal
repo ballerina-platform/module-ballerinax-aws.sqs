@@ -37,6 +37,9 @@ function setupQueue() returns error? {
     string _ = check sqsClient->createQueue("Test-4");
     string _ = check sqsClient->createQueue("Test-5");
     string _ = check sqsClient->createQueue("Test-6");
+    string _ = check sqsClient->createQueue("Test-7");
+    string _ = check sqsClient->createQueue("Test-8");
+    string _ = check sqsClient->createQueue("Test-9");
 }
 
 PollingConfig pollingConfig = {
@@ -67,7 +70,7 @@ isolated function setupListener() returns error? {
         queueUrl: "https://sqs.us-east-2.amazonaws.com/284495578152/Test-2",
         autoDelete: false
     } service object {
-        isolated remote function onMessage(Message message, Caller caller) returns error? {
+        isolated remote function onMessage(Caller caller, Message message) returns error? {
             if message.body == "Manual Delete test" {
                 lock {
                     manualDeleteMessageReceived = true;
@@ -95,7 +98,6 @@ isolated function setupListener() returns error? {
     check sqsListener.attach(manualDeleteService);
     check sqsListener.attach(batchService);
     check sqsListener.'start();
-
 }
 
 @test:Config {
@@ -169,6 +171,7 @@ function testListenerGracefulStop() returns error? {
     };
     check sqsListenerGracefulStop.attach(stopService);
     check sqsListenerGracefulStop.'start();
+    runtime:sleep(2);
     check sqsListenerGracefulStop.gracefulStop();
 }
 
@@ -186,6 +189,7 @@ function testListenerImmediateStop() returns error? {
     };
     check sqsListenerImmediateStop.attach(stopService);
     check sqsListenerImmediateStop.'start();
+    runtime:sleep(2);
     check sqsListenerImmediateStop.immediateStop();
 }
 
@@ -193,7 +197,6 @@ function testListenerImmediateStop() returns error? {
     groups: ["listener"]
 }
 isolated function testListenerBatchMessage() returns error? {
-
     SendMessageBatchEntry[] entries = [
         {id: "1", body: "Batch Message Test 1"},
         {id: "2", body: "Batch Message Test 2"},
@@ -202,3 +205,247 @@ isolated function testListenerBatchMessage() returns error? {
     SendMessageBatchResponse _ = check sqsClient->sendMessageBatch("https://sqs.us-east-2.amazonaws.com/284495578152/Test-5", entries);
 }
 
+@test:Config {
+    groups: ["listenerValidation"]
+}
+function testListenerWithNonExistentQueue() returns error? {
+    Listener nonExistentQueueListener = check new (connectionConfig, pollingConfig);
+    Service svc = @ServiceConfig {
+        queueUrl: "https://sqs.us-east-2.amazonaws.com/284495578152/NonExistentQueue",
+        autoDelete: true
+    } service object {
+        isolated remote function onMessage(Message message) returns error? {
+        }
+    };
+    check nonExistentQueueListener.attach(svc);
+    Error? result = nonExistentQueueListener.'start();
+    test:assertTrue(result is Error, "Expected an error when starting the listener with a non-existent queue");
+    if result is Error {
+        string message = result.message();
+        test:assertEquals(message, "Queue does not exist before polling: https://sqs.us-east-2.amazonaws.com/284495578152/NonExistentQueue");
+    }
+}
+
+@test:Config {
+    groups: ["listenerValidation"]
+}
+isolated function testListenerAttachWithInvalidOnMessageSignature() returns error? {
+    Service svc = @ServiceConfig {
+        queueUrl: "https://sqs.us-east-2.amazonaws.com/284495578152/Test-7",
+        autoDelete: true
+    } service object {
+        isolated remote function onMessage(int value) returns error? {
+        }
+    };
+    Error? result = sqsListener.attach(svc);
+    //io:println("Result of attaching service with invalid signature: ", result);
+    test:assertTrue(result is Error, "Expected error when attaching service with invalid onMessage signature");
+}
+
+@test:Config {
+    groups: ["listenerValidation"]
+}
+isolated function testListenerAttachWithoutServiceConfig() returns error? {
+    Service svc = service object {
+        isolated remote function onMessage(Message message) returns error? {
+        }
+    };
+    Error? result = sqsListener.attach(svc);
+    test:assertTrue(result is Error, "Expected error when attaching service without ServiceConfig annotation");
+    if result is Error {
+        test:assertEquals(result.message(), "Failed to attach service : Service configuration annotation is required.", "Invalid error message received ");
+    }
+}
+
+@test:Config {
+    groups: ["listenerValidation"]
+}
+isolated function testListenerWithResourceMethods() returns error? {
+    Service svc = @ServiceConfig {
+        queueUrl: "https://sqs.us-east-2.amazonaws.com/284495578152/Test-8",
+        autoDelete: true
+    } service object {
+        resource function get .() returns error? {
+        }
+        isolated remote function onMessage(Message message) returns error? {
+        }
+    };
+
+    Error? result = sqsListener.attach(svc);
+    test:assertTrue(result is Error);
+    if result is Error {
+        test:assertEquals(result.message(), "Failed to attach service : SQS service cannot have resource methods.", "Invalid error message received");
+    }
+}
+
+@test:Config {
+    groups: ["listenerValidation"]
+}
+isolated function testListenerWithNoOnMessagemethod() returns error? {
+    Service svc = @ServiceConfig {
+        queueUrl: "https://sqs.us-east-2.amazonaws.com/284495578152/Test-9",
+        autoDelete: true
+    } service object {
+        isolated remote function onError(Error err) returns error? {
+        }
+    };
+
+    Error? result = sqsListener.attach(svc);
+    test:assertTrue(result is Error, "Expected error when attaching service without remote methods");
+    if result is Error {
+        test:assertEquals(result.message(), "Failed to attach service : SQS service must have an 'onMessage' remote method.", "Invalid error message received");
+    }
+}
+
+@test:Config {
+    groups: ["listenerValidation"]
+}
+isolated function testListenerWithInvalidRemoteMethod() returns error? {
+    Service svc = @ServiceConfig {
+        queueUrl: "https://sqs.us-east-2.amazonaws.com/284495578152/Test-9",
+        autoDelete: true
+    } service object {
+        remote function onRequest(Message message, Caller caller) returns error? {
+        }
+    };
+    Error? result = sqsListener.attach(svc);
+    test:assertTrue(result is Error);
+    if result is Error {
+        test:assertEquals(
+                result.message(),
+                "Failed to attach service : Invalid remote method name: onRequest",
+                "Invalid error message received");
+    }
+}
+
+@test:Config {
+    groups: ["listenerValidation"]
+}
+isolated function testListenerMethodWithAdditionalParameters() returns error? {
+    Service svc = @ServiceConfig {
+        queueUrl: "https://sqs.us-east-2.amazonaws.com/284495578152/Test-10",
+        autoDelete: true
+    } service object {
+        remote function onMessage(Message message, Caller caller, string requestType) returns error? {
+        }
+    };
+    Error? result = sqsListener.attach(svc);
+    test:assertTrue(result is Error);
+    if result is Error {
+        test:assertEquals(
+                result.message(),
+                "Failed to attach service : onMessage method can have only have either one or two parameters.",
+                "Invalid error message received");
+    }
+}
+
+@test:Config {
+    groups: ["listenerValidation"]
+}
+isolated function testListenerMethodWithInvalidParams() returns error? {
+    Service svc = @ServiceConfig {
+        queueUrl: "https://sqs.us-east-2.amazonaws.com/284495578152/Test-11",
+        autoDelete: true
+    } service object {
+        remote function onMessage(Message message, string requestType) returns error? {
+        }
+    };
+    Error? result = sqsListener.attach(svc);
+    test:assertTrue(result is Error);
+    if result is Error {
+        test:assertEquals(
+                result.message(),
+                "Failed to attach service : onMessage method parameters must be of type 'sqs:Message' or 'sqs:Caller'.",
+                "Invalid error message received");
+    }
+}
+
+@test:Config {
+    groups: ["listenerValidation"]
+}
+isolated function testListenerMethodMandatoryParamMissing() returns error? {
+    Service svc = @ServiceConfig {
+        queueUrl: "https://sqs.us-east-2.amazonaws.com/284495578152/Test-12",
+        autoDelete: true
+    } service object {
+        remote function onMessage(Caller caller) returns error? {
+        }
+    };
+    Error? result = sqsListener.attach(svc);
+    test:assertTrue(result is Error);
+    if result is Error {
+        test:assertEquals(
+                result.message(),
+                "Failed to attach service : Required parameter 'sqs:Message' cannot be found.",
+                "Invalid error message received");
+    }
+}
+
+@test:Config {
+    groups: ["listenerValidation"]
+}
+isolated function testListenerOnErrorWithoutParameters() returns error? {
+    Service svc = @ServiceConfig {
+        queueUrl: "https://sqs.us-east-2.amazonaws.com/284495578152/Test-13",
+        autoDelete: true
+    } service object {
+        remote function onMessage(Message message, Caller caller) returns error? {
+        }
+        remote function onError() returns error? {
+        }
+    };
+    Error? result = sqsListener.attach(svc);
+    test:assertTrue(result is Error);
+    if result is Error {
+        test:assertEquals(
+                result.message(),
+                "Failed to attach service : onError method must have exactly one parameter of type 'sqs:Error'.",
+                "Invalid error message received");
+    }
+}
+
+@test:Config {
+    groups: ["listenerValidations"]
+}
+isolated function testListenerOnErrorWithInvalidParameter() returns error? {
+    Service svc = @ServiceConfig {
+        queueUrl: "https://sqs.us-east-2.amazonaws.com/284495578152/Test-14",
+        autoDelete: true
+    } service object {
+        remote function onMessage(Message message, Caller caller) returns error? {
+        }
+        remote function onError(Message message) returns error? {
+        }
+    };
+    Error? result = sqsListener.attach(svc);
+    test:assertTrue(result is Error);
+    if result is Error {
+        test:assertEquals(
+                result.message(),
+                "Failed to attach service : onError method parameter must be of type 'sqs:Error'.",
+                "Invalid error message received");
+    }
+}
+
+@test:Config {
+    groups: ["listenerValidation"]
+}
+isolated function testListenerOnErrorWithAdditionalParameters() returns error? {
+    Service svc = @ServiceConfig {
+        queueUrl: "https://sqs.us-east-2.amazonaws.com/284495578152/Test-12",
+        autoDelete: true
+    } service object {
+        remote function onMessage(Message message, Caller caller) returns error? {
+        }
+        remote function onError(Error err, Message message) returns error? {
+        }
+    };
+    Error? result = sqsListener.attach(svc);
+    test:assertTrue(result is Error);
+    if result is Error {
+        test:assertEquals(
+                result.message(),
+                "Failed to attach service : onError method must have exactly one parameter of type 'sqs:Error'.",
+                "Invalid error message received");
+    }
+}

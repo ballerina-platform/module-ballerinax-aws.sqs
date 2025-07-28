@@ -16,7 +16,7 @@
 
 import ballerina/jballerina.java;
 
-# Provides control over message acknowledgment and retries.
+# Provides control over message deletion from the queue after processing.
 public isolated client class Caller {
 
     # Delete the message from the queue after successful processing.

@@ -48,8 +48,8 @@ service on sqsListener {
         return;
     }
 
-    remote function onError(error err) returns error? {
-        log:printError("Listener error", cause = err.message(), occurredError = err.toString());
+    remote function onError(sqs:Error err) returns error? {
+        log:printError("Listener error", err);
     }
 }
 

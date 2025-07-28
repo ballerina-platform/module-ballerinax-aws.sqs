@@ -14,8 +14,8 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import ballerinax/aws.sqs;
 import ballerina/io;
+import ballerinax/aws.sqs;
 
 configurable string fifoQueueName = ?;
 configurable string accessKeyId = ?;

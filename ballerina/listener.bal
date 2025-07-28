@@ -20,14 +20,14 @@ import ballerina/jballerina.java;
 public isolated class Listener {
     # Initializes the AWS SQS listener.
     #
-    # + pollingConfig - Default polling behavior for all services (can be overridden per service)
     # + connectionConfig - The configurations to be used when initializing the AWS SQS listener
+    # + pollingConfig - Default polling behavior for all services (can be overridden per service)
     # + return - An `Error` if the initialization failed, nil otherwise
     public isolated function init(ConnectionConfig connectionConfig, PollingConfig pollingConfig = {}) returns Error? {
-        return self.initListener(pollingConfig, connectionConfig);
+        return self.initListener(connectionConfig, pollingConfig);
     }
 
-    isolated function initListener(PollingConfig pollingConfig, ConnectionConfig connectionConfig) returns Error? = @java:Method {
+    isolated function initListener(ConnectionConfig connectionConfig, PollingConfig pollingConfig) returns Error? = @java:Method {
         name: "init",
         'class: "io.ballerina.lib.aws.sqs.listener.Listener"
     } external;

@@ -28,7 +28,7 @@ import static io.ballerina.lib.aws.sqs.CommonUtils.createError;
  * Native implementation of the Ballerina AWS SQS Caller object.
  * Handles message acknowledgment and negative acknowledgment operations.
  */
-public class Caller {
+public final class Caller {
 
     private static final String NATIVE_SQS_CLIENT = NativeClientAdaptor.NATIVE_SQS_CLIENT;
     // Native data keys for storing queue URL and message information

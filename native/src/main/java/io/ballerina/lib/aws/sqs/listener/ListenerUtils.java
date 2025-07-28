@@ -28,7 +28,7 @@ import static io.ballerina.lib.aws.sqs.ModuleUtils.getModule;
  * Handles caller creation and message acknowledgment operations.
  */
 
-public class ListenerUtils {
+public final class ListenerUtils {
 
     /**
      * Creates a new Caller object for handling message acknowledgments.

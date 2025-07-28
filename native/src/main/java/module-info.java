@@ -23,7 +23,6 @@ module io.ballerina.stdlib.java.aws.sqs {
     requires transitive io.ballerina.runtime;
     requires software.amazon.awssdk.profiles;
     requires software.amazon.awssdk.core;
-    requires java.logging;
 
     exports io.ballerina.lib.aws.sqs;
 }

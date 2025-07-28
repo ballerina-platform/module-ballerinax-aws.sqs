@@ -33,20 +33,17 @@ import io.ballerina.runtime.api.values.BString;
 import software.amazon.awssdk.services.sqs.model.Message;
 
 import java.util.List;
-import java.util.logging.Logger;
-import java.util.logging.Level;
 
 /**
  * Handles the dispatching of received SQS messages to Ballerina services.
  */
-public class MessageDispatcher {
+public final class MessageDispatcher {
     private static final String ON_MESSAGE_METHOD = "onMessage";
     private static final String ON_ERROR_METHOD = "onError";
 
     private final Runtime ballerinaRuntime;
     private final Service nativeService;
     private final Environment environment;
-    private static final Logger logger = Logger.getLogger(MessageDispatcher.class.getName());
 
     /**
      * Creates a new message dispatcher.
@@ -62,17 +59,18 @@ public class MessageDispatcher {
     }
 
     /**
-     * Dispatches received messages to the appropriate service method.
+     * Dispatches received message to the appropriate service method.
      * Creates a virtual thread for async processing.
      *
-     * @param messages   The received SQS messages
+     * @param message    The received SQS message
      * @param bListener  The listener instance
      * @param queueUrl   The source queue URL
      * @param autoDelete Whether to auto-delete messages
      */
-    public void dispatch(List<Message> messages, BObject bListener, String queueUrl, boolean autoDelete) {
+    public void dispatch(List<Message> message, BObject bListener, String queueUrl, boolean autoDelete) {
         Thread.startVirtualThread(() -> {
-            for (Message msg : messages) {
+            if (!message.isEmpty()) {
+                Message msg = message.get(0);
                 try {
                     // convert to Ballerina record (single message)
                     BMap<BString, Object> bMsg = ReceiveMessageMapper.getNativeMessage(msg);
@@ -95,22 +93,24 @@ public class MessageDispatcher {
                                 meta,
                                 args);
                     } catch (Throwable userErr) {
-                        logger.log(Level.WARNING, "Error in user onMessage method", userErr);
+                        throw userErr;
                     }
-                    // auto-ack if requested
                     if (autoDelete) {
                         BObject caller = ListenerUtils.createCaller(environment, bListener, queueUrl,
                                 new AckMessage(msg.messageId(), msg.receiptHandle()));
                         Object err = Caller.delete(caller);
                         if (err instanceof BError) {
-                            logger.warning("Failed to delete message: " + ((BError) err).getMessage());
+                            // invoke onError for framework error
+                            invokeOnError((BError) err, bListener);
                         }
                     }
                     // only framework errors
-                } catch (Throwable e) {
-                    logger.log(Level.SEVERE, "Framework error in dispatching messages", e);
-                    BError err = CommonUtils.createError("Failed to dispatch messages", e);
+                } catch (BError frameworkError) {
+                    invokeOnError(frameworkError, bListener);
+                } catch (Throwable unknownErr) {
+                    BError err = CommonUtils.createError("Unhandled internal error", unknownErr);
                     invokeOnError(err, bListener);
+
                 }
             }
         });
@@ -127,14 +127,12 @@ public class MessageDispatcher {
             try {
                 StrandMetadata meta = new StrandMetadata(
                         nativeService.getOnErrorMethod().isIsolated(), null);
-                // onError(error, retry)
                 ballerinaRuntime.callMethod(
                         nativeService.getConsumerService(),
                         ON_ERROR_METHOD,
                         meta,
                         error, true);
             } catch (Throwable t) {
-                logger.log(Level.WARNING, "Error while invoking onError", t);
             }
         }
     }
@@ -150,18 +148,16 @@ public class MessageDispatcher {
         Parameter[] params = onMsg.getParameters();
         Object[] args = new Object[params.length];
 
-        // First parameter must be Message
-        if (params.length > 0) {
-            args[0] = bMsg;
-        }
-        // Second parameter (if present) must be Caller
-        if (params.length == 2) {
-            Type secondParamType = TypeUtils.getReferredType(params[1].type);
-            if (secondParamType.getTag() == TypeTags.OBJECT_TYPE_TAG) {
-                args[1] = ListenerUtils.createCaller(environment, bListener, queueUrl,
-                        (new AckMessage(msg.messageId(), msg.receiptHandle())));
+        for (int i = 0; i < params.length; i++) {
+            Type paramType = TypeUtils.getReferredType(params[i].type);
+            if (paramType.getTag() == TypeTags.RECORD_TYPE_TAG) {
+                args[i] = bMsg;
+            } else if (paramType.getTag() == TypeTags.OBJECT_TYPE_TAG) {
+                args[i] = ListenerUtils.createCaller(environment, bListener, queueUrl,
+                        new AckMessage(msg.messageId(), msg.receiptHandle()));
             } else {
-                throw new RuntimeException("Second parameter must be Caller");
+                throw new RuntimeException(
+                        "onMessage method parameters must be of type sqs:Message or Caller object");
             }
         }
         return args;
