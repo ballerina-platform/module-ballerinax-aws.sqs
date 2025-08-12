@@ -1,4 +1,4 @@
-# FIFO Queue Example with AWS SQS
+# Using FIFO Queue with AWS SQS
 
 This example demonstrates how to use the Ballerina AWS SQS connector to work with FIFO queues. It covers;
 

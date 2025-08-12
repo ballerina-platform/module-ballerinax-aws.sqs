@@ -1,6 +1,6 @@
 [package]
 org = "wso2"
-name = "enhanced_messaging"
+name = "advanced_messaging_features"
 version = "0.1.0"
 
 [[dependency]]
