@@ -23,15 +23,15 @@ import io.ballerina.runtime.api.values.BError;
 import io.ballerina.runtime.api.values.BMap;
 import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.api.values.BString;
-import software.amazon.awssdk.core.exception.AbortedException;
+
 import software.amazon.awssdk.services.sqs.SqsClient;
 import software.amazon.awssdk.services.sqs.model.QueueDoesNotExistException;
-import software.amazon.awssdk.services.sqs.model.ReceiveMessageRequest;
-import software.amazon.awssdk.services.sqs.model.ReceiveMessageResponse;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
+
+import static io.ballerina.lib.aws.sqs.listener.ListenerUtils.extractQueueName;
 
 /**
  * Native implementation of the Ballerina AWS SQS Listener.
@@ -39,18 +39,17 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public final class Listener {
 
-    public static final String NATIVE_SQS_CLIENT = "nativeClient";
-    private static final String NATIVE_POLLING_CONFIG = "native.polling.config";
-    private static final String NATIVE_SERVICES = "native.services";
-    private static final String NATIVE_STOPPED = "native.stopped";
-    private static final String NATIVE_POLLING_THREAD = "native.polling.thread";
+    static final String NATIVE_POLLING_CONFIG = "native.polling.config";
+    static final String NATIVE_SERVICES = "native.services";
+    static final String NATIVE_STOPPED = "native.stopped";
+    static final String NATIVE_SERVICE = "native.service";
+    static final String NATIVE_RECEIVER = "native.receiver";
 
     private Listener() {
     }
 
     /**
      * Initializes the SQS listener with the given configuration.
-     *
      * Sets up the SQS client and required native data.
      */
     public static Object init(Environment env,
@@ -58,14 +57,24 @@ public final class Listener {
             BMap<BString, Object> connectionConfig,
             BMap<BString, Object> pollingConfig) {
         try {
-            // Initialize the SQS client
-            NativeClientAdaptor.init(bListener, connectionConfig);
-            // Store polling config, an empty service map and the stopped flag
-            bListener.addNativeData(NATIVE_POLLING_CONFIG, new PollingConfig(pollingConfig));
-            bListener.addNativeData(NATIVE_SERVICES, new ConcurrentHashMap<String, Service>());
-            bListener.addNativeData(NATIVE_STOPPED, new AtomicBoolean(true));
+            // create the native SQS client
+            SqsClient nativeSqsClient = NativeClientAdaptor.createSqsClient(connectionConfig);
+            // set the native client as native data in the listener object
+            bListener.addNativeData(NativeClientAdaptor.NATIVE_SQS_CLIENT, nativeSqsClient);
+
+            // parse and store polling configuration
+            PollingConfig pollingCfg = new PollingConfig(pollingConfig);
+            bListener.addNativeData(NATIVE_POLLING_CONFIG, pollingCfg);
+
+            // initialize empty service registry
+            Map<String, Service> services = new ConcurrentHashMap<>();
+            bListener.addNativeData(NATIVE_SERVICES, services);
+
+            // initialize listener state (initially stopped)
+            AtomicBoolean listenerStopped = new AtomicBoolean(true);
+            bListener.addNativeData(NATIVE_STOPPED, listenerStopped);
         } catch (BError e) {
-            return e;
+            return CommonUtils.createError("Failed to initialize SQS listener: " + e.getMessage(), e);
         } catch (Exception e) {
             return CommonUtils.createError("Failed to initialize SQS listener: " + e.getMessage(), e);
         }
@@ -80,14 +89,28 @@ public final class Listener {
         try {
             Service.validateService(bService);
             Service nativeService = new Service(bService);
-            String queueUrl = nativeService.getServiceConfig().queueUrl;
+            ServiceConfig cfg = nativeService.getServiceConfig();
+
+            PollingConfig pollingConfig = (PollingConfig) bListener.getNativeData(NATIVE_POLLING_CONFIG);
+            PollingConfig effectiveConfig = cfg.pollingConfig != null ? cfg.pollingConfig : pollingConfig;
+
+            MessageDispatcher dispatcher = new MessageDispatcher(env, nativeService);
+            MessageReceiver receiver = new MessageReceiver(
+                    (SqsClient) bListener.getNativeData(NativeClientAdaptor.NATIVE_SQS_CLIENT),
+                    cfg.queueUrl,
+                    effectiveConfig,
+                    dispatcher,
+                    bListener,
+                    cfg.autoDelete);
+
             Map<String, Service> services = getServices(bListener);
-            services.put(queueUrl, nativeService);
-            bService.addNativeData("native.service", nativeService);
+            services.put(cfg.queueUrl, nativeService);
+            bService.addNativeData(NATIVE_SERVICE, nativeService);
+            bService.addNativeData(NATIVE_RECEIVER, receiver);
         } catch (BError e) {
-            return e;
+            return CommonUtils.createError(e.getMessage(), e);
         } catch (Exception e) {
-            return CommonUtils.createError("Failed to attach service: " + e.getMessage(), e);
+            return CommonUtils.createError(e.getMessage(), e);
         }
         return null;
     }
@@ -98,15 +121,15 @@ public final class Listener {
      */
     public static Object detach(Environment env, BObject bListener, BObject bService) {
         try {
-            Service nativeService = (Service) bService.getNativeData("native.service");
+            Service nativeService = (Service) bService.getNativeData(NATIVE_SERVICE);
             if (nativeService != null) {
                 String queueUrl = nativeService.getServiceConfig().queueUrl;
                 getServices(bListener).remove(queueUrl);
             }
         } catch (BError e) {
-            return e;
+            return CommonUtils.createError(e.getMessage(), e);
         } catch (Exception e) {
-            return CommonUtils.createError("Failed to detach service: " + e.getMessage(), e);
+            return CommonUtils.createError(e.getMessage(), e);
         }
         return null;
     }
@@ -120,66 +143,33 @@ public final class Listener {
         if (!stopped.compareAndSet(true, false)) {
             return null;
         }
-
-        SqsClient sqsClient = (SqsClient) bListener.getNativeData(NATIVE_SQS_CLIENT);
-        PollingConfig pollingConfig = (PollingConfig) bListener.getNativeData(NATIVE_POLLING_CONFIG);
+        SqsClient sqsClient = (SqsClient) bListener.getNativeData(NativeClientAdaptor.NATIVE_SQS_CLIENT);
         Map<String, Service> services = getServices(bListener);
-
-        for (Service svc : services.values()) {
-            ServiceConfig cfg = svc.getServiceConfig();
-            String queueName = extractQueueName(cfg.queueUrl);
-            try {
+        try {
+            for (Service service : services.values()) {
+                ServiceConfig cfg = service.getServiceConfig();
+                String queueName = extractQueueName(cfg.queueUrl);
                 sqsClient.getQueueUrl(builder -> builder.queueName(queueName));
-            } catch (QueueDoesNotExistException qex) {
-                sqsClient.close();
-                return CommonUtils.createError("Configured queue does not exist: " + cfg.queueUrl, qex);
             }
+        } catch (QueueDoesNotExistException qex) {
+            stopped.set(true);
+            return CommonUtils.createError("Queue does not exist before polling" , qex);
+        } catch (Exception ex) {
+            stopped.set(true);
+            return CommonUtils.createError("Failed to validate queue: ", ex);
         }
-        Map<String, ReceiveMessageRequest> receiveRequests = new ConcurrentHashMap<>();
-        for (Service svc : services.values()) {
-            ServiceConfig cfg = svc.getServiceConfig();
-            PollingConfig effectivePollingConfig = cfg.pollingConfig != null ? cfg.pollingConfig : pollingConfig;
-            ReceiveMessageRequest req = ReceiveMessageRequest.builder()
-                    .queueUrl(cfg.queueUrl)
-                    .maxNumberOfMessages(1)
-                    .waitTimeSeconds(effectivePollingConfig.waitTime())
-                    .visibilityTimeout(effectivePollingConfig.visibilityTimeout())
-                    .build();
-            receiveRequests.put(cfg.queueUrl, req);
-        }
-
-        Thread pollingThread = Thread.startVirtualThread(() -> {
-            while (!stopped.get()) {
-                for (Service svc : services.values()) {
-                    try {
-                        ServiceConfig cfg = svc.getServiceConfig();
-                        ReceiveMessageRequest req = receiveRequests.get(cfg.queueUrl);
-                        ReceiveMessageResponse resp = sqsClient.receiveMessage(req);
-                        if (resp.hasMessages()) {
-                            new MessageDispatcher(env, svc)
-                                    .dispatch(resp.messages(), bListener, cfg.queueUrl, cfg.autoDelete);
-                        }
-                        long sleep = pollingConfig.pollIntervalInMillis();
-                        if (sleep > 0) {
-                            Thread.sleep(sleep);
-                        }
-                    } catch (InterruptedException ie) {
-                        stopped.set(true);
-                        Thread.currentThread().interrupt();
-                    } catch (AbortedException ae) {
-                        stopped.set(true);
-                    } catch (QueueDoesNotExistException qex) {
-                        stopped.set(true);
-                        throw CommonUtils.createError(
-                                "Queue deleted during polling: " + qex.awsErrorDetails().errorMessage(), qex);
-                    } catch (Exception e) {
-                        stopped.set(true);
-                        throw CommonUtils.createError("Error polling messages from SQS: " + e.getMessage(), e);
-                    }
-                }
+        try {
+            for (Service service : services.values()) {
+                BObject bService = service.getConsumerService();
+                MessageReceiver receiver = (MessageReceiver) bService.getNativeData(NATIVE_RECEIVER);
+                receiver.consume();
             }
-        });
-        bListener.addNativeData(NATIVE_POLLING_THREAD, pollingThread);
+        } catch (Exception e) {
+            stopAllReceivers(services);
+            stopped.set(true);
+            return CommonUtils
+                    .createError("Error occurred while starting the Ballerina AWS SQS listener" + e.getMessage(), e);
+        }
         return null;
     }
 
@@ -187,16 +177,29 @@ public final class Listener {
      * Gracefully stops the listener.
      */
     public static Object gracefulStop(Environment env, BObject bListener) {
-        ((AtomicBoolean) bListener.getNativeData(NATIVE_STOPPED)).set(true);
-        Thread pollingThread = (Thread) bListener.getNativeData(NATIVE_POLLING_THREAD);
-        if (pollingThread != null) {
-            try {
-                pollingThread.join();
-            } catch (InterruptedException ignored) {
-                Thread.currentThread().interrupt();
-            }
+        AtomicBoolean stopped = (AtomicBoolean) bListener.getNativeData(NATIVE_STOPPED);
+        if (stopped.get()) {
+            return null;
         }
-        ((SqsClient) bListener.getNativeData(NATIVE_SQS_CLIENT)).close();
+        stopped.set(true);
+
+        Map<String, Service> services = getServices(bListener);
+        try {
+            for (Service service : services.values()) {
+                BObject bService = service.getConsumerService();
+                MessageReceiver receiver = (MessageReceiver) bService.getNativeData(NATIVE_RECEIVER);
+                if (receiver != null) {
+                    receiver.stop();
+                }
+            }
+            SqsClient client = (SqsClient) bListener.getNativeData(NativeClientAdaptor.NATIVE_SQS_CLIENT);
+            if (client != null) {
+                client.close();
+            }
+        } catch (Exception e) {
+            return CommonUtils.createError("Error occurred while gracefully stopping the Ballerina AWS SQS listener",
+                    e);
+        }
         return null;
     }
 
@@ -204,17 +207,25 @@ public final class Listener {
      * Immediately stops the listener.
      */
     public static Object immediateStop(Environment env, BObject bListener) {
-        ((AtomicBoolean) bListener.getNativeData(NATIVE_STOPPED)).set(true);
-        Thread pollingThread = (Thread) bListener.getNativeData(NATIVE_POLLING_THREAD);
-        if (pollingThread != null) {
-            pollingThread.interrupt(); // Interrupt the thread immediately
-            try {
-                pollingThread.join(); // Wait for it to finish
-            } catch (InterruptedException ignored) {
-                Thread.currentThread().interrupt();
+        AtomicBoolean stopped = (AtomicBoolean) bListener.getNativeData(NATIVE_STOPPED);
+        stopped.set(true);
+
+        Map<String, Service> services = getServices(bListener);
+        try {
+            for (Service service : services.values()) {
+                BObject bService = service.getConsumerService();
+                MessageReceiver receiver = (MessageReceiver) bService.getNativeData(NATIVE_RECEIVER);
+                if (receiver != null) {
+                    receiver.stop();
+                }
             }
+            SqsClient client = (SqsClient) bListener.getNativeData(NativeClientAdaptor.NATIVE_SQS_CLIENT);
+            if (client != null) {
+                client.close();
+            }
+        } catch (Exception e) {
+            return CommonUtils.createError("Error occurred while immediately stopping the Ballerina AWS SQS listener", e);
         }
-        ((SqsClient) bListener.getNativeData(NATIVE_SQS_CLIENT)).close();
         return null;
     }
 
@@ -226,11 +237,16 @@ public final class Listener {
         return (Map<String, Service>) bListener.getNativeData(NATIVE_SERVICES);
     }
 
-    private static String extractQueueName(String queueUrl) {
-        if (queueUrl == null || queueUrl.isEmpty()) {
-            return "";
+    private static void stopAllReceivers(Map<String, Service> services) {
+        for (Service service : services.values()) {
+            try {
+                BObject bService = service.getConsumerService();
+                MessageReceiver receiver = (MessageReceiver) bService.getNativeData(NATIVE_RECEIVER);
+                if (receiver != null) {
+                    receiver.stop();
+                }
+            } catch (Exception e) {
+            }
         }
-        String[] parts = queueUrl.split("/");
-        return parts[parts.length - 1];
     }
 }

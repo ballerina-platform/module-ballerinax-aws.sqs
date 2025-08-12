@@ -29,10 +29,10 @@ public record PollingConfig(
         double pollInterval,
         int waitTime,
         int visibilityTimeout) {
-    // Configuration keys from Ballerina PollingConfig
-    private static final BString POLL_INTERVAL = StringUtils.fromString("pollInterval");
-    private static final BString WAIT_TIME = StringUtils.fromString("waitTime");
-    private static final BString VISIBILITY_TIMEOUT = StringUtils.fromString("visibilityTimeout");
+
+    static final BString POLL_INTERVAL = StringUtils.fromString("pollInterval");
+    static final BString WAIT_TIME = StringUtils.fromString("waitTime");
+    static final BString VISIBILITY_TIMEOUT = StringUtils.fromString("visibilityTimeout");
 
     /**
      * Creates polling configuration from Ballerina config map.

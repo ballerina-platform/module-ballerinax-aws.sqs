@@ -38,8 +38,9 @@ import java.util.List;
  * Handles the dispatching of received SQS messages to Ballerina services.
  */
 public final class MessageDispatcher {
-    private static final String ON_MESSAGE_METHOD = "onMessage";
-    private static final String ON_ERROR_METHOD = "onError";
+
+    static final String ON_MESSAGE_METHOD = "onMessage";
+    static final String ON_ERROR_METHOD = "onError";
 
     private final Runtime ballerinaRuntime;
     private final Service nativeService;
@@ -56,6 +57,7 @@ public final class MessageDispatcher {
         this.environment = env;
         this.ballerinaRuntime = env.getRuntime();
         this.nativeService = nativeService;
+
     }
 
     /**
@@ -67,51 +69,60 @@ public final class MessageDispatcher {
      * @param queueUrl   The source queue URL
      * @param autoDelete Whether to auto-delete messages
      */
-    public void dispatch(List<Message> message, BObject bListener, String queueUrl, boolean autoDelete) {
+    public void dispatch(List<Message> message, BObject bListener, String queueUrl, boolean autoDelete,
+            OnMsgCallback callback) {
         Thread.startVirtualThread(() -> {
-            if (!message.isEmpty()) {
-                Message msg = message.get(0);
-                try {
-                    // convert to Ballerina record (single message)
-                    BMap<BString, Object> bMsg = ReceiveMessageMapper.getNativeMessage(msg);
-
-                    // build args of length 1 or 2
-                    Object[] args = getOnMessageParams(bMsg, bListener, queueUrl, msg);
-
-                    // invoke onMessage
-                    StrandMetadata meta = new StrandMetadata(
-                            nativeService.isOnMessageMethodIsolated(), null);
-                    if (args.length > 2 || args.length < 1) {
-                        throw CommonUtils.createError(
-                                "Invalid number of parameters for onMessage method. Expected 1 or 2, got "
-                                        + args.length);
-                    }
+            try {
+                if (!message.isEmpty()) {
+                    Message msg = message.get(0);
                     try {
-                        ballerinaRuntime.callMethod(
+                        // convert to Ballerina record (single message)
+                        BMap<BString, Object> bMsg = ReceiveMessageMapper.getNativeMessage(msg);
+
+                        // build args of length 1 or 2
+                        Object[] args = getOnMessageParams(bMsg, bListener, queueUrl, msg);
+
+                        // invoke onMessage
+                        StrandMetadata meta = new StrandMetadata(
+                                nativeService.isOnMessageMethodIsolated(), null);
+                        if (args.length > 2 || args.length < 1) {
+                            throw CommonUtils.createError(
+                                    "Invalid number of parameters for onMessage method. Expected 1 or 2, got "
+                                            + args.length);
+                        }
+                        Object result = ballerinaRuntime.callMethod(
                                 nativeService.getConsumerService(),
                                 ON_MESSAGE_METHOD,
                                 meta,
                                 args);
-                    } catch (Throwable userErr) {
-                        throw userErr;
-                    }
-                    if (autoDelete) {
-                        BObject caller = ListenerUtils.createCaller(environment, bListener, queueUrl,
-                                new AckMessage(msg.messageId(), msg.receiptHandle()));
-                        Object err = Caller.delete(caller);
-                        if (err instanceof BError) {
-                            // invoke onError for framework error
-                            invokeOnError((BError) err, bListener);
-                        }
-                    }
-                    // only framework errors
-                } catch (BError frameworkError) {
-                    invokeOnError(frameworkError, bListener);
-                } catch (Throwable unknownErr) {
-                    BError err = CommonUtils.createError("Unhandled internal error", unknownErr);
-                    invokeOnError(err, bListener);
 
+                        if (autoDelete) {
+                            BObject caller = ListenerUtils.createCaller(environment, bListener, queueUrl,
+                                    new AckMessage(msg.messageId(), msg.receiptHandle()));
+                            Object err = Caller.delete(caller);
+                            if (err instanceof BError) {
+                                // invoke onError for framework error
+                                invokeOnError((BError) err, bListener);
+                                callback.notifyFailure((BError) err);
+                                return;
+                            }
+                        }
+                        callback.notifySuccess(result);
+                        // only framework errors
+                    } catch (BError frameworkError) {
+                        invokeOnError(frameworkError, bListener);
+                        callback.notifyFailure(frameworkError);
+                    } catch (Throwable unknownErr) {
+                        BError err = CommonUtils.createError("Unhandled internal error", unknownErr);
+                        invokeOnError(err, bListener);
+                        callback.notifyFailure(err);
+                    }
+                } else {
+                    callback.notifySuccess(null);
                 }
+            } catch (Exception e) {
+                BError err = CommonUtils.createError("Dispatch error: " + e.getMessage(), e);
+                callback.notifyFailure(err);
             }
         });
     }
@@ -122,7 +133,7 @@ public final class MessageDispatcher {
      * @param error     The error that occurred
      * @param bListener The listener instance
      */
-    private void invokeOnError(BError error, BObject bListener) {
+    public void invokeOnError(BError error, BObject bListener) {
         if (nativeService.getOnErrorMethod() != null) {
             try {
                 StrandMetadata meta = new StrandMetadata(
@@ -132,7 +143,8 @@ public final class MessageDispatcher {
                         ON_ERROR_METHOD,
                         meta,
                         error, true);
-            } catch (Throwable t) {
+            } catch (BError err) {
+                CommonUtils.createError("Failed to invoke onError method: " + err.getMessage(), err);
             }
         }
     }

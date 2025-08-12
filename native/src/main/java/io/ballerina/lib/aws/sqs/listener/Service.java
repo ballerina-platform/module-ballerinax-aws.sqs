@@ -47,15 +47,15 @@ public final class Service {
                     getModule().getMajorVersion() + VERSION_SEPARATOR +
                     "ServiceConfig");
 
+    static final String ON_MESSAGE_METHOD = "onMessage";
+    static final String ON_ERROR_METHOD = "onError";
+
     // Core service components
     private final BObject consumerService;
     private final ServiceType serviceType;
     private final ServiceConfig serviceConfig;
     private final RemoteMethodType onMessage;
     private final RemoteMethodType onError;
-
-    private static final String ON_MESSAGE_METHOD = "onMessage";
-    private static final String ON_ERROR_METHOD = "onError";
 
     /**
      * Creates a new Service instance from a Ballerina service object.

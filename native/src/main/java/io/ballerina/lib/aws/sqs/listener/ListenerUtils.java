@@ -23,12 +23,17 @@ import software.amazon.awssdk.services.sqs.SqsClient;
 
 import static io.ballerina.lib.aws.sqs.ModuleUtils.getModule;
 
+import io.ballerina.lib.aws.sqs.client.NativeClientAdaptor;
+
 /**
  * Utility class for AWS SQS Listener operations.
  * Handles caller creation and message acknowledgment operations.
  */
 
 public final class ListenerUtils {
+
+    static final String NATIVE_QUEUE_URL = "native.queue.url";
+    static final String NATIVE_ACK_MESSAGES = "native.ack.messages";
 
     /**
      * Creates a new Caller object for handling message acknowledgments.
@@ -37,7 +42,7 @@ public final class ListenerUtils {
      * @param env       The Ballerina runtime environment
      * @param bListener The parent listener object
      * @param queueUrl  The SQS queue URL
-     * @param message  The received SQS message
+     * @param message   The received SQS message
      * @return A new Caller object configured for the given context
      */
     public static BObject createCaller(Environment env,
@@ -46,13 +51,26 @@ public final class ListenerUtils {
             AckMessage ackMessage) {
         BObject caller = ValueCreator.createObjectValue(getModule(), "Caller");
         // copy the SqsClient from the listener onto the caller
-        SqsClient sqsClient = (SqsClient) bListener.getNativeData(Listener.NATIVE_SQS_CLIENT);
-        caller.addNativeData(Listener.NATIVE_SQS_CLIENT, sqsClient);
+        SqsClient sqsClient = (SqsClient) bListener.getNativeData(NativeClientAdaptor.NATIVE_SQS_CLIENT);
+        caller.addNativeData(NativeClientAdaptor.NATIVE_SQS_CLIENT, sqsClient);
         // add the queue URL and the raw message
-        caller.addNativeData(Caller.NATIVE_QUEUE_URL, queueUrl);
-        caller.addNativeData(Caller.NATIVE_ACK_MESSAGES, ackMessage);
+        caller.addNativeData(NATIVE_QUEUE_URL, queueUrl);
+        caller.addNativeData(NATIVE_ACK_MESSAGES, ackMessage);
         return caller;
     }
 
+    /**
+     * Extracts the queue name from an SQS queue URL.
+     *
+     * @param queueUrl The full SQS queue URL
+     * @return The queue name (last part after the final '/')
+     */
+    public static String extractQueueName(String queueUrl) {
+        if (queueUrl != null && queueUrl.contains("/")) {
+            String[] parts = queueUrl.split("/");
+            return parts[parts.length - 1];
+        }
+        return queueUrl;
+    }
 
 }

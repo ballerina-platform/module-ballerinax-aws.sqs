@@ -20,16 +20,17 @@ import io.ballerina.runtime.api.utils.StringUtils;
 import io.ballerina.runtime.api.values.BMap;
 import io.ballerina.runtime.api.values.BString;
 
+
 /**
  * Represents the configuration for an SQS service.
  * Maps the Ballerina ServiceConfig annotation values to Java.
  * Handles queue URL, polling configuration, and acknowledgment behavior.
  */
 public final class ServiceConfig {
-    // Configuration keys from Ballerina ServiceConfig
-    private static final BString QUEUE_URL = StringUtils.fromString("queueUrl");
-    private static final BString CONFIG = StringUtils.fromString("config");
-    private static final BString AUTO_DELETE = StringUtils.fromString("autoDelete");
+
+    static final BString QUEUE_URL = StringUtils.fromString("queueUrl");
+    static final BString CONFIG = StringUtils.fromString("config");
+    static final BString AUTO_DELETE = StringUtils.fromString("autoDelete");
 
     // Configuration values
     public final String queueUrl;

@@ -16,13 +16,13 @@
 
 package io.ballerina.lib.aws.sqs.listener;
 
-import io.ballerina.lib.aws.sqs.client.NativeClientAdaptor;
 import io.ballerina.runtime.api.values.BError;
 import io.ballerina.runtime.api.values.BObject;
 import software.amazon.awssdk.services.sqs.SqsClient;
 import software.amazon.awssdk.services.sqs.model.DeleteMessageRequest;
 
 import static io.ballerina.lib.aws.sqs.CommonUtils.createError;
+import io.ballerina.lib.aws.sqs.client.NativeClientAdaptor;
 
 /**
  * Native implementation of the Ballerina AWS SQS Caller object.
@@ -30,10 +30,11 @@ import static io.ballerina.lib.aws.sqs.CommonUtils.createError;
  */
 public final class Caller {
 
-    private static final String NATIVE_SQS_CLIENT = NativeClientAdaptor.NATIVE_SQS_CLIENT;
-    // Native data keys for storing queue URL and message information
     static final String NATIVE_QUEUE_URL = "native.queue.url";
     static final String NATIVE_ACK_MESSAGES = "native.ack.messages";
+
+    private Caller() {
+    }
 
     /**
      * Acknowledges one or more messages, removing them from the queue.
@@ -45,7 +46,7 @@ public final class Caller {
     public static Object delete(BObject callerObj) {
         try {
             // Extract the SQS client, queue URL, and messages from the caller object
-            SqsClient client = (SqsClient) callerObj.getNativeData(NATIVE_SQS_CLIENT);
+            SqsClient client = (SqsClient) callerObj.getNativeData(NativeClientAdaptor.NATIVE_SQS_CLIENT);
             String queueUrl = (String) callerObj.getNativeData(NATIVE_QUEUE_URL);
             AckMessage ackMessage = (AckMessage) callerObj.getNativeData(NATIVE_ACK_MESSAGES);
 
