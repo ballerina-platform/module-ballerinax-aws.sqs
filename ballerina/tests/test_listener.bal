@@ -222,7 +222,7 @@ function testListenerWithNonExistentQueue() returns error? {
     test:assertTrue(result is Error, "Expected an error when starting the listener with a non-existent queue");
     if result is Error {
         string message = result.message();
-        test:assertEquals(message, "Queue does not exist before polling: https://sqs.us-east-2.amazonaws.com/284495578152/NonExistentQueue");
+        test:assertEquals(message, "Queue does not exist before polling");
     }
 }
 
@@ -238,7 +238,6 @@ isolated function testListenerAttachWithInvalidOnMessageSignature() returns erro
         }
     };
     Error? result = sqsListener.attach(svc);
-    //io:println("Result of attaching service with invalid signature: ", result);
     test:assertTrue(result is Error, "Expected error when attaching service with invalid onMessage signature");
 }
 

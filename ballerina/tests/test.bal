@@ -462,9 +462,9 @@ function testSendMessageBatchWithEmptyList() returns error? {
 }
 function testSendMessageBatchExceedsTotalSizeLimit() returns error? {
     string queueUrl = standardQueueUrl;
-    string largeBody = ""; // string with size ~26220 Bytes.
+    string largeBody = "";
     int i = 0;
-    while i < 26220 {
+    while i < 104858 {
         largeBody += "A";
         i += 1;
     }
@@ -481,7 +481,7 @@ function testSendMessageBatchExceedsTotalSizeLimit() returns error? {
         ErrorDetails details = result.detail();
         test:assertEquals(details.httpStatusCode, 400);
         test:assertEquals(details.errorCode, "AWS.SimpleQueueService.BatchRequestTooLong");
-        test:assertEquals(details.errorMessage, "Batch requests cannot be longer than 262144 bytes. You have sent 262200 bytes.");
+        test:assertEquals(details.errorMessage, "Batch requests cannot be longer than 1048576 bytes. You have sent 1048580 bytes.");
     }
 }
 
@@ -1010,7 +1010,7 @@ function testStartMessageMoveTask() returns error? {
 }
 
 @test:Config {
-    after:  testStartMessageMoveTask,
+    after: testStartMessageMoveTask,
     dependsOn: [testStartMessageMoveTask],
     groups: ["cancelMessageMoveTask"]
 }
@@ -1018,11 +1018,7 @@ function testCancelMessageMoveTask() returns error? {
     if moveTaskHandle == "" {
         test:assertFail("No move task handle available to cancel.");
     }
-
-    int attempts = 0;
-    int maxAttempts = 3;
-
-    while (attempts < maxAttempts) {
+    foreach int attempts in 0 ..< 3 {
         CancelMessageMoveTaskResponse|error cancelResult = sqsClient->cancelMessageMoveTask(moveTaskHandle);
         if cancelResult is CancelMessageMoveTaskResponse {
             test:assertTrue(cancelResult.approximateNumberOfMessagesMoved >= 0,
@@ -1033,7 +1029,6 @@ function testCancelMessageMoveTask() returns error? {
             if errMsg.startsWith("Failed") {
                 // Retry after short delay if task already completed
                 runtime:sleep(1);
-                attempts += 1;
             } else {
                 // Unexpected error, fail immediately
                 return cancelResult;
@@ -1041,8 +1036,7 @@ function testCancelMessageMoveTask() returns error? {
         }
     }
     // If retries exhausted, fail test
-    test:assertFail("Failed to cancel message move task after " + attempts.toString() +
-            " attempts: Task may have already completed.");
+    test:assertFail("Failed to cancel message move task");
 }
 
 @test:Config {
