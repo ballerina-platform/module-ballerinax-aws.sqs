@@ -14,7 +14,6 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import ballerina/lang.runtime;
 import ballerina/log;
 import ballerinax/aws.sqs;
 
@@ -53,15 +52,4 @@ service on sqsListener {
     }
 }
 
-public function main() returns error? {
-    sqs:Client sqsClient = check new (connectionConfig);
-    string createdQueueUrl = check sqsClient->createQueue(queueName);
-    log:printInfo("Queue created successfully. URL: ", queueUrl = createdQueueUrl);
-    foreach int i in 1 ... 20 {
-        string msg = string `Periodic message #${i}`;
-        _ = check sqsClient->sendMessage(createdQueueUrl, msg);
-        log:printInfo("Sent message", count = i, body = msg);
-        runtime:sleep(1);
-    }
-    log:printInfo("All messages sent. Listener will process them.", totalMessages = 20);
-}
+

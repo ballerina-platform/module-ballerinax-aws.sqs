@@ -1,10 +1,11 @@
-# Basic Queue Consumer Example with AWS SQS
+# Using Basic Queue Consumer with AWS SQS
 
-This example demonstrates how to use the Ballerina AWS SQS Listener to work with AWS SQS queues. It covers;
+This example demonstrates how to implement a listener-service based AWS SQS queue consumer using ballerina.
 
-- Creating a standard SQS queue
-- Sending messages to the queue
-- Receiving messages from the queue using a listener
+## Files
+
+- `service.bal` - The main SQS listener service that consumes messages
+- `send_messages.bal` - Utility to send test messages to the queue
 
 ## Prerequisites
 

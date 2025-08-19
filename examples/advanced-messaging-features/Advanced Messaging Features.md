@@ -1,4 +1,4 @@
-# Enhanced Messaging with AWS SQS
+# Advanced Messaging with AWS SQS
 
 This example demonstrates how to use the Ballerina AWS SQS connector to perform advanced messaging operations with AWS SQS. It covers queue creation with custom attributes, sending messages in batch with attributes, receiving messages, and cleaning up the queue.
 
