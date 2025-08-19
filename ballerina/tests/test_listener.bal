@@ -220,10 +220,10 @@ function testListenerWithNonExistentQueue() returns error? {
     check nonExistentQueueListener.attach(svc);
     Error? result = nonExistentQueueListener.'start();
     test:assertTrue(result is Error, "Expected an error when starting the listener with a non-existent queue");
-    if result is Error {
-        string message = result.message();
-        test:assertEquals(message, "Queue does not exist before polling");
+    if result is () {
+        test:assertFail("Expected an error but found a nil value");
     }
+    test:assertEquals(result.message(), "Queue does not exist before polling");
 }
 
 @test:Config {
@@ -251,9 +251,10 @@ isolated function testListenerAttachWithoutServiceConfig() returns error? {
     };
     Error? result = sqsListener.attach(svc);
     test:assertTrue(result is Error, "Expected error when attaching service without ServiceConfig annotation");
-    if result is Error {
-        test:assertEquals(result.message(), "Failed to attach service : Service configuration annotation is required.", "Invalid error message received ");
+    if result is () {
+        test:assertFail("Expected an error but found a nil value");
     }
+    test:assertEquals(result.message(), "Failed to attach service : Service configuration annotation is required.", "Invalid error message received ");
 }
 
 @test:Config {
@@ -272,9 +273,10 @@ isolated function testListenerWithResourceMethods() returns error? {
 
     Error? result = sqsListener.attach(svc);
     test:assertTrue(result is Error);
-    if result is Error {
-        test:assertEquals(result.message(), "Failed to attach service : SQS service cannot have resource methods.", "Invalid error message received");
+    if result is () {
+        test:assertFail("Expected an error but found a nil value");
     }
+    test:assertEquals(result.message(), "Failed to attach service : SQS service cannot have resource methods.", "Invalid error message received");
 }
 
 @test:Config {
@@ -291,9 +293,10 @@ isolated function testListenerWithNoOnMessagemethod() returns error? {
 
     Error? result = sqsListener.attach(svc);
     test:assertTrue(result is Error, "Expected error when attaching service without remote methods");
-    if result is Error {
-        test:assertEquals(result.message(), "Failed to attach service : SQS service must have an 'onMessage' remote method.", "Invalid error message received");
+    if result is () {
+        test:assertFail("Expected an error but found a nil value");
     }
+    test:assertEquals(result.message(), "Failed to attach service : SQS service must have an 'onMessage' remote method.", "Invalid error message received");
 }
 
 @test:Config {
@@ -309,12 +312,13 @@ isolated function testListenerWithInvalidRemoteMethod() returns error? {
     };
     Error? result = sqsListener.attach(svc);
     test:assertTrue(result is Error);
-    if result is Error {
-        test:assertEquals(
-                result.message(),
-                "Failed to attach service : Invalid remote method name: onRequest",
-                "Invalid error message received");
+    if result is () {
+        test:assertFail("Expected an error but found a nil value");
     }
+    test:assertEquals(
+                result.message(),
+            "Failed to attach service : Invalid remote method name: onRequest",
+            "Invalid error message received");
 }
 
 @test:Config {
@@ -330,12 +334,13 @@ isolated function testListenerMethodWithAdditionalParameters() returns error? {
     };
     Error? result = sqsListener.attach(svc);
     test:assertTrue(result is Error);
-    if result is Error {
-        test:assertEquals(
-                result.message(),
-                "Failed to attach service : onMessage method can have only have either one or two parameters.",
-                "Invalid error message received");
+    if result is () {
+        test:assertFail("Expected an error but found a nil value");
     }
+    test:assertEquals(
+                result.message(),
+            "Failed to attach service : onMessage method can have only have either one or two parameters.",
+            "Invalid error message received");
 }
 
 @test:Config {
@@ -351,12 +356,13 @@ isolated function testListenerMethodWithInvalidParams() returns error? {
     };
     Error? result = sqsListener.attach(svc);
     test:assertTrue(result is Error);
-    if result is Error {
-        test:assertEquals(
-                result.message(),
-                "Failed to attach service : onMessage method parameters must be of type 'sqs:Message' or 'sqs:Caller'.",
-                "Invalid error message received");
+    if result is () {
+        test:assertFail("Expected an error but found a nil value");
     }
+    test:assertEquals(
+                result.message(),
+            "Failed to attach service : onMessage method parameters must be of type 'sqs:Message' or 'sqs:Caller'.",
+            "Invalid error message received");
 }
 
 @test:Config {
@@ -372,12 +378,13 @@ isolated function testListenerMethodMandatoryParamMissing() returns error? {
     };
     Error? result = sqsListener.attach(svc);
     test:assertTrue(result is Error);
-    if result is Error {
-        test:assertEquals(
-                result.message(),
-                "Failed to attach service : Required parameter 'sqs:Message' cannot be found.",
-                "Invalid error message received");
+    if result is () {
+        test:assertFail("Expected an error but found a nil value");
     }
+    test:assertEquals(
+                result.message(),
+            "Failed to attach service : Required parameter 'sqs:Message' cannot be found.",
+            "Invalid error message received");
 }
 
 @test:Config {
@@ -386,7 +393,7 @@ isolated function testListenerMethodMandatoryParamMissing() returns error? {
 isolated function testListenerOnErrorWithoutParameters() returns error? {
     Service svc = @ServiceConfig {
         queueUrl: "https://sqs.us-east-2.amazonaws.com/284495578152/Test-13",
-        autoDelete: true
+        autoDelete: false
     } service object {
         remote function onMessage(Message message, Caller caller) returns error? {
         }
@@ -395,12 +402,13 @@ isolated function testListenerOnErrorWithoutParameters() returns error? {
     };
     Error? result = sqsListener.attach(svc);
     test:assertTrue(result is Error);
-    if result is Error {
-        test:assertEquals(
-                result.message(),
-                "Failed to attach service : onError method must have exactly one parameter of type 'sqs:Error'.",
-                "Invalid error message received");
+    if result is () {
+        test:assertFail("Expected an error but found a nil value");
     }
+    test:assertEquals(
+                result.message(),
+            "Failed to attach service : onError method must have exactly one parameter of type 'sqs:Error'.",
+            "Invalid error message received");
 }
 
 @test:Config {
@@ -418,12 +426,13 @@ isolated function testListenerOnErrorWithInvalidParameter() returns error? {
     };
     Error? result = sqsListener.attach(svc);
     test:assertTrue(result is Error);
-    if result is Error {
-        test:assertEquals(
-                result.message(),
-                "Failed to attach service : onError method parameter must be of type 'sqs:Error'.",
-                "Invalid error message received");
+    if result is () {
+        test:assertFail("Expected an error but found a nil value");
     }
+    test:assertEquals(
+                result.message(),
+            "Failed to attach service : onError method parameter must be of type 'sqs:Error'.",
+            "Invalid error message received");
 }
 
 @test:Config {
@@ -432,7 +441,7 @@ isolated function testListenerOnErrorWithInvalidParameter() returns error? {
 isolated function testListenerOnErrorWithAdditionalParameters() returns error? {
     Service svc = @ServiceConfig {
         queueUrl: "https://sqs.us-east-2.amazonaws.com/284495578152/Test-12",
-        autoDelete: true
+        autoDelete: false
     } service object {
         remote function onMessage(Message message, Caller caller) returns error? {
         }
@@ -441,10 +450,34 @@ isolated function testListenerOnErrorWithAdditionalParameters() returns error? {
     };
     Error? result = sqsListener.attach(svc);
     test:assertTrue(result is Error);
-    if result is Error {
-        test:assertEquals(
-                result.message(),
-                "Failed to attach service : onError method must have exactly one parameter of type 'sqs:Error'.",
-                "Invalid error message received");
+    if result is () {
+        test:assertFail("Expected an error but found a nil value");
     }
+    test:assertEquals(
+                result.message(),
+            "Failed to attach service : onError method must have exactly one parameter of type 'sqs:Error'.",
+            "Invalid error message received");
+}
+
+@test:Config {
+    groups: ["listenerValidation"]
+}
+isolated function testListenerCallerAndAutoDeleteMutualExclusivity() returns error? {
+    Service svc = @ServiceConfig {
+        queueUrl: "https://sqs.us-east-2.amazonaws.com/284495578152/Test-15",
+        autoDelete: true
+    } service object {
+        remote function onMessage(Message message, Caller caller) returns error? {
+        }
+    };
+    Error? result = sqsListener.attach(svc);
+    test:assertTrue(result is Error);
+    if result is () {
+        test:assertFail("Expected an error but found a nil value");
+    }
+    test:assertEquals(
+                result.message(),
+            "Failed to attach service : Caller parameter and autoDelete configuration are mutually exclusive. " +
+                "Use either manual acknowledgment with Caller or automatic deletion with autoDelete, but not both.",
+            "Invalid error message received");
 }

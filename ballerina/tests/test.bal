@@ -1010,7 +1010,6 @@ function testStartMessageMoveTask() returns error? {
 }
 
 @test:Config {
-    after: testStartMessageMoveTask,
     dependsOn: [testStartMessageMoveTask],
     groups: ["cancelMessageMoveTask"]
 }
