@@ -51,5 +51,3 @@ service on sqsListener {
         log:printError("Listener error", err);
     }
 }
-
-
