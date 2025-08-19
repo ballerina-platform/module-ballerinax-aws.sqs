@@ -53,11 +53,9 @@ public final class MessageDispatcher {
      * @param nativeService The native service implementation
      */
     public MessageDispatcher(Environment env, Service nativeService) {
-
         this.environment = env;
         this.ballerinaRuntime = env.getRuntime();
         this.nativeService = nativeService;
-
     }
 
     /**

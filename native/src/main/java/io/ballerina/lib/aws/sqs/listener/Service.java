@@ -103,6 +103,9 @@ public final class Service {
         if (Objects.isNull(svcConfig)) {
             throw CommonUtils.createError("Failed to attach service : Service configuration annotation is required.");
         }
+        @SuppressWarnings("unchecked")
+        ServiceConfig serviceConfig = new ServiceConfig((BMap<BString, Object>) svcConfig);
+
         if (serviceType.getResourceMethods().length > 0) {
             throw CommonUtils.createError("Failed to attach service : SQS service cannot have resource methods.");
         }
@@ -116,7 +119,7 @@ public final class Service {
             String methodName = method.getName();
             if (ON_MESSAGE_METHOD.equals(methodName)) {
                 hasOnMessage = true;
-                validateOnMessageMethod(method);
+                validateOnMessageMethod(method, serviceConfig);
             } else if (ON_ERROR_METHOD.equals(methodName)) {
                 validateOnErrorMethod(method);
             } else {
@@ -138,7 +141,7 @@ public final class Service {
      * @param onMessageMethod The method to validate
      * @throws BError if validation fails
      */
-    private static void validateOnMessageMethod(RemoteMethodType onMessageMethod) {
+    private static void validateOnMessageMethod(RemoteMethodType onMessageMethod, ServiceConfig serviceConfig) {
         Parameter[] parameters = onMessageMethod.getParameters();
         if (parameters.length < 1 || parameters.length > 2) {
             throw CommonUtils.createError(
@@ -166,6 +169,11 @@ public final class Service {
         if (parameters.length == 2 && !hasCaller) {
             throw CommonUtils.createError(
                     "Failed to attach service : If two parameters are present, one must be of the type 'sqs:Caller'.");
+        }
+        // validate mutual exclusivity of Caller paramter and autoDelete paramter
+        if (hasCaller && serviceConfig.autoDelete()) {
+            throw CommonUtils.createError(
+                    "Failed to attach service : `sqs:Caller` cannot be used together with the `autoDelete` configuration.");
         }
     }
 

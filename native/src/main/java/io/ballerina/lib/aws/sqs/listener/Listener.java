@@ -92,19 +92,19 @@ public final class Listener {
             ServiceConfig cfg = nativeService.getServiceConfig();
 
             PollingConfig pollingConfig = (PollingConfig) bListener.getNativeData(NATIVE_POLLING_CONFIG);
-            PollingConfig effectiveConfig = cfg.pollingConfig != null ? cfg.pollingConfig : pollingConfig;
+            PollingConfig effectiveConfig = cfg.pollingConfig() != null ? cfg.pollingConfig() : pollingConfig;
 
             MessageDispatcher dispatcher = new MessageDispatcher(env, nativeService);
             MessageReceiver receiver = new MessageReceiver(
                     (SqsClient) bListener.getNativeData(NativeClientAdaptor.NATIVE_SQS_CLIENT),
-                    cfg.queueUrl,
+                    cfg.queueUrl(),
                     effectiveConfig,
                     dispatcher,
                     bListener,
-                    cfg.autoDelete);
+                    cfg.autoDelete());
 
             Map<String, Service> services = getServices(bListener);
-            services.put(cfg.queueUrl, nativeService);
+            services.put(cfg.queueUrl(), nativeService);
             bService.addNativeData(NATIVE_SERVICE, nativeService);
             bService.addNativeData(NATIVE_RECEIVER, receiver);
         } catch (BError e) {
@@ -123,7 +123,7 @@ public final class Listener {
         try {
             Service nativeService = (Service) bService.getNativeData(NATIVE_SERVICE);
             if (nativeService != null) {
-                String queueUrl = nativeService.getServiceConfig().queueUrl;
+                String queueUrl = nativeService.getServiceConfig().queueUrl();
                 getServices(bListener).remove(queueUrl);
             }
         } catch (BError e) {
@@ -148,7 +148,7 @@ public final class Listener {
         try {
             for (Service service : services.values()) {
                 ServiceConfig cfg = service.getServiceConfig();
-                String queueName = extractQueueName(cfg.queueUrl);
+                String queueName = extractQueueName(cfg.queueUrl());
                 sqsClient.getQueueUrl(builder -> builder.queueName(queueName));
             }
         } catch (QueueDoesNotExistException qex) {

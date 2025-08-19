@@ -114,7 +114,6 @@ public class MessageReceiver {
         } catch (InterruptedException e) {
             this.executorService.shutdownNow();
             Thread.currentThread().interrupt();
-
         }
     }
 
@@ -129,5 +128,4 @@ public class MessageReceiver {
     public long getPollingInterval() {
         return pollingInterval;
     }
-
 }

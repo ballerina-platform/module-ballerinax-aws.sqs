@@ -20,22 +20,16 @@ import io.ballerina.runtime.api.utils.StringUtils;
 import io.ballerina.runtime.api.values.BMap;
 import io.ballerina.runtime.api.values.BString;
 
-
 /**
  * Represents the configuration for an SQS service.
  * Maps the Ballerina ServiceConfig annotation values to Java.
  * Handles queue URL, polling configuration, and acknowledgment behavior.
  */
-public final class ServiceConfig {
+public record ServiceConfig(String queueUrl, PollingConfig pollingConfig, boolean autoDelete) {
 
     static final BString QUEUE_URL = StringUtils.fromString("queueUrl");
     static final BString CONFIG = StringUtils.fromString("config");
     static final BString AUTO_DELETE = StringUtils.fromString("autoDelete");
-
-    // Configuration values
-    public final String queueUrl;
-    public final PollingConfig pollingConfig;
-    public final boolean autoDelete;
 
     /**
      * Creates a service configuration from Ballerina config map.
@@ -44,10 +38,10 @@ public final class ServiceConfig {
      */
     @SuppressWarnings("unchecked")
     public ServiceConfig(BMap<BString, Object> config) {
-        this.queueUrl = config.getStringValue(QUEUE_URL).getValue();
-        this.pollingConfig = config.containsKey(CONFIG) && config.get(CONFIG) != null
-                ? new PollingConfig((BMap<BString, Object>) config.get(CONFIG))
-                : null;
-        this.autoDelete = config.containsKey(AUTO_DELETE) && config.getBooleanValue(AUTO_DELETE);
+        this(config.getStringValue(QUEUE_URL).getValue(),
+                config.containsKey(CONFIG) && config.get(CONFIG) != null
+                        ? new PollingConfig((BMap<BString, Object>) config.get(CONFIG))
+                        : null,
+                config.containsKey(AUTO_DELETE) && config.getBooleanValue(AUTO_DELETE));
     }
 }

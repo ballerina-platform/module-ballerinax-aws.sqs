@@ -49,8 +49,4 @@ public record PollingConfig(
     public long pollIntervalInMillis() {
         return (long) (pollInterval * 1000);
     }
-
-    public int maxMessages() {
-        return 1;
-    }
 }
