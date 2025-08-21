@@ -38,9 +38,8 @@ final readonly & ProfileAuthConfig profileAuth = {
 final Client sqsClient = check initClient();
 
 isolated function initClient() returns Client|error {
-    boolean useStatic = authType == "static";
     boolean useProfile = authType == "profile";
-    if useStatic && accessKeyId != "" && secretAccessKey != "" {
+    if accessKeyId != "" && secretAccessKey != "" {
         return new ({
             region: awsRegion,
             auth: staticAuth

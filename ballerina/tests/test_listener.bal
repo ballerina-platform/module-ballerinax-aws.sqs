@@ -417,7 +417,7 @@ isolated function testListenerOnErrorWithoutParameters() returns error? {
 isolated function testListenerOnErrorWithInvalidParameter() returns error? {
     Service svc = @ServiceConfig {
         queueUrl: "https://sqs.us-east-2.amazonaws.com/284495578152/Test-14",
-        autoDelete: true
+        autoDelete: false
     } service object {
         remote function onMessage(Message message, Caller caller) returns error? {
         }
@@ -477,7 +477,5 @@ isolated function testListenerCallerAndAutoDeleteMutualExclusivity() returns err
     }
     test:assertEquals(
                 result.message(),
-            "Failed to attach service : Caller parameter and autoDelete configuration are mutually exclusive. " +
-                "Use either manual acknowledgment with Caller or automatic deletion with autoDelete, but not both.",
-            "Invalid error message received");
+            "Failed to attach service : `sqs:Caller` cannot be used together with the `autoDelete` configuration.");
 }

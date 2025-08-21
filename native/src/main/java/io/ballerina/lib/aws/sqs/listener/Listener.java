@@ -153,7 +153,7 @@ public final class Listener {
             }
         } catch (QueueDoesNotExistException qex) {
             stopped.set(true);
-            return CommonUtils.createError("Queue does not exist before polling" , qex);
+            return CommonUtils.createError("Queue does not exist before polling", qex);
         } catch (Exception ex) {
             stopped.set(true);
             return CommonUtils.createError("Failed to validate queue: ", ex);
@@ -197,8 +197,7 @@ public final class Listener {
                 client.close();
             }
         } catch (Exception e) {
-            return CommonUtils.createError("Error occurred while gracefully stopping the Ballerina AWS SQS listener",
-                    e);
+            return CommonUtils.createError("Error occurred while gracefully stopping the Ballerina AWS SQS listener", e);
         }
         return null;
     }
@@ -224,7 +223,8 @@ public final class Listener {
                 client.close();
             }
         } catch (Exception e) {
-            return CommonUtils.createError("Error occurred while immediately stopping the Ballerina AWS SQS listener", e);
+            return CommonUtils.createError("Error occurred while immediately stopping the Ballerina AWS SQS listener",
+                    e);
         }
         return null;
     }

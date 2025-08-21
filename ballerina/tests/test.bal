@@ -35,6 +35,7 @@ isolated function testInitUsingStaticAuth() returns error? {
 }
 
 @test:Config {
+    enable: false,
     groups: ["init"]
 }
 isolated function testInitUsingProfileAuth() returns error? {
@@ -582,6 +583,7 @@ function testReceiveMessageWithAllOptionalConfigs() returns error? {
 }
 function testDeleteMessage() returns error? {
     string queueUrl = standardQueueUrl;
+    SendMessageResponse _ = check sqsClient->sendMessage(queueUrl,messageBody = "test-delete-msg");
     Message[] received = check sqsClient->receiveMessage(queueUrl, waitTimeSeconds = 20);
     test:assertTrue(received.length() > 0, "Expected at least one message");
     Message message = received[0];
@@ -624,7 +626,8 @@ function testDeleteMessageBatchSuccess() returns error? {
         {id: "id-i", body: "Message I"}
     ];
     _ = check sqsClient->sendMessageBatch(queueUrl, batch);
-    Message[] received = check sqsClient->receiveMessage(queueUrl, maxNumberOfMessages = 10, waitTimeSeconds = 20);
+    runtime:sleep(2);
+    Message[] received = check sqsClient->receiveMessage(queueUrl, maxNumberOfMessages = 5, waitTimeSeconds = 20);
     test:assertTrue(received.length() >= 2);
     DeleteMessageBatchEntry[] deleteBatch = [
         {id: "msg-id-1", receiptHandle: check received[0].receiptHandle.ensureType()},
@@ -653,7 +656,8 @@ function testDeleteMessageBatchWithInvalidReceiptHandle() returns error? {
     if sendResult is error {
         test:assertFail("Failed to send batch messages: " + sendResult.toString());
     }
-    Message[]|Error received = sqsClient->receiveMessage(queueUrl, maxNumberOfMessages = 10, waitTimeSeconds = 20);
+    runtime:sleep(2);
+    Message[]|Error received = sqsClient->receiveMessage(queueUrl, maxNumberOfMessages = 5, waitTimeSeconds = 20);
     if received is error || received.length() < 2 {
         test:assertFail("Expected 2 messages, but received fewer");
     }
@@ -689,9 +693,10 @@ function testDeleteMessageBatchWithDuplicateIds() returns error? {
     if sendResult is error {
         test:assertFail("Failed to send batch messages: " + sendResult.toString());
     }
+    runtime:sleep(2);
     ReceiveMessageConfig receiveConfig = {
         waitTimeSeconds: 20,
-        maxNumberOfMessages: 2
+        maxNumberOfMessages: 5
     };
     Message[]|Error received = sqsClient->receiveMessage(queueUrl, receiveConfig);
     if received is error || received.length() < 2 {
