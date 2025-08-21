@@ -5,7 +5,7 @@
 
 [ballerina]
 dependencies-toml-version = "2"
-distribution-version = "2201.12.0"
+distribution-version = "2201.12.7"
 
 [[package]]
 org = "ballerina"
@@ -62,6 +62,18 @@ scope = "testOnly"
 
 [[package]]
 org = "ballerina"
+name = "lang.runtime"
+version = "0.0.0"
+scope = "testOnly"
+dependencies = [
+	{org = "ballerina", name = "jballerina.java"}
+]
+modules = [
+	{org = "ballerina", packageName = "lang.runtime", moduleName = "lang.runtime"}
+]
+
+[[package]]
+org = "ballerina"
 name = "lang.value"
 version = "0.0.0"
 scope = "testOnly"
@@ -102,6 +114,7 @@ name = "aws.sqs"
 version = "0.1.0"
 dependencies = [
 	{org = "ballerina", name = "jballerina.java"},
+	{org = "ballerina", name = "lang.runtime"},
 	{org = "ballerina", name = "os"},
 	{org = "ballerina", name = "test"}
 ]

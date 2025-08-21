@@ -146,7 +146,7 @@ public type MessageAttributeValue record {|
 # + waitTimeSeconds - Duration to wait for a message to arrive (long polling)
 # + visibilityTimeout - Visibility timeout for received messages
 # + maxNumberOfMessages - Maximum number of messages to receive (1 to 10)
-# + receiveRequestAttemptId - Deduplication token for `receiveMessage` requests (FIFO only) 
+# + receiveRequestAttemptId - Deduplication token for `receiveMessage` requests (FIFO only)
 # + messageAttributeNames - List of message attribute names to return; use `All` to get all
 # + messageSystemAttributeNames - List of system attribute names to return; use `All` to get all
 public type ReceiveMessageConfig record {|
@@ -477,3 +477,30 @@ public type StartMessageMoveTaskResponse record {|
 public type CancelMessageMoveTaskResponse record {|
     int approximateNumberOfMessagesMoved;
 |};
+
+# Polling configuration for message retrieval.
+#
+# + pollInterval - Interval between polling attempts in seconds. If set to 0, the listener will poll back-to-back without delay. Use with caution as it may cause high CPU usage.
+# + waitTime - The duration, in seconds, for which the polling waits for messages
+# + visibilityTimeout - The duration, in seconds, for which the received message remains invisible to other consumers
+public type PollingConfig record {|
+    decimal pollInterval = 1;
+    int waitTime = 20;
+    int visibilityTimeout = 30;
+|};
+
+# Represents an AWS SQS service object that can be attached to an `sqs:Listener`.
+public type Service distinct service object {};
+
+# The service configuration type for the `sqs:Service`.
+# + queueUrl - The URL of the SQS queue to consume messages from
+# + config - Optional per-service polling behavior
+# + autoDelete - Whether to automatically delete messages after receiving
+public type ServiceConfigType record {|
+    string queueUrl;
+    PollingConfig config?;
+    boolean autoDelete = true;
+|};
+
+# Annotation to configure the `sqs:Service`.
+public annotation ServiceConfigType ServiceConfig on service;
