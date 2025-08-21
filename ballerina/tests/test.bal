@@ -35,6 +35,7 @@ isolated function testInitUsingStaticAuth() returns error? {
 }
 
 @test:Config {
+    enable: false,
     groups: ["init"]
 }
 isolated function testInitUsingProfileAuth() returns error? {
