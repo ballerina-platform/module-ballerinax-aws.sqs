@@ -111,7 +111,7 @@ modules = [
 [[package]]
 org = "ballerinax"
 name = "aws.sqs"
-version = "0.1.0"
+version = "4.0.0"
 dependencies = [
 	{org = "ballerina", name = "jballerina.java"},
 	{org = "ballerina", name = "lang.runtime"},
