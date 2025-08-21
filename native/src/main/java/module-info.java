@@ -15,8 +15,8 @@
 // under the License.
 
 module io.ballerina.stdlib.java.aws.sqs {
-    requires transitive software.amazon.awssdk.services.sqs;
-    requires transitive software.amazon.awssdk.auth;
+    requires software.amazon.awssdk.services.sqs;
+    requires software.amazon.awssdk.auth;
     requires software.amazon.awssdk.http;
     requires software.amazon.awssdk.regions;
     requires software.amazon.awssdk.awscore;
