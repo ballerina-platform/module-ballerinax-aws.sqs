@@ -583,7 +583,7 @@ function testReceiveMessageWithAllOptionalConfigs() returns error? {
 }
 function testDeleteMessage() returns error? {
     string queueUrl = standardQueueUrl;
-    SendMessageResponse _ = check sqsClient->sendMessage(queueUrl,messageBody = "test-delete-msg");
+    SendMessageResponse _ = check sqsClient->sendMessage(queueUrl, messageBody = "test-delete-msg");
     Message[] received = check sqsClient->receiveMessage(queueUrl, waitTimeSeconds = 20);
     test:assertTrue(received.length() > 0, "Expected at least one message");
     Message message = received[0];
@@ -1069,7 +1069,8 @@ function testDeleteQueue() returns error? {
     groups: ["deleteQueue"]
 }
 isolated function testDeleteNonExistentQueue() returns error? {
-    string queueUrl = "https://sqs.eu-north-1.amazonaws.com/284495578152/Secondtest";
+    string realQueueUrl = check sqsClient->createQueue("test-delete-non-exist");
+    string queueUrl = realQueueUrl + "fake-queue";
     Error? result = sqsClient->deleteQueue(queueUrl);
     test:assertTrue(result is Error, "Expected uncessfull deletion.");
     if result is error {
