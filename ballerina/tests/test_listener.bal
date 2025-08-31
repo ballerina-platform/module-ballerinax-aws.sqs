@@ -21,6 +21,22 @@ isolated boolean autoDeleteMessageReceived = false;
 isolated boolean manualDeleteMessageReceived = false;
 isolated boolean batchMessageReceived = false;
 
+string testQueue1Url = "";
+string testQueue2Url = "";
+string testQueue3Url = "";
+string testQueue4Url = "";
+string testQueue5Url = "";
+string testQueue6Url = "";
+string testQueue7Url = "";
+string testQueue8Url = "";
+string testQueue9Url = "";
+string testQueue10Url = "";
+string testQueue11Url = "";
+string testQueue12Url = "";
+string testQueue13Url = "";
+string testQueue14Url = "";
+string testQueue15Url = "";
+
 ConnectionConfig connectionConfig = {
     region: awsRegion,
     auth: staticAuth
@@ -31,15 +47,21 @@ ConnectionConfig connectionConfig = {
 }
 function setupQueue() returns error? {
     Client sqsClient = check new (connectionConfig);
-    string _ = check sqsClient->createQueue("Test-1");
-    string _ = check sqsClient->createQueue("Test-2");
-    string _ = check sqsClient->createQueue("Test-3");
-    string _ = check sqsClient->createQueue("Test-4");
-    string _ = check sqsClient->createQueue("Test-5");
-    string _ = check sqsClient->createQueue("Test-6");
-    string _ = check sqsClient->createQueue("Test-7");
-    string _ = check sqsClient->createQueue("Test-8");
-    string _ = check sqsClient->createQueue("Test-9");
+    testQueue1Url = check sqsClient->createQueue("Test-1");
+    testQueue2Url = check sqsClient->createQueue("Test-2");
+    testQueue3Url = check sqsClient->createQueue("Test-3");
+    testQueue4Url = check sqsClient->createQueue("Test-4");
+    testQueue5Url = check sqsClient->createQueue("Test-5");
+    testQueue6Url = check sqsClient->createQueue("Test-6");
+    testQueue7Url = check sqsClient->createQueue("Test-7");
+    testQueue8Url = check sqsClient->createQueue("Test-8");
+    testQueue9Url = check sqsClient->createQueue("Test-9");
+    testQueue10Url = check sqsClient->createQueue("Test-10");
+    testQueue11Url = check sqsClient->createQueue("Test-11");
+    testQueue12Url = check sqsClient->createQueue("Test-12");
+    testQueue13Url = check sqsClient->createQueue("Test-13");
+    testQueue14Url = check sqsClient->createQueue("Test-14");
+    testQueue15Url = check sqsClient->createQueue("Test-15");
 }
 
 PollingConfig pollingConfig = {
@@ -55,7 +77,7 @@ final Listener sqsListener = check new (connectionConfig, pollingConfig);
 isolated function setupListener() returns error? {
 
     Service autoDeleteService = @ServiceConfig {
-        queueUrl: "https://sqs.us-east-2.amazonaws.com/284495578152/Test-1",
+        queueUrl: testQueue1Url,
         autoDelete: true
     } service object {
         isolated remote function onMessage(Message message) returns error? {
@@ -67,7 +89,7 @@ isolated function setupListener() returns error? {
         }
     };
     Service manualDeleteService = @ServiceConfig {
-        queueUrl: "https://sqs.us-east-2.amazonaws.com/284495578152/Test-2",
+        queueUrl: testQueue2Url,
         autoDelete: false
     } service object {
         isolated remote function onMessage(Caller caller, Message message) returns error? {
@@ -80,7 +102,7 @@ isolated function setupListener() returns error? {
         }
     };
     Service batchService = @ServiceConfig {
-        queueUrl: "https://sqs.us-east-2.amazonaws.com/284495578152/Test-5",
+        queueUrl: testQueue5Url,
         autoDelete: true
     } service object {
         isolated remote function onMessage(Message message) returns error? {
@@ -103,8 +125,8 @@ isolated function setupListener() returns error? {
 @test:Config {
     groups: ["listener"]
 }
-isolated function testListenerAutoDelete() returns error? {
-    SendMessageResponse _ = check sqsClient->sendMessage("https://sqs.us-east-2.amazonaws.com/284495578152/Test-1", "Hello World");
+function testListenerAutoDelete() returns error? {
+    SendMessageResponse _ = check sqsClient->sendMessage(testQueue1Url, "Hello World");
     int attempts = 0;
     int maxAttempts = 40;
     boolean received = false;
@@ -124,8 +146,8 @@ isolated function testListenerAutoDelete() returns error? {
 @test:Config {
     groups: ["listener"]
 }
-isolated function testListenerManualDelete() returns error? {
-    SendMessageResponse _ = check sqsClient->sendMessage("https://sqs.us-east-2.amazonaws.com/284495578152/Test-2", "Manual Delete test");
+function testListenerManualDelete() returns error? {
+    SendMessageResponse _ = check sqsClient->sendMessage(testQueue2Url, "Manual Delete test");
     int attempts = 0;
     int maxAttempts = 40;
     boolean received = false;
@@ -147,7 +169,7 @@ isolated function testListenerManualDelete() returns error? {
 }
 isolated function testListenerServiceDetach() returns error? {
     Service detachService = @ServiceConfig {
-        queueUrl: "https://sqs.us-east-2.amazonaws.com/284495578152/Test-3",
+        queueUrl: testQueue3Url,
         autoDelete: true
     } service object {
         isolated remote function onMessage(Message message) returns error? {
@@ -163,7 +185,7 @@ isolated function testListenerServiceDetach() returns error? {
 function testListenerGracefulStop() returns error? {
     Listener sqsListenerGracefulStop = check new (connectionConfig, pollingConfig);
     Service stopService = @ServiceConfig {
-        queueUrl: "https://sqs.us-east-2.amazonaws.com/284495578152/Test-4",
+        queueUrl: testQueue4Url,
         autoDelete: true
     } service object {
         isolated remote function onMessage(Message message) returns error? {
@@ -181,7 +203,7 @@ function testListenerGracefulStop() returns error? {
 function testListenerImmediateStop() returns error? {
     Listener sqsListenerImmediateStop = check new (connectionConfig, pollingConfig);
     Service stopService = @ServiceConfig {
-        queueUrl: "https://sqs.us-east-2.amazonaws.com/284495578152/Test-6",
+        queueUrl: testQueue6Url,
         autoDelete: true
     } service object {
         isolated remote function onMessage(Message message) returns error? {
@@ -196,13 +218,13 @@ function testListenerImmediateStop() returns error? {
 @test:Config {
     groups: ["listener"]
 }
-isolated function testListenerBatchMessage() returns error? {
+function testListenerBatchMessage() returns error? {
     SendMessageBatchEntry[] entries = [
         {id: "1", body: "Batch Message Test 1"},
         {id: "2", body: "Batch Message Test 2"},
         {id: "3", body: "Batch Message Test 3"}
     ];
-    SendMessageBatchResponse _ = check sqsClient->sendMessageBatch("https://sqs.us-east-2.amazonaws.com/284495578152/Test-5", entries);
+    SendMessageBatchResponse _ = check sqsClient->sendMessageBatch(testQueue5Url, entries);
 }
 
 @test:Config {
@@ -231,7 +253,7 @@ function testListenerWithNonExistentQueue() returns error? {
 }
 isolated function testListenerAttachWithInvalidOnMessageSignature() returns error? {
     Service svc = @ServiceConfig {
-        queueUrl: "https://sqs.us-east-2.amazonaws.com/284495578152/Test-7",
+        queueUrl: testQueue7Url,
         autoDelete: true
     } service object {
         isolated remote function onMessage(int value) returns error? {
@@ -262,7 +284,7 @@ isolated function testListenerAttachWithoutServiceConfig() returns error? {
 }
 isolated function testListenerWithResourceMethods() returns error? {
     Service svc = @ServiceConfig {
-        queueUrl: "https://sqs.us-east-2.amazonaws.com/284495578152/Test-8",
+        queueUrl: testQueue8Url,
         autoDelete: true
     } service object {
         resource function get .() returns error? {
@@ -284,7 +306,7 @@ isolated function testListenerWithResourceMethods() returns error? {
 }
 isolated function testListenerWithNoOnMessagemethod() returns error? {
     Service svc = @ServiceConfig {
-        queueUrl: "https://sqs.us-east-2.amazonaws.com/284495578152/Test-9",
+        queueUrl: testQueue9Url,
         autoDelete: true
     } service object {
         isolated remote function onError(Error err) returns error? {
@@ -304,7 +326,7 @@ isolated function testListenerWithNoOnMessagemethod() returns error? {
 }
 isolated function testListenerWithInvalidRemoteMethod() returns error? {
     Service svc = @ServiceConfig {
-        queueUrl: "https://sqs.us-east-2.amazonaws.com/284495578152/Test-9",
+        queueUrl: testQueue9Url,
         autoDelete: true
     } service object {
         remote function onRequest(Message message, Caller caller) returns error? {
@@ -326,7 +348,7 @@ isolated function testListenerWithInvalidRemoteMethod() returns error? {
 }
 isolated function testListenerMethodWithAdditionalParameters() returns error? {
     Service svc = @ServiceConfig {
-        queueUrl: "https://sqs.us-east-2.amazonaws.com/284495578152/Test-10",
+        queueUrl: testQueue10Url,
         autoDelete: true
     } service object {
         remote function onMessage(Message message, Caller caller, string requestType) returns error? {
@@ -348,7 +370,7 @@ isolated function testListenerMethodWithAdditionalParameters() returns error? {
 }
 isolated function testListenerMethodWithInvalidParams() returns error? {
     Service svc = @ServiceConfig {
-        queueUrl: "https://sqs.us-east-2.amazonaws.com/284495578152/Test-11",
+        queueUrl: testQueue11Url,
         autoDelete: true
     } service object {
         remote function onMessage(Message message, string requestType) returns error? {
@@ -370,7 +392,7 @@ isolated function testListenerMethodWithInvalidParams() returns error? {
 }
 isolated function testListenerMethodMandatoryParamMissing() returns error? {
     Service svc = @ServiceConfig {
-        queueUrl: "https://sqs.us-east-2.amazonaws.com/284495578152/Test-12",
+        queueUrl: testQueue12Url,
         autoDelete: true
     } service object {
         remote function onMessage(Caller caller) returns error? {
@@ -392,7 +414,7 @@ isolated function testListenerMethodMandatoryParamMissing() returns error? {
 }
 isolated function testListenerOnErrorWithoutParameters() returns error? {
     Service svc = @ServiceConfig {
-        queueUrl: "https://sqs.us-east-2.amazonaws.com/284495578152/Test-13",
+        queueUrl: testQueue13Url,
         autoDelete: false
     } service object {
         remote function onMessage(Message message, Caller caller) returns error? {
@@ -416,7 +438,7 @@ isolated function testListenerOnErrorWithoutParameters() returns error? {
 }
 isolated function testListenerOnErrorWithInvalidParameter() returns error? {
     Service svc = @ServiceConfig {
-        queueUrl: "https://sqs.us-east-2.amazonaws.com/284495578152/Test-14",
+        queueUrl: testQueue14Url,
         autoDelete: false
     } service object {
         remote function onMessage(Message message, Caller caller) returns error? {
@@ -440,7 +462,7 @@ isolated function testListenerOnErrorWithInvalidParameter() returns error? {
 }
 isolated function testListenerOnErrorWithAdditionalParameters() returns error? {
     Service svc = @ServiceConfig {
-        queueUrl: "https://sqs.us-east-2.amazonaws.com/284495578152/Test-12",
+        queueUrl: testQueue12Url,
         autoDelete: false
     } service object {
         remote function onMessage(Message message, Caller caller) returns error? {
@@ -464,7 +486,7 @@ isolated function testListenerOnErrorWithAdditionalParameters() returns error? {
 }
 isolated function testListenerCallerAndAutoDeleteMutualExclusivity() returns error? {
     Service svc = @ServiceConfig {
-        queueUrl: "https://sqs.us-east-2.amazonaws.com/284495578152/Test-15",
+        queueUrl: testQueue15Url,
         autoDelete: true
     } service object {
         remote function onMessage(Message message, Caller caller) returns error? {
