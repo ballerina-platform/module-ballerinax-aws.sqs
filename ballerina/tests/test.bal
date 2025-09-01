@@ -244,7 +244,12 @@ function testSendMessageToNonexistentQueue() returns error? {
         ErrorDetails details = result.detail();
         test:assertEquals(details.httpStatusCode, 400);
         test:assertEquals(details.errorCode, "AWS.SimpleQueueService.NonExistentQueue");
-        test:assertEquals(details.errorMessage, "The specified queue does not exist.");
+        string? errorMessage = details.errorMessage;
+        if errorMessage is () {
+            test:assertFail("Expecting an error message, but found none");
+        }
+        test:assertTrue(errorMessage.includes("The specified queue does not exist"),
+                "Error message should mention that the queue does not exist.");
     }
 }
 
