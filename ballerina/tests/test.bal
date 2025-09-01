@@ -16,6 +16,7 @@
 
 import ballerina/lang.runtime;
 import ballerina/test;
+import ballerina/log;
 
 string standardQueueUrl = "";
 string fifoQueueUrl = "";
@@ -1069,8 +1070,10 @@ function testDeleteQueue() returns error? {
     groups: ["deleteQueue"]
 }
 isolated function testDeleteNonExistentQueue() returns error? {
-    string realQueueUrl = check sqsClient->createQueue("test-delete-non-exist");
-    string queueUrl = realQueueUrl + "fake-queue";
+    string realQueueUrl = check sqsClient->createQueue("test-delete");
+    log:printInfo("realQueueUrl", url=realQueueUrl);
+    string queueUrl = realQueueUrl + "-non-existent-queue";
+    log:printInfo("queueUrl",url=queueUrl);
     Error? result = sqsClient->deleteQueue(queueUrl);
     test:assertTrue(result is Error, "Expected uncessfull deletion.");
     if result is error {
