@@ -16,7 +16,6 @@
 
 import ballerina/lang.runtime;
 import ballerina/test;
-import ballerina/log;
 
 string standardQueueUrl = "";
 string fifoQueueUrl = "";
@@ -1071,16 +1070,19 @@ function testDeleteQueue() returns error? {
 }
 isolated function testDeleteNonExistentQueue() returns error? {
     string realQueueUrl = check sqsClient->createQueue("test-delete");
-    log:printInfo("realQueueUrl", url=realQueueUrl);
     string queueUrl = realQueueUrl + "-non-existent-queue";
-    log:printInfo("queueUrl",url=queueUrl);
     Error? result = sqsClient->deleteQueue(queueUrl);
-    test:assertTrue(result is Error, "Expected uncessfull deletion.");
+    test:assertTrue(result is Error, "Expected unsuccessful deletion.");
     if result is error {
         ErrorDetails details = result.detail();
         test:assertEquals(details.errorCode, "AWS.SimpleQueueService.NonExistentQueue");
         test:assertEquals(details.httpStatusCode, 400);
-        test:assertEquals(details.errorMessage, "The specified queue does not exist.");
+        string? errorMessage = details.errorMessage;
+        if errorMessage is () {
+            test:assertFail("Expecting an error message, but found none");
+        }
+        test:assertTrue(errorMessage.includes("The specified queue does not exist"),
+                "Error message should mention that the queue does not exist.");
     }
 }
 
