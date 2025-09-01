@@ -1,10 +1,175 @@
 [package]
-distribution = "2201.12.0"
 org = "ballerinax"
 name = "aws.sqs"
-license= ["Apache-2.0"]
-authors = ["Ballerina"]
-version= "3.1.0"
-keywords = ["IT Operations/Message Brokers", "Cost/Freemium", "Vendor/Amazon"]
-icon= "icon.png"
-repository = "https://github.com/ballerina-platform/module-ballerinax-aws.sqs"
+version = "4.0.0"
+authors=["ballerina"]
+keywords=["IT Operations/Message Brokers", "Cost/Freemium", "Vendor/Amazon"]
+repository= "https://github.com/ballerina-platform/module-ballerinax-aws.sqs"
+icon="icon.png"
+license=["Apache-2.0"]
+distribution = "2201.12.0"
+
+[platform.java21]
+graalvmCompatible = true
+
+[[platform.java21.dependency]]
+groupId = "io.ballerina.lib"
+artifactId = "aws.sqs-native"
+version = "4.0.0-SNAPSHOT"
+path = "../native/build/libs/aws.sqs-native-4.0.0-SNAPSHOT.jar"
+
+[[platform.java21.dependency]]
+groupId = "software.amazon.awssdk"
+artifactId = "sqs"
+version = "2.31.66"
+path = "./lib/sqs-2.31.66.jar"
+
+[[platform.java21.dependency]]
+groupId = "software.amazon.awssdk"
+artifactId = "apache-client"
+version = "2.31.66"
+path = "./lib/apache-client-2.31.66.jar"
+
+[[platform.java21.dependency]]
+groupId = "software.amazon.awssdk"
+artifactId = "auth"
+version = "2.31.66"
+path = "./lib/auth-2.31.66.jar"
+
+[[platform.java21.dependency]]
+groupId = "software.amazon.awssdk"
+artifactId = "aws-core"
+version = "2.31.66"
+path = "./lib/aws-core-2.31.66.jar"
+
+[[platform.java21.dependency]]
+groupId = "software.amazon.awssdk"
+artifactId = "aws-json-protocol"
+version = "2.31.66"
+path = "./lib/aws-json-protocol-2.31.66.jar"
+
+[[platform.java21.dependency]]
+groupId = "software.amazon.awssdk"
+artifactId = "checksums"
+version = "2.31.66"
+path = "./lib/checksums-2.31.66.jar"
+
+[[platform.java21.dependency]]
+groupId = "software.amazon.awssdk"
+artifactId = "checksums-spi"
+version = "2.31.66"
+path = "./lib/checksums-spi-2.31.66.jar"
+
+[[platform.java21.dependency]]
+groupId = "software.amazon.awssdk"
+artifactId = "endpoints-spi"
+version = "2.31.66"
+path = "./lib/endpoints-spi-2.31.66.jar"
+
+[[platform.java21.dependency]]
+groupId = "software.amazon.awssdk"
+artifactId = "http-auth"
+version = "2.31.66"
+path = "./lib/http-auth-2.31.66.jar"
+
+[[platform.java21.dependency]]
+groupId = "software.amazon.awssdk"
+artifactId = "http-auth-aws"
+version = "2.31.66"
+path = "./lib/http-auth-aws-2.31.66.jar"
+
+[[platform.java21.dependency]]
+groupId = "software.amazon.awssdk"
+artifactId = "http-auth-spi"
+version = "2.31.66"
+path = "./lib/http-auth-spi-2.31.66.jar"
+
+[[platform.java21.dependency]]
+groupId = "software.amazon.awssdk"
+artifactId = "http-client-spi"
+version = "2.31.66"
+path = "./lib/http-client-spi-2.31.66.jar"
+
+[[platform.java21.dependency]]
+groupId = "software.amazon.awssdk"
+artifactId = "identity-spi"
+version = "2.31.66"
+path = "./lib/identity-spi-2.31.66.jar"
+
+[[platform.java21.dependency]]
+groupId = "software.amazon.awssdk"
+artifactId = "json-utils"
+version = "2.31.66"
+path = "./lib/json-utils-2.31.66.jar"
+
+[[platform.java21.dependency]]
+groupId = "software.amazon.awssdk"
+artifactId = "metrics-spi"
+version = "2.31.66"
+path = "./lib/metrics-spi-2.31.66.jar"
+
+[[platform.java21.dependency]]
+groupId = "software.amazon.awssdk"
+artifactId = "profiles"
+version = "2.31.66"
+path = "./lib/profiles-2.31.66.jar"
+
+[[platform.java21.dependency]]
+groupId = "software.amazon.awssdk"
+artifactId = "protocol-core"
+version = "2.31.66"
+path = "./lib/protocol-core-2.31.66.jar"
+
+[[platform.java21.dependency]]
+groupId = "software.amazon.awssdk"
+artifactId = "regions"
+version = "2.31.66"
+path = "./lib/regions-2.31.66.jar"
+
+[[platform.java21.dependency]]
+groupId = "software.amazon.awssdk"
+artifactId = "retries"
+version = "2.31.66"
+path = "./lib/retries-2.31.66.jar"
+
+[[platform.java21.dependency]]
+groupId = "software.amazon.awssdk"
+artifactId = "retries-spi"
+version = "2.31.66"
+path = "./lib/retries-spi-2.31.66.jar"
+
+[[platform.java21.dependency]]
+groupId = "software.amazon.awssdk"
+artifactId = "sdk-core"
+version = "2.31.66"
+path = "./lib/sdk-core-2.31.66.jar"
+
+[[platform.java21.dependency]]
+groupId = "software.amazon.awssdk"
+artifactId = "third-party-jackson-core"
+version = "2.31.66"
+path = "./lib/third-party-jackson-core-2.31.66.jar"
+
+[[platform.java21.dependency]]
+groupId = "software.amazon.awssdk"
+artifactId = "utils"
+version = "2.31.66"
+path = "./lib/utils-2.31.66.jar"
+
+[[platform.java21.dependency]]
+groupId = "org.apache.httpcomponents"
+artifactId = "httpcore"
+version = "4.4.16"
+path = "./lib/httpcore-4.4.16.jar"
+
+[[platform.java21.dependency]]
+groupId = "org.apache.httpcomponents"
+artifactId = "httpclient"
+version = "4.5.14"
+path = "./lib/httpclient-4.5.14.jar"
+
+[[platform.java21.dependency]]
+groupId = "org.reactivestreams"
+artifactId = "reactive-streams"
+version = "1.0.4"
+path = "./lib/reactive-streams-1.0.4.jar"

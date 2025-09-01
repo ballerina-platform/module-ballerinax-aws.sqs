@@ -1,34 +1,62 @@
 # Examples
 
-This directory contains a collection of sample code examples written in Ballerina. These examples demonstrate various
-use cases of the module. You can follow the instructions below to build and run these examples.
+The `ballerinax/aws.sqs` connector provides practical examples illustrating usage in various scenarios. Explore these [examples](https://github.com/ballerina-platform/module-ballerinax-aws.sqs/tree/main/examples) to understand how to send, receive, and process messages with Amazon SQS using Ballerina.
 
-## Running an Example
-
-Execute the following commands to build an example from the source.
-
-* To build an example
-
-  `bal build <example-name>`
+1. [Basic Queue Consumer](https://github.com/ballerina-platform/module-ballerinax-aws.sqs/tree/main/examples/basic-queue-consumer) – Demonstrates creating a standard SQS queue, sending messages, and consuming them using a Ballerina listener.
+2. [Basic Queue Operations](https://github.com/ballerina-platform/module-ballerinax-aws.sqs/tree/main/examples/basic-queue-operations) – Shows basic operations: create, send, receive, and delete messages and queues.
+3. [Enhanced Messaging](https://github.com/ballerina-platform/module-ballerinax-aws.sqs/tree/main/examples/enhanced-messaging) – Demonstrates advanced messaging features such as message attributes, batch operations, and queue configuration.
+4. [FIFO Queue](https://github.com/ballerina-platform/module-ballerinax-aws.sqs/tree/main/examples/fifo-queue) – Shows how to work with FIFO queues, including sending messages with different `messageGroupId`s and grouping received messages.
 
 
-* To run an example
+## Prerequisites
 
-  `bal run <example-name>`
+1. AWS Account with SQS access.
+2. For each example, create a `Config.toml` file with your AWS credentials and queue details. Here’s an example:
 
-## Building the Examples with the Local Module
+```toml
+# Standard queue name
+queueName = "ballerina-example-queue"
 
-**Warning**: Because of the absence of support for reading local repositories for single Ballerina files, the bala of
-the module is manually written to the central repository as a workaround. Consequently, the bash script may modify your
-local Ballerina repositories.
+# FIFO queue name (must end with .fifo)
+fifoQueueName = "ballerina-example-queue.fifo"
 
-Execute the following commands to build all the examples against the changes you have made to the module locally.
+# AWS credentials
+accessKeyId = "<YOUR_ACCESS_KEY_ID>"
+secretAccessKey = "<YOUR_SECRET_ACCESS_KEY>"
 
-* To build all the examples
+# Queue URL
+queueUrl = "<YOUR_QUEUE_URL>"
+```
 
-  `./build.sh build`
+## Running an example
 
+Execute the following commands to build an example from the source:
 
-* To run all the examples
+* To build an example:
 
-  `./build.sh run`
+    ```bash
+    bal build
+    ```
+
+* To run an example:
+
+    ```bash
+    bal run
+    ```
+
+## Building the examples with the local module
+
+**Warning**: Due to the absence of support for reading local repositories for single Ballerina files, the Bala of the module is manually written to the central repository as a workaround. Consequently, the bash script may modify your local Ballerina repositories.
+
+Execute the following commands to build all the examples against the changes you have made to the module locally:
+
+* To build all the examples:
+
+    ```bash
+    ./build.sh build
+    ```
+
+* To run all the examples:
+
+    ```bash
+    ./build.sh run
