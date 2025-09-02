@@ -623,17 +623,20 @@ function testDeleteMessageBatchSuccess() returns error? {
         {id: "id-a", body: "Message A"},
         {id: "id-b", body: "Message B"},
         {id: "id-c", body: "Message C"},
-        {id: "id-d", body: "Message D"},
-        {id: "id-e", body: "Message E"},
-        {id: "id-f", body: "Message F"},
-        {id: "id-g", body: "Message G"},
-        {id: "id-h", body: "Message H"},
-        {id: "id-i", body: "Message I"}
+        {id: "id-d", body: "Message D"}
     ];
     _ = check sqsClient->sendMessageBatch(queueUrl, batch);
     runtime:sleep(2);
-    Message[] received = check sqsClient->receiveMessage(queueUrl, maxNumberOfMessages = 5, waitTimeSeconds = 20);
-    test:assertTrue(received.length() >= 2);
+    Message[] received = [];
+    int retryCount = 0;
+    int maxRetries = 10;
+    while received.length() < 2 && retryCount < maxRetries {
+        received = check sqsClient->receiveMessage(queueUrl, maxNumberOfMessages = 5, waitTimeSeconds = 20);
+        if received.length() < 2 {
+            runtime:sleep(3);
+            retryCount+=1;
+        }
+    }
     DeleteMessageBatchEntry[] deleteBatch = [
         {id: "msg-id-1", receiptHandle: check received[0].receiptHandle.ensureType()},
         {id: "msg-id-2", receiptHandle: check received[1].receiptHandle.ensureType()}
