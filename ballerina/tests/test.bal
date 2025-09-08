@@ -626,17 +626,7 @@ function testDeleteMessageBatchSuccess() returns error? {
         {id: "id-d", body: "Message D"}
     ];
     _ = check sqsClient->sendMessageBatch(queueUrl, batch);
-    runtime:sleep(2);
-    Message[] received = [];
-    int retryCount = 0;
-    int maxRetries = 10;
-    while received.length() < 2 && retryCount < maxRetries {
-        received = check sqsClient->receiveMessage(queueUrl, maxNumberOfMessages = 5, waitTimeSeconds = 20);
-        if received.length() < 2 {
-            runtime:sleep(3);
-            retryCount+=1;
-        }
-    }
+    Message[] received = check receiveMessagesWithRetry(queueUrl, 2, 10, 3);
     DeleteMessageBatchEntry[] deleteBatch = [
         {id: "msg-id-1", receiptHandle: check received[0].receiptHandle.ensureType()},
         {id: "msg-id-2", receiptHandle: check received[1].receiptHandle.ensureType()}
@@ -664,11 +654,7 @@ function testDeleteMessageBatchWithInvalidReceiptHandle() returns error? {
     if sendResult is error {
         test:assertFail("Failed to send batch messages: " + sendResult.toString());
     }
-    runtime:sleep(2);
-    Message[]|Error received = sqsClient->receiveMessage(queueUrl, maxNumberOfMessages = 5, waitTimeSeconds = 20);
-    if received is error || received.length() < 2 {
-        test:assertFail("Expected 2 messages, but received fewer");
-    }
+    Message[] received = check receiveMessagesWithRetry(queueUrl, 2, 10, 3);
     DeleteMessageBatchEntry[] entries = [
         {id: "id-1", receiptHandle: "invalid-receipt-handle"},
         {id: "id-2", receiptHandle: check received[1].receiptHandle.ensureType()}
@@ -689,27 +675,13 @@ function testDeleteMessageBatchWithDuplicateIds() returns error? {
         {id: "id1", body: "Message A"},
         {id: "id2", body: "Message B"},
         {id: "id3", body: "Message C"},
-        {id: "id4", body: "Message D"},
-        {id: "id5", body: "Message E"},
-        {id: "id6", body: "Message F"},
-        {id: "id7", body: "Message G"},
-        {id: "id8", body: "Message H"},
-        {id: "id9", body: "Message I"},
-        {id: "id10", body: "Message J"}
+        {id: "id4", body: "Message D"}
     ];
     SendMessageBatchResponse|Error sendResult = sqsClient->sendMessageBatch(queueUrl, batch);
     if sendResult is error {
         test:assertFail("Failed to send batch messages: " + sendResult.toString());
     }
-    runtime:sleep(2);
-    ReceiveMessageConfig receiveConfig = {
-        waitTimeSeconds: 20,
-        maxNumberOfMessages: 5
-    };
-    Message[]|Error received = sqsClient->receiveMessage(queueUrl, receiveConfig);
-    if received is error || received.length() < 2 {
-        test:assertFail("Expected 2 messages, but received fewer");
-    }
+    Message[] received = check receiveMessagesWithRetry(queueUrl, 2, 10, 3);
     DeleteMessageBatchEntry[] entries = [
         {id: "dup-id", receiptHandle: check received[0].receiptHandle.ensureType()},
         {id: "dup-id", receiptHandle: check received[0].receiptHandle.ensureType()}
@@ -1121,4 +1093,18 @@ function testDeleteAllQueues() returns error? {
     foreach string queueUrl in listResult.queueUrls {
         check sqsClient->deleteQueue(queueUrl);
     }
+}
+
+function receiveMessagesWithRetry(string queueUrl, int expectedCount, int maxTries = 10, decimal sleepSeconds = 3) returns Message[]|error {
+    int tries = 0;
+    Message[] received = [];
+    while tries < maxTries {
+        received = check sqsClient->receiveMessage(queueUrl, maxNumberOfMessages = expectedCount, waitTimeSeconds = 20);
+        if received.length() >= expectedCount {
+            return received;
+        }
+        runtime:sleep(sleepSeconds);
+        tries += 1;
+    }
+    return error(string `Expected at least ${expectedCount} messages, but received only ${received.length()}`);
 }
