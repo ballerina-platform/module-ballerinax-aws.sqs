@@ -15,8 +15,8 @@ graalvmCompatible = true
 [[platform.java21.dependency]]
 groupId = "io.ballerina.lib"
 artifactId = "aws.sqs-native"
-version = "4.0.0-SNAPSHOT"
-path = "../native/build/libs/aws.sqs-native-4.0.0-SNAPSHOT.jar"
+version = "4.0.0"
+path = "../native/build/libs/aws.sqs-native-4.0.0.jar"
 
 [[platform.java21.dependency]]
 groupId = "software.amazon.awssdk"
