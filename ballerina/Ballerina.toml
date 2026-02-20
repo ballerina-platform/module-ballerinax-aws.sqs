@@ -1,7 +1,7 @@
 [package]
 org = "ballerinax"
 name = "aws.sqs"
-version = "4.0.0"
+version = "4.0.1"
 authors=["ballerina"]
 keywords = ["IT Operations/Message Brokers", "Cost/Freemium", "Vendor/Amazon", "Area/Communication", "Type/Connector"]
 repository= "https://github.com/ballerina-platform/module-ballerinax-aws.sqs"
@@ -15,8 +15,8 @@ graalvmCompatible = true
 [[platform.java21.dependency]]
 groupId = "io.ballerina.lib"
 artifactId = "aws.sqs-native"
-version = "4.0.0"
-path = "../native/build/libs/aws.sqs-native-4.0.0.jar"
+version = "4.0.1"
+path = "../native/build/libs/aws.sqs-native-4.0.1.jar"
 
 [[platform.java21.dependency]]
 groupId = "software.amazon.awssdk"
