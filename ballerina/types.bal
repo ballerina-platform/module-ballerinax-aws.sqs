@@ -14,13 +14,19 @@
 // specific language governing permissions and limitations
 // under the License.
 
+# Represents the default AWS credential chain based authentication.
+# Automatically resolves credentials from environment variables, ECS container credentials,
+# EC2 instance profiles, and other standard AWS credential sources.
+public const DEFAULT_CREDENTIALS = "DEFAULT_CREDENTIALS";
+
 # Represents the connection configuration for the Amazon SQS client.
 #
 # + region - AWS region (e.g., `us-east-1`)
-# + auth - Authentication configuration using either static credentials or an AWS profile
+# + auth - Authentication configuration using static credentials, an AWS profile,
+# or the default credential provider chain
 public type ConnectionConfig record {|
     Region region;
-    StaticAuthConfig|ProfileAuthConfig auth;
+    StaticAuthConfig|ProfileAuthConfig|DEFAULT_CREDENTIALS auth;
 |};
 
 # Represents static authentication configuration for the Amazon SQS Client
