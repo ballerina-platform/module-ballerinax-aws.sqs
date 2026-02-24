@@ -18,6 +18,7 @@ package io.ballerina.lib.aws.sqs.auth;
 import io.ballerina.runtime.api.utils.StringUtils;
 import io.ballerina.runtime.api.values.BMap;
 import io.ballerina.runtime.api.values.BString;
+import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
 
 import static io.ballerina.lib.aws.sqs.auth.StaticAuthConfig.AWS_ACCESS_KEY_ID;
@@ -60,8 +61,11 @@ public record ConnectionConfig(Region region, Object authConfig) {
 
     @SuppressWarnings("unchecked")
     private static Object getAuthConfig(BMap<BString, Object> bConnectionConfig) {
-        BMap<BString, Object> bAuthConfig = (BMap<BString, Object>) bConnectionConfig
-                .getMapValue(CONNECTION_CONFIG_AUTH_CONFIG);
+        Object bAuth = bConnectionConfig.get(CONNECTION_CONFIG_AUTH_CONFIG);
+        if (bAuth instanceof BString) {
+            return DefaultCredentialsProvider.create();
+        }
+        BMap<BString, Object> bAuthConfig = (BMap<BString, Object>) bAuth;
         if (bAuthConfig.containsKey(AWS_ACCESS_KEY_ID)) {
             return new StaticAuthConfig(bAuthConfig);
         }

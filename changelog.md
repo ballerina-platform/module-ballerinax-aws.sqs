@@ -5,6 +5,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## Unreleased
 
+### Added
+- [Support default credential login for the AWS SQS connector](https://github.com/wso2-enterprise/wso2-integration-internal/issues/4608)
+
 ## [X.Y.Z] - YYYY-MM-DD
 
 ### Added

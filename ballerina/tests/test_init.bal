@@ -38,16 +38,20 @@ final readonly & ProfileAuthConfig profileAuth = {
 final Client sqsClient = check initClient();
 
 isolated function initClient() returns Client|error {
-    boolean useProfile = authType == "profile";
-    if accessKeyId != "" && secretAccessKey != "" {
+    if authType == "default" {
         return new ({
             region: awsRegion,
-            auth: staticAuth
+            auth: DEFAULT_CREDENTIALS
         });
-    } else if useProfile {
+    } else if authType == "profile" {
         return new ({
             region: awsRegion,
             auth: profileAuth
+        });
+    } else if accessKeyId != "" && secretAccessKey != "" {
+        return new ({
+            region: awsRegion,
+            auth: staticAuth
         });
     }
     return test:mock(Client);

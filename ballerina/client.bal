@@ -19,7 +19,8 @@ import ballerina/jballerina.java;
 # The Amazon SQS API Client.
 #
 # Provides access to Amazon Simple Queue Service (SQS) using the AWS SDK for Java V2.
-# Supports static and profile-based credential configurations.
+# Supports static credentials, profile-based credentials, and the default AWS credential
+# provider chain (environment variables, ECS container credentials, EC2 instance profiles, etc.).
 public isolated client class Client {
 
     # Initializes the Amazon SQS client with the provided connection configuration.
