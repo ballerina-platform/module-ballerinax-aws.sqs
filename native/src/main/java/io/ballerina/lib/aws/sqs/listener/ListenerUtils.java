@@ -61,9 +61,11 @@ public final class ListenerUtils {
 
     /**
      * Extracts the queue name from an SQS queue URL.
+     * For a URL of the form {@code https://sqs.{region}.amazonaws.com/{accountId}/{queueName}}
+     * this returns the last path segment.
      *
      * @param queueUrl The full SQS queue URL
-     * @return The queue name (last part after the final '/')
+     * @return The queue name (last path segment)
      */
     public static String extractQueueName(String queueUrl) {
         if (queueUrl != null && queueUrl.contains("/")) {
@@ -71,5 +73,23 @@ public final class ListenerUtils {
             return parts[parts.length - 1];
         }
         return queueUrl;
+    }
+
+    /**
+     * Extracts the AWS account ID from an SQS queue URL.
+     * For a URL of the form {@code https://sqs.{region}.amazonaws.com/{accountId}/{queueName}}
+     * this returns the second-to-last path segment.
+     *
+     * @param queueUrl The full SQS queue URL
+     * @return The account ID, or {@code null} if it cannot be determined
+     */
+    public static String extractAccountId(String queueUrl) {
+        if (queueUrl != null && queueUrl.contains("/")) {
+            String[] parts = queueUrl.split("/");
+            if (parts.length >= 2) {
+                return parts[parts.length - 2];
+            }
+        }
+        return null;
     }
 }

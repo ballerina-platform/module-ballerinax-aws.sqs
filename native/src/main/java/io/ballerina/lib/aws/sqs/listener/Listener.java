@@ -31,6 +31,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import static io.ballerina.lib.aws.sqs.listener.ListenerUtils.extractAccountId;
 import static io.ballerina.lib.aws.sqs.listener.ListenerUtils.extractQueueName;
 
 /**
@@ -145,18 +146,26 @@ public final class Listener {
         }
         SqsClient sqsClient = (SqsClient) bListener.getNativeData(NativeClientAdaptor.NATIVE_SQS_CLIENT);
         Map<String, Service> services = getServices(bListener);
-        try {
-            for (Service service : services.values()) {
-                ServiceConfig cfg = service.getServiceConfig();
+        for (Service service : services.values()) {
+            ServiceConfig cfg = service.getServiceConfig();
+            if (cfg.validateOnStart()) {
                 String queueName = extractQueueName(cfg.queueUrl());
-                sqsClient.getQueueUrl(builder -> builder.queueName(queueName));
+                String accountId = extractAccountId(cfg.queueUrl());
+                try {
+                    sqsClient.getQueueUrl(builder -> {
+                        builder.queueName(queueName);
+                        if (accountId != null) {
+                            builder.queueOwnerAWSAccountId(accountId);
+                        }
+                    });
+                } catch (QueueDoesNotExistException qex) {
+                    stopped.set(true);
+                    return CommonUtils.createError("Queue does not exist before polling", qex);
+                } catch (Exception ex) {
+                    stopped.set(true);
+                    return CommonUtils.createError("Failed to validate queue: " + ex.getMessage(), ex);
+                }
             }
-        } catch (QueueDoesNotExistException qex) {
-            stopped.set(true);
-            return CommonUtils.createError("Queue does not exist before polling", qex);
-        } catch (Exception ex) {
-            stopped.set(true);
-            return CommonUtils.createError("Failed to validate queue: ", ex);
         }
         try {
             for (Service service : services.values()) {
