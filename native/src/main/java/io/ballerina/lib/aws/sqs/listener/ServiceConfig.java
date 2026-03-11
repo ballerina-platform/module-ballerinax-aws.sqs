@@ -25,13 +25,11 @@ import io.ballerina.runtime.api.values.BString;
  * Maps the Ballerina ServiceConfig annotation values to Java.
  * Handles queue URL, polling configuration, and acknowledgment behavior.
  */
-public record ServiceConfig(String queueUrl, PollingConfig pollingConfig, boolean autoDelete,
-        boolean validateOnStart) {
+public record ServiceConfig(String queueUrl, PollingConfig pollingConfig, boolean autoDelete) {
 
     static final BString QUEUE_URL = StringUtils.fromString("queueUrl");
     static final BString CONFIG = StringUtils.fromString("config");
     static final BString AUTO_DELETE = StringUtils.fromString("autoDelete");
-    static final BString VALIDATE_ON_START = StringUtils.fromString("validateOnStart");
 
     /**
      * Creates a service configuration from Ballerina config map.
@@ -44,7 +42,6 @@ public record ServiceConfig(String queueUrl, PollingConfig pollingConfig, boolea
                 config.containsKey(CONFIG) && config.get(CONFIG) != null
                         ? new PollingConfig((BMap<BString, Object>) config.get(CONFIG))
                         : null,
-                config.containsKey(AUTO_DELETE) && config.getBooleanValue(AUTO_DELETE),
-                config.containsKey(VALIDATE_ON_START) && config.getBooleanValue(VALIDATE_ON_START));
+                config.containsKey(AUTO_DELETE) && config.getBooleanValue(AUTO_DELETE));
     }
 }

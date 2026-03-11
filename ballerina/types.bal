@@ -502,14 +502,10 @@ public type Service distinct service object {};
 # + queueUrl - The URL of the SQS queue to consume messages from
 # + config - Optional per-service polling behavior
 # + autoDelete - Whether to automatically delete messages after receiving
-# + validateOnStart - When `true`, calls `GetQueueUrl` at listener start to verify the queue exists before polling begins.
-# Requires the `sqs:GetQueueUrl` IAM permission and works with cross-account queues.
-# Defaults to `false`; queue existence errors will surface on the first poll cycle instead.
 public type ServiceConfigType record {|
     string queueUrl;
     PollingConfig config?;
     boolean autoDelete = true;
-    boolean validateOnStart = false;
 |};
 
 # Annotation to configure the `sqs:Service`.

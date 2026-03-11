@@ -25,14 +25,10 @@ import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.api.values.BString;
 
 import software.amazon.awssdk.services.sqs.SqsClient;
-import software.amazon.awssdk.services.sqs.model.QueueDoesNotExistException;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
-
-import static io.ballerina.lib.aws.sqs.listener.ListenerUtils.extractAccountId;
-import static io.ballerina.lib.aws.sqs.listener.ListenerUtils.extractQueueName;
 
 /**
  * Native implementation of the Ballerina AWS SQS Listener.
@@ -144,29 +140,7 @@ public final class Listener {
         if (!stopped.compareAndSet(true, false)) {
             return null;
         }
-        SqsClient sqsClient = (SqsClient) bListener.getNativeData(NativeClientAdaptor.NATIVE_SQS_CLIENT);
         Map<String, Service> services = getServices(bListener);
-        for (Service service : services.values()) {
-            ServiceConfig cfg = service.getServiceConfig();
-            if (cfg.validateOnStart()) {
-                String queueName = extractQueueName(cfg.queueUrl());
-                String accountId = extractAccountId(cfg.queueUrl());
-                try {
-                    sqsClient.getQueueUrl(builder -> {
-                        builder.queueName(queueName);
-                        if (accountId != null) {
-                            builder.queueOwnerAWSAccountId(accountId);
-                        }
-                    });
-                } catch (QueueDoesNotExistException qex) {
-                    stopped.set(true);
-                    return CommonUtils.createError("Queue does not exist before polling", qex);
-                } catch (Exception ex) {
-                    stopped.set(true);
-                    return CommonUtils.createError("Failed to validate queue: " + ex.getMessage(), ex);
-                }
-            }
-        }
         try {
             for (Service service : services.values()) {
                 BObject bService = service.getConsumerService();
