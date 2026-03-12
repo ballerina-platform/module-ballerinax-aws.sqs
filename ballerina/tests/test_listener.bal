@@ -20,6 +20,7 @@ import ballerina/test;
 isolated boolean autoDeleteMessageReceived = false;
 isolated boolean manualDeleteMessageReceived = false;
 isolated boolean batchMessageReceived = false;
+isolated boolean nonExistentQueueErrorReceived = false;
 
 string testQueue1Url = "";
 string testQueue2Url = "";
@@ -238,14 +239,29 @@ function testListenerWithNonExistentQueue() returns error? {
     } service object {
         isolated remote function onMessage(Message message) returns error? {
         }
+        isolated remote function onError(Error err) returns error? {
+            lock {
+                nonExistentQueueErrorReceived = true;
+            }
+        }
     };
     check nonExistentQueueListener.attach(svc);
-    Error? result = nonExistentQueueListener.'start();
-    test:assertTrue(result is Error, "Expected an error when starting the listener with a non-existent queue");
-    if result is () {
-        test:assertFail("Expected an error but found a nil value");
+    check nonExistentQueueListener.'start();
+    int attempts = 0;
+    int maxAttempts = 20;
+    boolean received = false;
+    while attempts < maxAttempts {
+        lock {
+            received = nonExistentQueueErrorReceived;
+        }
+        if received {
+            break;
+        }
+        runtime:sleep(3);
+        attempts += 1;
     }
-    test:assertEquals(result.message(), "Queue does not exist before polling");
+    check nonExistentQueueListener.gracefulStop();
+    test:assertTrue(received, "Expected onError to be called for non-existent queue");
 }
 
 @test:Config {

@@ -58,18 +58,4 @@ public final class ListenerUtils {
         caller.addNativeData(NATIVE_ACK_MESSAGES, ackMessage);
         return caller;
     }
-
-    /**
-     * Extracts the queue name from an SQS queue URL.
-     *
-     * @param queueUrl The full SQS queue URL
-     * @return The queue name (last part after the final '/')
-     */
-    public static String extractQueueName(String queueUrl) {
-        if (queueUrl != null && queueUrl.contains("/")) {
-            String[] parts = queueUrl.split("/");
-            return parts[parts.length - 1];
-        }
-        return queueUrl;
-    }
 }
