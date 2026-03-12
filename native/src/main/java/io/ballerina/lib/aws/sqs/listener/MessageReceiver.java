@@ -92,7 +92,7 @@ public class MessageReceiver {
                 }
             }
         } catch (QueueDoesNotExistException e) {
-            BError error = CommonUtils.createError("Queue does not exist: " + queueUrl);
+            BError error = CommonUtils.createError("Polling Error: " + e.getMessage());
             this.pollingTaskFuture.cancel(false);
             if (stopListener != null) {
                 // Run on a new thread to avoid deadlocking the executor when stop() awaits termination.
