@@ -18,6 +18,7 @@ package io.ballerina.lib.aws.sqs;
 
 import io.ballerina.runtime.api.Environment;
 import io.ballerina.runtime.api.Module;
+import io.ballerina.runtime.api.values.BError;
 
 /**
  * Module utils for the Ballerina AWS SQS Client to obtain the module info in
@@ -40,5 +41,13 @@ public final class ModuleUtils {
 
     public static void setModule(Environment environment) {
         module = environment.getCurrentModule();
+    }
+
+    public static void notifyFailure(BError bError) {
+        bError.printStackTrace();
+        // Service level `panic` is captured in this method.
+        // Since, `panic` is due to a critical application bug or resource exhaustion we need to exit the application.
+        // Please refer: https://github.com/ballerina-platform/ballerina-standard-library/issues/2714
+        System.exit(1);
     }
 }

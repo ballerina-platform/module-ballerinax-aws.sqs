@@ -145,6 +145,7 @@ public final class Listener {
             for (Service service : services.values()) {
                 BObject bService = service.getConsumerService();
                 MessageReceiver receiver = (MessageReceiver) bService.getNativeData(NATIVE_RECEIVER);
+                receiver.setStopListener(() -> gracefulStop(null, bListener));
                 receiver.consume();
             }
         } catch (Exception e) {

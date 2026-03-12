@@ -26,9 +26,12 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import io.ballerina.lib.aws.sqs.CommonUtils;
+import io.ballerina.lib.aws.sqs.ModuleUtils;
+import io.ballerina.runtime.api.values.BError;
 import io.ballerina.runtime.api.values.BObject;
 import software.amazon.awssdk.services.sqs.SqsClient;
 import software.amazon.awssdk.services.sqs.model.Message;
+import software.amazon.awssdk.services.sqs.model.QueueDoesNotExistException;
 import software.amazon.awssdk.services.sqs.model.ReceiveMessageRequest;
 import software.amazon.awssdk.services.sqs.model.ReceiveMessageResponse;
 
@@ -47,6 +50,7 @@ public class MessageReceiver {
     private final boolean autoDelete;
 
     private ScheduledFuture<?> pollingTaskFuture;
+    private Runnable stopListener;
 
     public MessageReceiver(SqsClient sqsClient, String queueUrl, PollingConfig pollingConfig,
             MessageDispatcher messageDispatcher, BObject bListener, boolean autoDelete) {
@@ -87,6 +91,14 @@ public class MessageReceiver {
                     return;
                 }
             }
+        } catch (QueueDoesNotExistException e) {
+            BError error = CommonUtils.createError("Queue does not exist: " + queueUrl);
+            this.pollingTaskFuture.cancel(false);
+            if (stopListener != null) {
+                // Run on a new thread to avoid deadlocking the executor when stop() awaits termination.
+                Thread.startVirtualThread(stopListener::run);
+            }
+            ModuleUtils.notifyFailure(error);
         } catch (Exception e) {
             if (!closed.get()) {
                 CommonUtils.createError("Polling Error: " + e.getMessage(), e);
@@ -98,6 +110,10 @@ public class MessageReceiver {
     public void consume() {
         this.pollingTaskFuture = this.executorService.scheduleAtFixedRate(
                 this::poll, 0, this.pollingInterval, TimeUnit.MILLISECONDS);
+    }
+
+    public void setStopListener(Runnable stopListener) {
+        this.stopListener = stopListener;
     }
 
     public void stop() throws Exception {
