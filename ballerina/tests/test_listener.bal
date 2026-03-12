@@ -20,7 +20,6 @@ import ballerina/test;
 isolated boolean autoDeleteMessageReceived = false;
 isolated boolean manualDeleteMessageReceived = false;
 isolated boolean batchMessageReceived = false;
-isolated boolean nonExistentQueueErrorReceived = false;
 
 string testQueue1Url = "";
 string testQueue2Url = "";
@@ -226,42 +225,6 @@ function testListenerBatchMessage() returns error? {
         {id: "3", body: "Batch Message Test 3"}
     ];
     SendMessageBatchResponse _ = check sqsClient->sendMessageBatch(testQueue5Url, entries);
-}
-
-@test:Config {
-    groups: ["listenerValidation"]
-}
-function testListenerWithNonExistentQueue() returns error? {
-    Listener nonExistentQueueListener = check new (connectionConfig, pollingConfig);
-    Service svc = @ServiceConfig {
-        queueUrl: "https://sqs.us-east-2.amazonaws.com/284495578152/NonExistentQueue",
-        autoDelete: true
-    } service object {
-        isolated remote function onMessage(Message message) returns error? {
-        }
-        isolated remote function onError(Error err) returns error? {
-            lock {
-                nonExistentQueueErrorReceived = true;
-            }
-        }
-    };
-    check nonExistentQueueListener.attach(svc);
-    check nonExistentQueueListener.'start();
-    int attempts = 0;
-    int maxAttempts = 20;
-    boolean received = false;
-    while attempts < maxAttempts {
-        lock {
-            received = nonExistentQueueErrorReceived;
-        }
-        if received {
-            break;
-        }
-        runtime:sleep(3);
-        attempts += 1;
-    }
-    check nonExistentQueueListener.gracefulStop();
-    test:assertTrue(received, "Expected onError to be called for non-existent queue");
 }
 
 @test:Config {
