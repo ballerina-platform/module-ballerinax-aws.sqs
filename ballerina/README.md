@@ -4,5 +4,10 @@ Amazon Simple Queue Service (SQS) is a fully managed message queuing service tha
 
 ### Key Features
 
-- Fully managed and highly scalable message queuing\n- Support for both standard and FIFO queues\n- Reliable message delivery with dead-letter queue support\n- Secure communication with AWS IAM authentication\n- Simplified message production and consumption\n- GraalVM compatible for native image builds
+- Fully managed and highly scalable message queuing
+- Support for both standard and FIFO queues
+- Reliable message delivery with dead-letter queue support
+- Secure communication with AWS IAM authentication
+- Simplified message production and consumption
+- GraalVM compatible for native image builds
 
