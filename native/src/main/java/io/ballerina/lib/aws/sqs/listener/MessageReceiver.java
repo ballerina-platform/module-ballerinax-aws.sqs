@@ -93,15 +93,16 @@ public class MessageReceiver {
             }
         } catch (QueueDoesNotExistException e) {
             BError error = CommonUtils.createError("Polling Error: " + e.getMessage());
+            error.printStackTrace();
             this.pollingTaskFuture.cancel(false);
             if (stopListener != null) {
                 // Run on a new thread to avoid deadlocking the executor when stop() awaits termination.
                 Thread.startVirtualThread(stopListener::run);
             }
-            ModuleUtils.notifyFailure(error);
         } catch (Exception e) {
             if (!closed.get()) {
-                CommonUtils.createError("Polling Error: " + e.getMessage(), e);
+                BError error = CommonUtils.createError("Polling Error: " + e.getMessage(), e);
+                error.printStackTrace();
                 this.pollingTaskFuture.cancel(false);
             }
         }
