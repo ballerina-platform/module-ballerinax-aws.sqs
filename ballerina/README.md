@@ -1,5 +1,9 @@
 ## Overview
 
+Amazon Simple Queue Service (SQS) is a fully managed message queuing service that enables you to decouple and scale microservices, distributed systems, and serverless applications. It provides a reliable and highly scalable way to exchange messages between different components. The AWS SQS connector allows you to interact with SQS queues, enabling efficient message processing in the cloud.
+
+### Key Features
+
 [Amazon Simple Queue Service (SQS)](https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/welcome.html) is a fully managed message queuing service provided by Amazon Web Services (AWS) that enables you to decouple and scale microservices, distributed systems, and serverless applications.
 
 The `ballerinax/aws.sqs` package allows developers to interact with Amazon SQS seamlessly using Ballerina. This connector provides capabilities to send, receive, delete messages, and manage SQS queues programmatically.
