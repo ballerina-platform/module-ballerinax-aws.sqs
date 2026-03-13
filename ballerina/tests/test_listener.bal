@@ -229,8 +229,7 @@ function testListenerBatchMessage() returns error? {
 }
 
 @test:Config {
-    groups: ["listenerValidation"],
-    enable: false
+    groups: ["listenerValidation"]
 }
 function testListenerWithNonExistentQueue() returns error? {
     Listener nonExistentQueueListener = check new (connectionConfig, pollingConfig);
