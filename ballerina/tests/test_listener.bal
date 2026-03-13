@@ -242,7 +242,7 @@ function testListenerWithNonExistentQueue() returns error? {
     };
     check nonExistentQueueListener.attach(svc);
     check nonExistentQueueListener.'start();
-    test:assertTrue(isLive(nonExistentQueueListener), "Expected onError to be called for non-existent queue");
+    test:assertTrue(isLive(nonExistentQueueListener), "Expected the listener to be stopped");
 }
 
 @test:Config {
