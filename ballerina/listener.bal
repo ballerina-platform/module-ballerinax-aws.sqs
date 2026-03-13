@@ -65,3 +65,7 @@ public isolated class Listener {
         'class: "io.ballerina.lib.aws.sqs.listener.Listener"
     } external;
 }
+
+isolated function isLive(Listener 'listener) returns boolean|Error = @java:Method {
+    'class: "io.ballerina.lib.aws.sqs.listener.Listener"
+} external;

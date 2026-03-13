@@ -233,4 +233,9 @@ public final class Listener {
             }
         }
     }
+
+    public static Object isLive(Environment env, BObject bListener) {
+        AtomicBoolean stopped = (AtomicBoolean) bListener.getNativeData(NATIVE_STOPPED);
+        return !stopped.get();
+    }
 }
