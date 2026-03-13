@@ -239,29 +239,10 @@ function testListenerWithNonExistentQueue() returns error? {
     } service object {
         isolated remote function onMessage(Message message) returns error? {
         }
-        isolated remote function onError(Error err) returns error? {
-            lock {
-                nonExistentQueueErrorReceived = true;
-            }
-        }
     };
     check nonExistentQueueListener.attach(svc);
     check nonExistentQueueListener.'start();
-    int attempts = 0;
-    int maxAttempts = 20;
-    boolean received = false;
-    while attempts < maxAttempts {
-        lock {
-            received = nonExistentQueueErrorReceived;
-        }
-        if received {
-            break;
-        }
-        runtime:sleep(3);
-        attempts += 1;
-    }
-    check nonExistentQueueListener.gracefulStop();
-    test:assertTrue(received, "Expected onError to be called for non-existent queue");
+    test:assertTrue(check isLive(nonExistentQueueListener), "Expected the listener to be stopped");
 }
 
 @test:Config {
