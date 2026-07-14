@@ -46,7 +46,19 @@ public final class CommonUtils {
     private CommonUtils() {
     }
 
-    public static BError createError(String message, Throwable exception) {
+    /**
+     * Builds a Ballerina {@code sqs:Error} for a failed operation.
+     *
+     * <p>The top-level message is always just the action being attempted —
+     * the raw exception, however verbose (an AWS SDK credential-chain dump
+     * can run to thousands of characters), is never inlined into it. It's
+     * preserved in full as this error's {@code cause} instead, reachable in
+     * Ballerina via {@code err.cause()} for anyone who wants the detail.
+     *
+     * @param action    what was being attempted, e.g. {@code "sending message"}
+     * @param exception the exception that was caught
+     */
+    public static BError createError(String action, Throwable exception) {
         BError cause = ErrorCreator.createError(exception);
         BMap<BString, Object> errorDetails = ValueCreator.createRecordValue(
                 ModuleUtils.getModule(), ERROR_DETAILS);
@@ -63,7 +75,8 @@ public final class CommonUtils {
             errorDetails.put(ERROR_DETAILS_ERROR_MESSAGE, StringUtils.fromString(awsErrorDetails.errorMessage()));
         }
         return ErrorCreator.createError(
-                ModuleUtils.getModule(), ERROR, StringUtils.fromString(message), cause, errorDetails);
+                ModuleUtils.getModule(), ERROR, StringUtils.fromString("Error occurred while " + action),
+                cause, errorDetails);
     }
 
     public static BError createError(String message) {

@@ -14,97 +14,23 @@
 // specific language governing permissions and limitations
 // under the License.
 
-# Represents the default AWS credential chain based authentication.
-# Automatically resolves credentials from environment variables, ECS container credentials,
-# EC2 instance profiles, and other standard AWS credential sources.
-public const DEFAULT_CREDENTIALS = "DEFAULT_CREDENTIALS";
+import ballerinax/aws;
+import ballerinax/aws.auth;
 
 # Represents the connection configuration for the Amazon SQS client.
 #
 # + region - AWS region (e.g., `us-east-1`)
-# + auth - Authentication configuration using static credentials, an AWS profile,
-# or the default credential provider chain
+# + auth - Authentication configuration: any AWS credential source supported by
+# `ballerinax/aws.auth` — static credentials, an AWS profile, STS assume-role,
+# web identity (OIDC), IAM Identity Center (SSO), an external credential
+# process, or the default credential provider chain
+# + endpoint - Optional endpoint options: FIPS/dualstack variants, or a custom
+# endpoint override (e.g. LocalStack, VPC interface endpoints)
 public type ConnectionConfig record {|
-    Region region;
-    StaticAuthConfig|ProfileAuthConfig|DEFAULT_CREDENTIALS auth;
+    auth:AuthConfig auth;
+    aws:Region region;
+    aws:EndpointConfig endpoint?;
 |};
-
-# Represents static authentication configuration for the Amazon SQS Client
-#
-# + accessKeyId - AWS access key ID used to identify the AWS account
-# + secretAccessKey - AWS secret access key used to authenticate the user
-# + sessionToken - Optional session token used for temporary credentials
-public type StaticAuthConfig record {|
-    string accessKeyId;
-    string secretAccessKey;
-    string sessionToken?;
-|};
-
-# Represents profile-based authentication configuration for the Amazon SQS client.
-#
-# + profileName - Name of the AWS profile in the credentials file
-# + credentialsFilePath - Optional custom path to the AWS credentials file
-#
-# The credentials file should follow the standard AWS format:
-# ```
-# [default]
-# aws_access_key_id = YOUR_ACCESS_KEY_ID
-# aws_secret_access_key = YOUR_SECRET_ACCESS_KEY
-#
-# [profile-name]
-# aws_access_key_id = ANOTHER_ACCESS_KEY_ID
-# aws_secret_access_key = ANOTHER_SECRET_ACCESS_KEY
-# ```
-public type ProfileAuthConfig record {|
-    string profileName = "default";
-    string credentialsFilePath = "~/.aws/credentials";
-|};
-
-# Represents an AWS Region used by the Amazon SQS client.
-public enum Region {
-    AF_SOUTH_1 = "af-south-1",
-    AP_EAST_1 = "ap-east-1",
-    AP_NORTHEAST_1 = "ap-northeast-1",
-    AP_NORTHEAST_2 = "ap-northeast-2",
-    AP_NORTHEAST_3 = "ap-northeast-3",
-    AP_SOUTH_1 = "ap-south-1",
-    AP_SOUTH_2 = "ap-south-2",
-    AP_SOUTHEAST_1 = "ap-southeast-1",
-    AP_SOUTHEAST_2 = "ap-southeast-2",
-    AP_SOUTHEAST_3 = "ap-southeast-3",
-    AP_SOUTHEAST_4 = "ap-southeast-4",
-    AWS_CN_GLOBAL = "aws-cn-global",
-    AWS_GLOBAL = "aws-global",
-    AWS_ISO_GLOBAL = "aws-iso-global",
-    AWS_ISO_B_GLOBAL = "aws-iso-b-global",
-    AWS_US_GOV_GLOBAL = "aws-us-gov-global",
-    CA_WEST_1 = "ca-west-1",
-    CA_CENTRAL_1 = "ca-central-1",
-    CN_NORTH_1 = "cn-north-1",
-    CN_NORTHWEST_1 = "cn-northwest-1",
-    EU_CENTRAL_1 = "eu-central-1",
-    EU_CENTRAL_2 = "eu-central-2",
-    EU_ISOE_WEST_1 = "eu-isoe-west-1",
-    EU_NORTH_1 = "eu-north-1",
-    EU_SOUTH_1 = "eu-south-1",
-    EU_SOUTH_2 = "eu-south-2",
-    EU_WEST_1 = "eu-west-1",
-    EU_WEST_2 = "eu-west-2",
-    EU_WEST_3 = "eu-west-3",
-    IL_CENTRAL_1 = "il-central-1",
-    ME_CENTRAL_1 = "me-central-1",
-    ME_SOUTH_1 = "me-south-1",
-    SA_EAST_1 = "sa-east-1",
-    US_EAST_1 = "us-east-1",
-    US_EAST_2 = "us-east-2",
-    US_GOV_EAST_1 = "us-gov-east-1",
-    US_GOV_WEST_1 = "us-gov-west-1",
-    US_ISOB_EAST_1 = "us-isob-east-1",
-    US_ISO_EAST_1 = "us-iso-east-1",
-    US_ISO_WEST_1 = "us-iso-west-1",
-    US_WEST_1 = "us-west-1",
-    US_WEST_2 = "us-west-2"
-}
 
 # Contains response details returned by the `sendMessage` API.
 #

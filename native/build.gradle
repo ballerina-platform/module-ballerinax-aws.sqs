@@ -26,6 +26,7 @@ configurations {
 dependencies {
     implementation group: 'org.ballerinalang', name: 'ballerina-runtime', version: "${ballerinaLangVersion}"
     implementation group: 'software.amazon.awssdk', name: 'sqs', version: "${awsJavaSdkVersion}"
+    compileOnly group: 'io.ballerina.lib', name: 'aws-native', version: "${awsAuthNativeVersion}"
     
 }
 

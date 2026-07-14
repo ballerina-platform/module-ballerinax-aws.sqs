@@ -45,8 +45,36 @@ def stripBallerinaExtensionVersion(String extVersion) {
 ballerina {
     packageOrganization = packageOrg
     module = packageName
+    langVersion = ballerinaLangVersion
     testCoverageParam = "--code-coverage --coverage-format=xml"
-    isConnector = true
+    // Connector packages build inside Docker by default (plugin-gradle), which
+    // cannot resolve dependencies from the host's local Ballerina repository.
+    // For local development against an unpublished ballerinax/aws.auth, run with
+    // `-PbuildLocal=true` to build with the locally installed distribution instead.
+    isConnector = !project.hasProperty('buildLocal')
+}
+
+if (project.hasProperty('buildLocal')) {
+    // The plugin expects a distribution at build/jballerina-tools-<version>/bin
+    // when not building on Docker; link the installed distribution there.
+    task linkLocalDistribution {
+        doLast {
+            def link = new File("${project.projectDir}/build/jballerina-tools-${ballerinaLangVersion}")
+            if (!link.exists()) {
+                link.parentFile.mkdirs()
+                def distribution = new File("${System.getProperty('user.home')}" +
+                        "/.ballerina/ballerina-home/distributions/ballerina-${ballerinaLangVersion}")
+                if (!distribution.exists()) {
+                    throw new GradleException("Ballerina distribution ${ballerinaLangVersion} not found at " +
+                            "${distribution}. Install it with: bal dist pull ${ballerinaLangVersion}")
+                }
+                java.nio.file.Files.createSymbolicLink(link.toPath(), distribution.toPath())
+            }
+        }
+    }
+    tasks.matching { it.name == 'build' || it.name == 'test' }.configureEach {
+        dependsOn linkLocalDistribution
+    }
 }
 
 configurations {

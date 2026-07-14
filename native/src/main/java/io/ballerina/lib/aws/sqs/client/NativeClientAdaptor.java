@@ -20,11 +20,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
+import io.ballerina.lib.aws.EndpointConfigUtils;
+import io.ballerina.lib.aws.auth.ProviderFactory;
 import io.ballerina.lib.aws.sqs.CommonUtils;
 import io.ballerina.lib.aws.sqs.auth.ConnectionConfig;
-import io.ballerina.lib.aws.sqs.auth.StaticAuthConfig;
 import io.ballerina.lib.aws.sqs.mappers.CancelMessageMoveTaskMapper;
 import io.ballerina.lib.aws.sqs.mappers.CreateQueueMapper;
 import io.ballerina.lib.aws.sqs.mappers.DeleteMessageBatchMapper;
@@ -44,12 +44,9 @@ import io.ballerina.runtime.api.values.BMap;
 import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.api.values.BString;
 
-import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
-import software.amazon.awssdk.auth.credentials.AwsCredentials;
 import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
-import software.amazon.awssdk.auth.credentials.AwsSessionCredentials;
-import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.services.sqs.SqsClient;
+import software.amazon.awssdk.services.sqs.SqsClientBuilder;
 import software.amazon.awssdk.services.sqs.model.CancelMessageMoveTaskRequest;
 import software.amazon.awssdk.services.sqs.model.CancelMessageMoveTaskResponse;
 import software.amazon.awssdk.services.sqs.model.ChangeMessageVisibilityRequest;
@@ -87,42 +84,35 @@ import software.amazon.awssdk.services.sqs.model.UntagQueueRequest;
 
 public class NativeClientAdaptor {
     public static final String NATIVE_SQS_CLIENT = "nativeClient";
+    public static final String NATIVE_CREDENTIALS_PROVIDER = "nativeCredentialsProvider";
 
     private NativeClientAdaptor() {
     }
 
     public static SqsClient createSqsClient(BMap<BString, Object> bConnectionConfig) {
-        ConnectionConfig connectionConfig = new ConnectionConfig(bConnectionConfig);
-        AwsCredentialsProvider credentialsProvider = getCredentialsProvider(connectionConfig.authConfig());
-        return SqsClient.builder()
+        return buildSqsClient(new ConnectionConfig(bConnectionConfig));
+    }
+
+    private static SqsClient buildSqsClient(ConnectionConfig connectionConfig) {
+        SqsClientBuilder builder = SqsClient.builder()
                 .region(connectionConfig.region())
-                .credentialsProvider(credentialsProvider)
-                .build();
+                .credentialsProvider(connectionConfig.credentialsProvider());
+        EndpointConfigUtils.applyEndpointConfig(builder, connectionConfig.endpointConfig());
+        return builder.build();
     }
 
     public static Object init(BObject bClient, BMap<BString, Object> bConnectionConfig) {
         try {
-            SqsClient nativeClient = createSqsClient(bConnectionConfig);
+            ConnectionConfig connectionConfig = new ConnectionConfig(bConnectionConfig);
+            SqsClient nativeClient = buildSqsClient(connectionConfig);
             bClient.addNativeData(NATIVE_SQS_CLIENT, nativeClient);
+            // Retained for release on close(): the SDK client does not close a
+            // caller-supplied credentials provider.
+            bClient.addNativeData(NATIVE_CREDENTIALS_PROVIDER, connectionConfig.credentialsProvider());
         } catch (Exception e) {
-            String errorMsg = String.format("Error occurred while initializing the SQS client: %s",
-                    e.getMessage());
-            return CommonUtils.createError(errorMsg, e);
+            return CommonUtils.createError("initializing the SQS client", e);
         }
         return null;
-    }
-
-    private static AwsCredentialsProvider getCredentialsProvider(Object authConfig) {
-        if (authConfig instanceof StaticAuthConfig staticAuth) {
-            AwsCredentials credentials = Objects.nonNull(staticAuth.sessionToken()) ? AwsSessionCredentials.create(
-                    staticAuth.accessKeyId(), staticAuth.secretAccessKey(), staticAuth.sessionToken())
-                    : AwsBasicCredentials.create(staticAuth.accessKeyId(), staticAuth.secretAccessKey());
-            return StaticCredentialsProvider.create(credentials);
-        }
-        if (authConfig instanceof AwsCredentialsProvider) {
-            return (AwsCredentialsProvider) authConfig;
-        }
-        throw new IllegalArgumentException("Unsupported authentication configuration");
     }
 
     public static Object sendMessage(Environment env, BObject bClient, BString queueUrl, BString messageBody,
@@ -136,8 +126,7 @@ public class NativeClientAdaptor {
                 SendMessageResponse response = sqsClient.sendMessage(request);
                 return SendMessageMapper.getNativeSendMessageResponse(response);
             } catch (Exception e) {
-                String msg = "Failed to send message: " + Objects.requireNonNullElse(e.getMessage(), "Unknown error");
-                return CommonUtils.createError(msg, e);
+                return CommonUtils.createError("sending message", e);
             }
         });
     }
@@ -152,9 +141,7 @@ public class NativeClientAdaptor {
                 ReceiveMessageResponse response = sqsClient.receiveMessage(request);
                 return ReceiveMessageMapper.getNativeReceiveMessageResponse(response);
             } catch (Exception e) {
-                String msg = "Failed to receive message: "
-                        + Objects.requireNonNullElse(e.getMessage(), "Unknown error");
-                return CommonUtils.createError(msg, e);
+                return CommonUtils.createError("receiving message", e);
             }
         });
     }
@@ -171,7 +158,7 @@ public class NativeClientAdaptor {
                 sqsClient.deleteMessage(request);
                 return null;
             } catch (Exception e) {
-                return CommonUtils.createError("Failed to delete message: " + e.getMessage(), e);
+                return CommonUtils.createError("deleting message", e);
             }
         });
     }
@@ -186,9 +173,7 @@ public class NativeClientAdaptor {
                 SendMessageBatchResponse response = sqsClient.sendMessageBatch(request);
                 return SendMessageBatchMapper.getNativeSendMessageBatchResponse(response);
             } catch (Exception e) {
-                String msg = "Failed to send batch message"
-                        + Objects.requireNonNullElse(e.getMessage(), "Unknown error");
-                return CommonUtils.createError(msg, e);
+                return CommonUtils.createError("sending batch message", e);
             }
         });
     }
@@ -203,9 +188,7 @@ public class NativeClientAdaptor {
                 DeleteMessageBatchResponse response = sqsClient.deleteMessageBatch(request);
                 return DeleteMessageBatchMapper.getNativeDeleteMessageBatchResponse(response);
             } catch (Exception e) {
-                String msg = "Failed to delete batch message"
-                        + Objects.requireNonNullElse(e.getMessage(), "Unknown Error");
-                return CommonUtils.createError(msg, e);
+                return CommonUtils.createError("deleting batch message", e);
             }
         });
     }
@@ -220,8 +203,7 @@ public class NativeClientAdaptor {
                 CreateQueueResponse response = sqsClient.createQueue(request);
                 return StringUtils.fromString(response.queueUrl());
             } catch (Exception e) {
-                String msg = "Failed to create queue: " + Objects.requireNonNullElse(e.getMessage(), "Unknown error");
-                return CommonUtils.createError(msg, e);
+                return CommonUtils.createError("creating queue", e);
             }
         });
 
@@ -238,7 +220,7 @@ public class NativeClientAdaptor {
                 sqsClient.deleteQueue(request);
                 return null;
             } catch (Exception e) {
-                return CommonUtils.createError("Failed to delete Queue: " + e.getMessage(), e);
+                return CommonUtils.createError("deleting queue", e);
             }
         });
     }
@@ -253,8 +235,7 @@ public class NativeClientAdaptor {
                 GetQueueUrlResponse response = sqsClient.getQueueUrl(request);
                 return StringUtils.fromString(response.queueUrl());
             } catch (Exception e) {
-                String msg = "Failed to get queue URL: " + Objects.requireNonNullElse(e.getMessage(), "Unknown error");
-                return CommonUtils.createError(msg, e);
+                return CommonUtils.createError("getting queue URL", e);
             }
         });
     }
@@ -268,8 +249,7 @@ public class NativeClientAdaptor {
                 ListQueuesResponse response = sqsClient.listQueues(request);
                 return ListQueuesMapper.getNativeListQueuesResponse(response);
             } catch (Exception e) {
-                String msg = "Failed to list queues " + Objects.requireNonNullElse(e.getMessage(), "Unknown Error");
-                return CommonUtils.createError(msg, e);
+                return CommonUtils.createError("listing queues", e);
             }
         });
     }
@@ -285,9 +265,7 @@ public class NativeClientAdaptor {
                 GetQueueAttributesResponse response = sqsClient.getQueueAttributes(request);
                 return GetQueueAttributesMapper.getNativeGetQueueAttributesResponse(response);
             } catch (Exception e) {
-                String msg = "Failed to get queue attributes: "
-                        + Objects.requireNonNullElse(e.getMessage(), "Unknown error");
-                return CommonUtils.createError(msg, e);
+                return CommonUtils.createError("getting queue attributes", e);
             }
         });
     }
@@ -303,9 +281,7 @@ public class NativeClientAdaptor {
                 sqsClient.setQueueAttributes(request);
                 return null;
             } catch (Exception e) {
-                String msg = "Failed to set queue attributes: "
-                        + Objects.requireNonNullElse(e.getMessage(), "Unknown Error");
-                return CommonUtils.createError(msg, e);
+                return CommonUtils.createError("setting queue attributes", e);
             }
         });
 
@@ -326,9 +302,7 @@ public class NativeClientAdaptor {
                 return null;
 
             } catch (Exception e) {
-                String msg = "Failed to change message visibility: "
-                        + Objects.requireNonNullElse(e.getMessage(), "Unknown Error");
-                return CommonUtils.createError(msg, e);
+                return CommonUtils.createError("changing message visibility", e);
             }
         });
     }
@@ -344,8 +318,7 @@ public class NativeClientAdaptor {
                 sqsClient.purgeQueue(request);
                 return null;
             } catch (Exception e) {
-                String msg = "Failed to purge queue" + Objects.requireNonNullElse(e.getMessage(), "Unknown Error");
-                return CommonUtils.createError(msg, e);
+                return CommonUtils.createError("purging queue", e);
             }
 
         });
@@ -371,8 +344,7 @@ public class NativeClientAdaptor {
                 sqsClient.tagQueue(request);
                 return null;
             } catch (Exception e) {
-                String msg = "Failed to tag queue: " + Objects.requireNonNullElse(e.getMessage(), "Unknown error");
-                return CommonUtils.createError(msg, e);
+                return CommonUtils.createError("tagging queue", e);
             }
         });
     }
@@ -396,8 +368,7 @@ public class NativeClientAdaptor {
                 sqsClient.untagQueue(request);
                 return null;
             } catch (Exception e) {
-                String msg = "Failed to untag queue: " + Objects.requireNonNullElse(e.getMessage(), "Unknown error");
-                return CommonUtils.createError(msg, e);
+                return CommonUtils.createError("untagging queue", e);
             }
         });
     }
@@ -413,9 +384,7 @@ public class NativeClientAdaptor {
                 ListQueueTagsResponse response = sqsClient.listQueueTags(request);
                 return ListQueueTagsMapper.getNativeListQueueTagsResponse(response);
             } catch (Exception e) {
-                String msg = "Failed to list queue tags: "
-                        + Objects.requireNonNullElse(e.getMessage(), "Unknown error");
-                return CommonUtils.createError(msg, e);
+                return CommonUtils.createError("listing queue tags", e);
             }
         });
     }
@@ -431,9 +400,7 @@ public class NativeClientAdaptor {
                 StartMessageMoveTaskResponse response = sqsClient.startMessageMoveTask(request);
                 return StartMessageMoveTaskMapper.getNativeStartMessageMoveTaskResponse(response);
             } catch (Exception e) {
-                String msg = "Failed to start message move task: "
-                        + Objects.requireNonNullElse(e.getMessage(), "Unknown error");
-                return CommonUtils.createError(msg, e);
+                return CommonUtils.createError("starting message move task", e);
             }
         });
     }
@@ -449,9 +416,7 @@ public class NativeClientAdaptor {
                 CancelMessageMoveTaskResponse response = sqsClient.cancelMessageMoveTask(request);
                 return CancelMessageMoveTaskMapper.getNativeCancelMessageMoveTaskResponse(response);
             } catch (Exception e) {
-                String msg = "Failed to cancel message move task: "
-                        + Objects.requireNonNullElse(e.getMessage(), "Unknown error");
-                return CommonUtils.createError(msg, e);
+                return CommonUtils.createError("cancelling message move task", e);
             }
         });
     }
@@ -460,10 +425,12 @@ public class NativeClientAdaptor {
         SqsClient nativeClient = (SqsClient) bClient.getNativeData(NATIVE_SQS_CLIENT);
         try {
             nativeClient.close();
+            Object provider = bClient.getNativeData(NATIVE_CREDENTIALS_PROVIDER);
+            if (provider instanceof AwsCredentialsProvider credentialsProvider) {
+                ProviderFactory.closeProvider(credentialsProvider);
+            }
         } catch (Exception e) {
-            String errorMsg = String.format("Error occurred while closing the SQS client: %s",
-                    Objects.requireNonNullElse(e.getMessage(), "Unknown error"));
-            return CommonUtils.createError(errorMsg, e);
+            return CommonUtils.createError("closing the SQS client", e);
         }
         return null;
     }

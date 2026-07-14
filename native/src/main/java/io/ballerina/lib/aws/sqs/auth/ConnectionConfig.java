@@ -15,44 +15,34 @@
 // under the License.
 package io.ballerina.lib.aws.sqs.auth;
 
+import io.ballerina.lib.aws.auth.ProviderFactory;
 import io.ballerina.runtime.api.utils.StringUtils;
 import io.ballerina.runtime.api.values.BMap;
 import io.ballerina.runtime.api.values.BString;
-import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
+import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
-
-import static io.ballerina.lib.aws.sqs.auth.StaticAuthConfig.AWS_ACCESS_KEY_ID;
 
 /**
  * {@code ConnectionConfig} represents the connection configuration required for
  * the Ballerina AWS SQS API Client.
  *
- * <p>
- * This record encapsulates the AWS region and authentication configuration
- * (either static credentials or profile-based credentials) used to initialize
- * the SQS client.
- * </p>
- *
- * <ul>
- * <li><b>region</b> - The AWS region where the SQS service is accessed.</li>
- * <li><b>authConfig</b> - The authentication configuration, which can be
- * either:
- * <ul>
- * <li>{@link StaticAuthConfig} for static access key/secret key
- * authentication</li>
- * <li>{@link ProfileAuthConfig} for profile-based authentication</li>
- * </ul>
- * </li>
- * </ul>
+ * <p>The {@code auth} field is a {@code ballerinax/aws.auth:AuthConfig} value;
+ * credential resolution is delegated to the shared {@code aws.auth} library
+ * ({@link ProviderFactory}), which supports all standardized AWS credential
+ * sources (static keys, profile, STS assume-role, web identity, IAM Identity
+ * Center, external process, and the default provider chain) with automatic
+ * refresh of expiring credentials.
  */
-public record ConnectionConfig(Region region, Object authConfig) {
+public record ConnectionConfig(Region region, AwsCredentialsProvider credentialsProvider,
+        BMap<BString, Object> endpointConfig) {
     private static final BString CONNECTION_CONFIG_REGION = StringUtils.fromString("region");
     private static final BString CONNECTION_CONFIG_AUTH_CONFIG = StringUtils.fromString("auth");
-    private static final BString PROFILE_NAME = StringUtils.fromString("profileName");
-    private static final BString CREDENTIALS_FILE_PATH = StringUtils.fromString("credentialsFilePath");
+    private static final BString CONNECTION_CONFIG_ENDPOINT = StringUtils.fromString("endpoint");
 
     public ConnectionConfig(BMap<BString, Object> bConnectionConfig) {
-        this(getRegion(bConnectionConfig), getAuthConfig(bConnectionConfig));
+        this(getRegion(bConnectionConfig),
+                ProviderFactory.buildProvider(bConnectionConfig.get(CONNECTION_CONFIG_AUTH_CONFIG)),
+                getEndpointConfig(bConnectionConfig));
     }
 
     private static Region getRegion(BMap<BString, Object> bConnectionConfig) {
@@ -60,20 +50,8 @@ public record ConnectionConfig(Region region, Object authConfig) {
     }
 
     @SuppressWarnings("unchecked")
-    private static Object getAuthConfig(BMap<BString, Object> bConnectionConfig) {
-        Object bAuth = bConnectionConfig.get(CONNECTION_CONFIG_AUTH_CONFIG);
-        if (bAuth instanceof BString) {
-            return DefaultCredentialsProvider.create();
-        }
-        BMap<BString, Object> bAuthConfig = (BMap<BString, Object>) bAuth;
-        if (bAuthConfig.containsKey(AWS_ACCESS_KEY_ID)) {
-            return new StaticAuthConfig(bAuthConfig);
-        }
-        if (bAuthConfig.containsKey(PROFILE_NAME)) {
-            String profileName = bAuthConfig.getStringValue(PROFILE_NAME).getValue();
-            String credentialsFilePath = bAuthConfig.getStringValue(CREDENTIALS_FILE_PATH).getValue();
-            return ProfileAuthConfig.fromConfig(profileName, credentialsFilePath);
-        }
-        throw new IllegalArgumentException("Unsupported authentication configuration");
+    private static BMap<BString, Object> getEndpointConfig(BMap<BString, Object> bConnectionConfig) {
+        // The `endpoint` field is optional; null when not configured.
+        return (BMap<BString, Object>) bConnectionConfig.getMapValue(CONNECTION_CONFIG_ENDPOINT);
     }
 }
