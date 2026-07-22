@@ -423,15 +423,27 @@ public class NativeClientAdaptor {
 
     public static Object close(BObject bClient) {
         SqsClient nativeClient = (SqsClient) bClient.getNativeData(NATIVE_SQS_CLIENT);
+        Exception closeException = null;
         try {
             nativeClient.close();
-            Object provider = bClient.getNativeData(NATIVE_CREDENTIALS_PROVIDER);
-            if (provider instanceof AwsCredentialsProvider credentialsProvider) {
-                ProviderFactory.closeProvider(credentialsProvider);
-            }
         } catch (Exception e) {
-            return CommonUtils.createError("closing the SQS client", e);
+            closeException = e;
+        } finally {
+            // Always release the credentials provider's resources (e.g. STS/SSO
+            // background refresh threads), even if closing the SQS client itself failed.
+            try {
+                Object provider = bClient.getNativeData(NATIVE_CREDENTIALS_PROVIDER);
+                if (provider instanceof AwsCredentialsProvider credentialsProvider) {
+                    ProviderFactory.closeProvider(credentialsProvider);
+                }
+            } catch (Exception e) {
+                if (closeException == null) {
+                    closeException = e;
+                } else {
+                    closeException.addSuppressed(e);
+                }
+            }
         }
-        return null;
+        return closeException == null ? null : CommonUtils.createError("closing the SQS client", closeException);
     }
 }

@@ -26,7 +26,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import io.ballerina.lib.aws.sqs.CommonUtils;
-import io.ballerina.lib.aws.sqs.ModuleUtils;
 import io.ballerina.runtime.api.values.BError;
 import io.ballerina.runtime.api.values.BObject;
 import software.amazon.awssdk.services.sqs.SqsClient;

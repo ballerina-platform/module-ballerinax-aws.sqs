@@ -69,6 +69,7 @@ To use the `aws.sqs` connector in your Ballerina project, modify the .bal file a
 ### Step 1: Import the module
 
 ```ballerina
+import ballerinax/aws;
 import ballerinax/aws.sqs;
 ```
 
@@ -81,7 +82,7 @@ configurable string accessKeyId = ?;
 configurable string secretAccessKey = ?;
 
 sqs:Client sqsClient = check new ({
-   region: sqs:US_EAST_1,
+   region: aws:US_EAST_1,
    auth: {
       accessKeyId,
       secretAccessKey
@@ -97,11 +98,28 @@ You can use AWS profile-based authentication as an alternative to static credent
 
 ```ballerina
 sqs:Client sqsClient = check new ({
-   region: sqs:US_EAST_1,
+   region: aws:US_EAST_1,
    auth: {
       profileName: "myAwsProfile",
       credentialsFilePath: "/path/to/custom/credentials"
    }
+});
+```
+
+##### Default credential provider chain
+
+The standard default credential provider chain, trying each of the following in order and taking the first source that yields credentials:
+
+1. Environment variables (`AWS_ACCESS_KEY_ID`/`AWS_SECRET_ACCESS_KEY`, and `AWS_WEB_IDENTITY_TOKEN_FILE` if set)
+2. The shared config/credentials file's active profile (`AWS_PROFILE`, or `default` if unset) — which may itself resolve via SSO
+, an external process, or a chained `AssumeRole` call, depending on that profile's configuration
+3. Container credentials (ECS/EKS)
+4. EC2 instance profile (IMDS)
+
+```ballerina
+sqs:Client sqsClient = check new ({
+   region: aws:US_EAST_1,
+   auth: auth:DEFAULT_CREDENTIALS
 });
 ```
 

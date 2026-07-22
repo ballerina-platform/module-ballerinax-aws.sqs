@@ -25,7 +25,7 @@ final string secretAccessKey = os:getEnv("BALLERINA_AWS_TEST_SECRET_ACCESS_KEY")
 final string profileName = os:getEnv("BALLERINA_AWS_TEST_PROFILE_NAME");
 final string credentialsFilePath = os:getEnv("BALLERINA_AWS_TEST_CREDENTIALS_FILE");
 
-final readonly & aws:Region awsRegion = aws:US_EAST_2;
+final readonly & aws:Region awsRegion = aws:US_EAST_1;
 
 final readonly & auth:StaticAuthConfig staticAuth = {
     accessKeyId,

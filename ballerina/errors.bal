@@ -27,4 +27,6 @@ public type ErrorDetails record {|
     string errorCode?;
     # The human-readable error message provided by the service
     string errorMessage?;
+    # The unique identifier of the request assigned by the service
+    string requestId?;
 |};

@@ -42,6 +42,7 @@ public final class CommonUtils {
     private static final BString ERROR_DETAILS_HTTP_STATUS_TEXT = StringUtils.fromString("httpStatusText");
     private static final BString ERROR_DETAILS_ERROR_CODE = StringUtils.fromString("errorCode");
     private static final BString ERROR_DETAILS_ERROR_MESSAGE = StringUtils.fromString("errorMessage");
+    private static final BString ERROR_DETAILS_REQUEST_ID = StringUtils.fromString("requestId");
 
     private CommonUtils() {
     }
@@ -50,6 +51,7 @@ public final class CommonUtils {
         BError cause = ErrorCreator.createError(exception);
         BMap<BString, Object> errorDetails = ValueCreator.createRecordValue(
                 ModuleUtils.getModule(), ERROR_DETAILS);
+        String message = "Error occurred while " + action;
         if (exception instanceof AwsServiceException awsServiceException &&
                 Objects.nonNull(awsServiceException.awsErrorDetails())) {
             AwsErrorDetails awsErrorDetails = awsServiceException.awsErrorDetails();
@@ -61,10 +63,13 @@ public final class CommonUtils {
             }
             errorDetails.put(ERROR_DETAILS_ERROR_CODE, StringUtils.fromString(awsErrorDetails.errorCode()));
             errorDetails.put(ERROR_DETAILS_ERROR_MESSAGE, StringUtils.fromString(awsErrorDetails.errorMessage()));
+            if (Objects.nonNull(awsServiceException.requestId())) {
+                errorDetails.put(ERROR_DETAILS_REQUEST_ID, StringUtils.fromString(awsServiceException.requestId()));
+            }
+            message = message + ": " + awsErrorDetails.errorMessage();
         }
         return ErrorCreator.createError(
-                ModuleUtils.getModule(), ERROR, StringUtils.fromString("Error occurred while " + action),
-                cause, errorDetails);
+                ModuleUtils.getModule(), ERROR, StringUtils.fromString(message), cause, errorDetails);
     }
 
     public static BError createError(String message) {

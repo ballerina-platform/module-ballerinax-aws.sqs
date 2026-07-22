@@ -105,7 +105,7 @@ public final class Listener {
             bService.addNativeData(NATIVE_SERVICE, nativeService);
             bService.addNativeData(NATIVE_RECEIVER, receiver);
         } catch (BError e) {
-            return CommonUtils.createError(e.getMessage(), e);
+            return e;
         } catch (Exception e) {
             return CommonUtils.createError(e.getMessage(), e);
         }
@@ -124,7 +124,7 @@ public final class Listener {
                 getServices(bListener).remove(queueUrl);
             }
         } catch (BError e) {
-            return CommonUtils.createError(e.getMessage(), e);
+            return e;
         } catch (Exception e) {
             return CommonUtils.createError(e.getMessage(), e);
         }
