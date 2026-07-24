@@ -6,36 +6,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ## Unreleased
 
 ### Added
+- [Revamp Connector Authentication Flow](https://github.com/wso2-enterprise/integration-engineering/issues/2091)
+
+## [4.1.0] - 2026-02-26
+
+### Added
 - [Support default credential login for the AWS SQS connector](https://github.com/wso2-enterprise/wso2-integration-internal/issues/4608)
-
-## [X.Y.Z] - YYYY-MM-DD
-
-### Added
-- [Description of new feature added](https://github.com/ballerina-platform/ballerina-library/issues/XXXX)
-
-### Changed
-- [Description of change made](https://github.com/ballerina-platform/ballerina-library/issues/XXXX)
-
-### Fixed
-- [Description of bug fixed](https://github.com/ballerina-platform/ballerina-library/issues/XXXX)
-
-### Removed
-- [Description of feature removed](https://github.com/ballerina-platform/ballerina-library/issues/XXXX)
-
-<!-- Example releases for reference:
-
-## [1.0.0] - 2024-12-01
-
-### Added
-- [Initial implementation of AWS SQS connector with basic queue operations](https://github.com/ballerina-platform/ballerina-library/issues/XXXX)
-- [Support for queue creation, deletion, and listing](https://github.com/ballerina-platform/ballerina-library/issues/XXXX)
-- [Message sending and receiving capabilities](https://github.com/ballerina-platform/ballerina-library/issues/XXXX)
-- [AWS authentication support with static credentials and profiles](https://github.com/ballerina-platform/ballerina-library/issues/XXXX)
-
-### Changed
-- [Updated AWS SDK to version X.Y.Z](https://github.com/ballerina-platform/ballerina-library/issues/XXXX)
-
-### Fixed
-- [Fixed issue with message attribute handling](https://github.com/ballerina-platform/ballerina-library/issues/XXXX)
-
--->
