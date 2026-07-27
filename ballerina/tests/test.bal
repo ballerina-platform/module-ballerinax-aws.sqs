@@ -16,6 +16,7 @@
 
 import ballerina/lang.runtime;
 import ballerina/test;
+import ballerinax/aws;
 
 string standardQueueUrl = "";
 string fifoQueueUrl = "";
@@ -27,7 +28,7 @@ string testAttributesQueueUrl = "";
 }
 isolated function testInitUsingStaticAuth() returns error? {
     ConnectionConfig connectionConfig = {
-        region: awsRegion,
+        region: aws:US_EAST_1,
         auth: staticAuth
     };
     Client sqsClient = check new (connectionConfig);
@@ -40,7 +41,7 @@ isolated function testInitUsingStaticAuth() returns error? {
 }
 isolated function testInitUsingProfileAuth() returns error? {
     ConnectionConfig connectionConfig = {
-        region: awsRegion,
+        region: aws:US_EAST_1,
         auth: profileAuth
     };
     Client sqsClient = check new (connectionConfig);

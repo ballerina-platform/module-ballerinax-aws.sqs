@@ -16,6 +16,8 @@
 
 package io.ballerina.lib.aws.sqs.listener;
 
+import java.util.Objects;
+
 import io.ballerina.lib.aws.sqs.CommonUtils;
 import io.ballerina.lib.aws.sqs.client.NativeClientAdaptor;
 import io.ballerina.runtime.api.Environment;
@@ -71,9 +73,13 @@ public final class Listener {
             AtomicBoolean listenerStopped = new AtomicBoolean(true);
             bListener.addNativeData(NATIVE_STOPPED, listenerStopped);
         } catch (BError e) {
-            return CommonUtils.createError("Failed to initialize SQS listener: " + e.getMessage(), e);
+            String msg = "Failed to initialize SQS listener: "
+                    + Objects.requireNonNullElse(e.getMessage(), "Unknown error");
+            return CommonUtils.createError(msg, e);
         } catch (Exception e) {
-            return CommonUtils.createError("Failed to initialize SQS listener: " + e.getMessage(), e);
+            String msg = "Failed to initialize SQS listener: "
+                    + Objects.requireNonNullElse(e.getMessage(), "Unknown error");
+            return CommonUtils.createError(msg, e);
         }
         return null;
     }
@@ -107,7 +113,7 @@ public final class Listener {
         } catch (BError e) {
             return e;
         } catch (Exception e) {
-            return CommonUtils.createError(e.getMessage(), e);
+            return CommonUtils.createError(Objects.requireNonNullElse(e.getMessage(), "Unknown error"), e);
         }
         return null;
     }
@@ -126,7 +132,7 @@ public final class Listener {
         } catch (BError e) {
             return e;
         } catch (Exception e) {
-            return CommonUtils.createError(e.getMessage(), e);
+            return CommonUtils.createError(Objects.requireNonNullElse(e.getMessage(), "Unknown error"), e);
         }
         return null;
     }
@@ -151,8 +157,9 @@ public final class Listener {
         } catch (Exception e) {
             stopAllReceivers(services);
             stopped.set(true);
-            return CommonUtils
-                    .createError("Error occurred while starting the Ballerina AWS SQS listener" + e.getMessage(), e);
+            String msg = "Error occurred while starting the Ballerina AWS SQS listener: "
+                    + Objects.requireNonNullElse(e.getMessage(), "Unknown error");
+            return CommonUtils.createError(msg, e);
         }
         return null;
     }

@@ -91,7 +91,8 @@ public class MessageReceiver {
                 }
             }
         } catch (QueueDoesNotExistException e) {
-            BError error = CommonUtils.createError("Polling Error: " + e.getMessage());
+            String msg = "Polling Error: " + Objects.requireNonNullElse(e.getMessage(), "Unknown error");
+            BError error = CommonUtils.createError(msg);
             error.printStackTrace();
             this.pollingTaskFuture.cancel(false);
             if (stopListener != null) {
@@ -100,7 +101,8 @@ public class MessageReceiver {
             }
         } catch (Exception e) {
             if (!closed.get()) {
-                BError error = CommonUtils.createError("Polling Error: " + e.getMessage(), e);
+                String msg = "Polling Error: " + Objects.requireNonNullElse(e.getMessage(), "Unknown error");
+                BError error = CommonUtils.createError(msg, e);
                 error.printStackTrace();
                 this.pollingTaskFuture.cancel(false);
             }

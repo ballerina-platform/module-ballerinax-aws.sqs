@@ -24,7 +24,7 @@ configurable string secretAccessKey = ?;
 
 public function main() returns error? {
     sqs:Client sqsClient = check new ({
-        region: aws:US_EAST_1,
+        region: aws:US_EAST_2,
         auth: {
             accessKeyId,
             secretAccessKey

@@ -2,3 +2,9 @@
 org = "wso2"
 name = "fifo_queue"
 version = "0.1.0"
+
+[[dependency]]
+org = "ballerinax"
+name = "aws.sqs"
+version = "5.0.0"
+repository = "local"

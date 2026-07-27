@@ -19,12 +19,12 @@ import ballerinax/aws.auth;
 
 # Represents the connection configuration for the Amazon SQS client.
 #
-# + region - AWS region: an `aws:Region` enum member (e.g., `aws:US_EAST_1`) or a
-# plain region string (e.g., `"us-east-1"`) for regions not yet in the enum
-# + auth - Authentication configuration: any AWS credential source supported by
-# `ballerinax/aws.auth` — static credentials, an AWS profile, STS assume-role,
+# + auth - Authentication configuration: any standard credential source supported by
+# AWS — static credentials, an AWS profile, STS assume-role,
 # web identity (OIDC), IAM Identity Center (SSO), an external credential
 # process, or the default credential provider chain
+# + region - AWS region: an `aws:Region` enum member or a plain region
+# string (e.g., `"us-east-1"`) for regions not yet in the enum
 # + endpoint - Optional endpoint options: FIPS/dualstack variants, or a custom
 # endpoint override (e.g. LocalStack, VPC interface endpoints)
 public type ConnectionConfig record {|

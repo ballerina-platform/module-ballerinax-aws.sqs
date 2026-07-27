@@ -47,11 +47,10 @@ public final class CommonUtils {
     private CommonUtils() {
     }
 
-    public static BError createError(String action, Throwable exception) {
+    public static BError createError(String message, Throwable exception) {
         BError cause = ErrorCreator.createError(exception);
         BMap<BString, Object> errorDetails = ValueCreator.createRecordValue(
                 ModuleUtils.getModule(), ERROR_DETAILS);
-        String message = "Error occurred while " + action;
         if (exception instanceof AwsServiceException awsServiceException &&
                 Objects.nonNull(awsServiceException.awsErrorDetails())) {
             AwsErrorDetails awsErrorDetails = awsServiceException.awsErrorDetails();
@@ -66,7 +65,6 @@ public final class CommonUtils {
             if (Objects.nonNull(awsServiceException.requestId())) {
                 errorDetails.put(ERROR_DETAILS_REQUEST_ID, StringUtils.fromString(awsServiceException.requestId()));
             }
-            message = message + ": " + awsErrorDetails.errorMessage();
         }
         return ErrorCreator.createError(
                 ModuleUtils.getModule(), ERROR, StringUtils.fromString(message), cause, errorDetails);
