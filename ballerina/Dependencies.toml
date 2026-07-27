@@ -10,7 +10,7 @@ distribution-version = "2201.12.0"
 [[package]]
 org = "ballerina"
 name = "io"
-version = "1.8.0"
+version = "1.8.1"
 scope = "testOnly"
 dependencies = [
 	{org = "ballerina", name = "jballerina.java"},
@@ -110,13 +110,26 @@ modules = [
 
 [[package]]
 org = "ballerinax"
+name = "aws"
+version = "0.1.0"
+dependencies = [
+	{org = "ballerina", name = "jballerina.java"}
+]
+modules = [
+	{org = "ballerinax", packageName = "aws", moduleName = "aws"},
+	{org = "ballerinax", packageName = "aws", moduleName = "aws.auth"}
+]
+
+[[package]]
+org = "ballerinax"
 name = "aws.sqs"
-version = "4.1.3"
+version = "5.0.0"
 dependencies = [
 	{org = "ballerina", name = "jballerina.java"},
 	{org = "ballerina", name = "lang.runtime"},
 	{org = "ballerina", name = "os"},
-	{org = "ballerina", name = "test"}
+	{org = "ballerina", name = "test"},
+	{org = "ballerinax", name = "aws"}
 ]
 modules = [
 	{org = "ballerinax", packageName = "aws.sqs", moduleName = "aws.sqs"}

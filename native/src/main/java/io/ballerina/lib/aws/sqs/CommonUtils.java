@@ -42,6 +42,7 @@ public final class CommonUtils {
     private static final BString ERROR_DETAILS_HTTP_STATUS_TEXT = StringUtils.fromString("httpStatusText");
     private static final BString ERROR_DETAILS_ERROR_CODE = StringUtils.fromString("errorCode");
     private static final BString ERROR_DETAILS_ERROR_MESSAGE = StringUtils.fromString("errorMessage");
+    private static final BString ERROR_DETAILS_REQUEST_ID = StringUtils.fromString("requestId");
 
     private CommonUtils() {
     }
@@ -59,8 +60,16 @@ public final class CommonUtils {
                 sdkResponse.statusText().ifPresent(httpStatusTxt -> errorDetails.put(
                         ERROR_DETAILS_HTTP_STATUS_TEXT, StringUtils.fromString(httpStatusTxt)));
             }
-            errorDetails.put(ERROR_DETAILS_ERROR_CODE, StringUtils.fromString(awsErrorDetails.errorCode()));
-            errorDetails.put(ERROR_DETAILS_ERROR_MESSAGE, StringUtils.fromString(awsErrorDetails.errorMessage()));
+            if (Objects.nonNull(awsErrorDetails.errorCode())) {
+                errorDetails.put(ERROR_DETAILS_ERROR_CODE, StringUtils.fromString(awsErrorDetails.errorCode()));
+            }
+            if (Objects.nonNull(awsErrorDetails.errorMessage())) {
+                errorDetails.put(ERROR_DETAILS_ERROR_MESSAGE,
+                        StringUtils.fromString(awsErrorDetails.errorMessage()));
+            }
+            if (Objects.nonNull(awsServiceException.requestId())) {
+                errorDetails.put(ERROR_DETAILS_REQUEST_ID, StringUtils.fromString(awsServiceException.requestId()));
+            }
         }
         return ErrorCreator.createError(
                 ModuleUtils.getModule(), ERROR, StringUtils.fromString(message), cause, errorDetails);

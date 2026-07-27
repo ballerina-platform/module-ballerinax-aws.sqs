@@ -16,6 +16,7 @@
 
 import ballerina/lang.runtime;
 import ballerina/test;
+import ballerinax/aws;
 
 isolated boolean autoDeleteMessageReceived = false;
 isolated boolean manualDeleteMessageReceived = false;
@@ -39,7 +40,7 @@ string testQueue14Url = "";
 string testQueue15Url = "";
 
 ConnectionConfig connectionConfig = {
-    region: awsRegion,
+    region: aws:US_EAST_1,
     auth: staticAuth
 };
 

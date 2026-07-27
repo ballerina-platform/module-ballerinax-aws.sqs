@@ -15,6 +15,7 @@
 // under the License.
 
 import ballerina/io;
+import ballerinax/aws;
 import ballerinax/aws.sqs;
 
 configurable string fifoQueueName = ?;
@@ -23,7 +24,7 @@ configurable string secretAccessKey = ?;
 
 public function main() returns error? {
     sqs:Client sqsClient = check new ({
-        region: sqs:US_EAST_2,
+        region: aws:US_EAST_1,
         auth: {
             accessKeyId,
             secretAccessKey

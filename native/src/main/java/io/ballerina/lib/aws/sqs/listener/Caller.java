@@ -16,6 +16,8 @@
 
 package io.ballerina.lib.aws.sqs.listener;
 
+import java.util.Objects;
+
 import io.ballerina.runtime.api.values.BError;
 import io.ballerina.runtime.api.values.BObject;
 import software.amazon.awssdk.services.sqs.SqsClient;
@@ -60,7 +62,9 @@ public final class Caller {
         } catch (BError e) {
             return e;
         } catch (Throwable e) {
-            return createError("Failed to acknowledge message(s): " + e.getMessage(), e);
+            String msg = "Failed to acknowledge message(s): "
+                    + Objects.requireNonNullElse(e.getMessage(), "Unknown error");
+            return createError(msg, e);
         }
         return null;
     }
