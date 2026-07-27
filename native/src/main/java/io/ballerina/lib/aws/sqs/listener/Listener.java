@@ -73,9 +73,7 @@ public final class Listener {
             AtomicBoolean listenerStopped = new AtomicBoolean(true);
             bListener.addNativeData(NATIVE_STOPPED, listenerStopped);
         } catch (BError e) {
-            String msg = "Failed to initialize SQS listener: "
-                    + Objects.requireNonNullElse(e.getMessage(), "Unknown error");
-            return CommonUtils.createError(msg, e);
+            return e;
         } catch (Exception e) {
             String msg = "Failed to initialize SQS listener: "
                     + Objects.requireNonNullElse(e.getMessage(), "Unknown error");
