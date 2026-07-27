@@ -764,13 +764,6 @@ function testGetQueueAttributesWithSomeAttributes() returns error? {
     };
     GetQueueAttributesResponse|Error result = sqsClient->getQueueAttributes(queueUrl, config);
     test:assertTrue(result is GetQueueAttributesResponse);
-    test:assertFalse(result is Error);
-    if result is error {
-        aws:ErrorDetails detail = result.detail();
-        test:assertEquals(detail.errorCode, "InvalidAttributeName");
-        test:assertEquals(detail.errorMessage, "Unknown Attribute FifoQueue.");
-        test:assertEquals(detail.httpStatusCode, 400);
-    }
 }
 
 @test:Config {
