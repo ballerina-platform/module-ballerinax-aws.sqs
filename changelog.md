@@ -111,18 +111,6 @@ if result is sqs:Error {
 }
 ```
 
-Configurations that used one of the removed `Region` members should supply the region string directly:
-
-```ballerina
-// 4.x
-sqs:ConnectionConfig config = {region: sqs:US_ISO_EAST_1, auth: authConfig};
-```
-
-```ballerina
-// 5.0.0
-sqs:ConnectionConfig config = {region: "us-iso-east-1", auth: authConfig};
-```
-
 ## [4.1.0] - 2026-02-26
 
 ### Added
