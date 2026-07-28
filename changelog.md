@@ -32,21 +32,7 @@ It contains breaking changes. See the "Migrating from 4.x" section below.
   type references need updating.
 - **[Breaking]** `sqs:ErrorDetails` has been removed in favour of `aws:ErrorDetails`. The replacement record
   is structurally identical to the one it replaces.
-- **[Breaking]** The `sqs:Region` enum has been removed in favour of `aws:Region`. The following members
-  have no `aws:Region` equivalent and must now be supplied as plain region strings
-  (for example, `region: "us-iso-east-1"`):
-
-  | Removed member | Region string |
-  | --- | --- |
-  | `AWS_GLOBAL` | `aws-global` |
-  | `AWS_CN_GLOBAL` | `aws-cn-global` |
-  | `AWS_US_GOV_GLOBAL` | `aws-us-gov-global` |
-  | `AWS_ISO_GLOBAL` | `aws-iso-global` |
-  | `AWS_ISO_B_GLOBAL` | `aws-iso-b-global` |
-  | `US_ISO_EAST_1` | `us-iso-east-1` |
-  | `US_ISO_WEST_1` | `us-iso-west-1` |
-  | `US_ISOB_EAST_1` | `us-isob-east-1` |
-  | `EU_ISOE_WEST_1` | `eu-isoe-west-1` |
+- **[Breaking]** The `sqs:Region` enum has been removed in favour of `aws:Region`.
 
 ### Added
 - Support for four additional AWS credential sources, available through `auth:AuthConfig`:
