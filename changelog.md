@@ -20,12 +20,18 @@ It contains breaking changes. See the "Migrating from 4.x" section below.
 - **[Breaking]** The `ConnectionConfig.region` field type changed from `sqs:Region` to `aws:Region|string`.
   The `string` alternative allows regions that are not yet present in the `aws:Region` enum to be supplied
   directly.
+- **[Breaking]** The detail type of `sqs:Error` changed from `sqs:ErrorDetails` to `aws:ErrorDetails`, so that
+  all AWS connectors report failures through a single, shared error detail record. The two records have
+  identical fields, so field access on the value returned by `error.detail()` continues to work unchanged —
+  only explicit `sqs:ErrorDetails` type references need updating.
 
 ### Removed
 - **[Breaking]** `sqs:StaticAuthConfig`, `sqs:ProfileAuthConfig` and `sqs:DEFAULT_CREDENTIALS` have been
   removed in favour of the `ballerinax/aws.auth` equivalents. The replacement records are structurally
   identical to the ones they replace, so inline record literals continue to work unchanged — only explicit
   type references need updating.
+- **[Breaking]** `sqs:ErrorDetails` has been removed in favour of `aws:ErrorDetails`. The replacement record
+  is structurally identical to the one it replaces.
 - **[Breaking]** The `sqs:Region` enum has been removed in favour of `aws:Region`. The following members
   have no `aws:Region` equivalent and must now be supplied as plain region strings
   (for example, `region: "us-iso-east-1"`):
@@ -51,7 +57,7 @@ It contains breaking changes. See the "Migrating from 4.x" section below.
 - A new optional `ConnectionConfig.endpoint` field of type `aws:EndpointConfig`, for selecting FIPS or
   dualstack endpoint variants and for overriding the endpoint entirely (for example, LocalStack or VPC
   interface endpoints).
-- A new optional `requestId` field on `ErrorDetails`, carrying the AWS request ID of the failed call to
+- A new optional `requestId` field on `aws:ErrorDetails`, carrying the AWS request ID of the failed call to
   simplify support escalations.
 - New `aws:Region` members not present in the former `sqs:Region` enum: `AP_EAST_2`, `AP_SOUTHEAST_5`,
   `AP_SOUTHEAST_7` and `MX_CENTRAL_1`.
@@ -98,6 +104,25 @@ import ballerinax/aws.auth;
 auth:StaticAuthConfig authConfig = {accessKeyId, secretAccessKey};
 auth:ProfileAuthConfig authConfig = {profileName: "dev"};
 sqs:ConnectionConfig config = {region: aws:US_EAST_1, auth: auth:DEFAULT_CREDENTIALS};
+```
+
+Code that named `sqs:ErrorDetails` when inspecting an error must use `aws:ErrorDetails` instead. Field
+access is unchanged:
+
+```ballerina
+// 4.x
+if result is sqs:Error {
+    sqs:ErrorDetails details = result.detail();
+    io:println(details.errorCode);
+}
+```
+
+```ballerina
+// 5.0.0
+if result is sqs:Error {
+    aws:ErrorDetails details = result.detail();
+    io:println(details.errorCode);
+}
 ```
 
 Configurations that used one of the removed `Region` members should supply the region string directly:

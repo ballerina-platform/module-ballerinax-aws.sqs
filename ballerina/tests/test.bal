@@ -129,7 +129,7 @@ function testCreateQueueWithInvalidName() returns error? {
     string|Error result = sqsClient->createQueue(queueName);
     test:assertTrue(result is Error);
     if result is error {
-        ErrorDetails details = result.detail();
+        aws:ErrorDetails details = result.detail();
         test:assertEquals(details.errorCode, "InvalidParameterValue");
         test:assertEquals(details.httpStatusCode, 400);
         test:assertEquals(details.errorMessage, "Can only include alphanumeric characters, hyphens, or underscores. 1 to 80 in length");
@@ -149,7 +149,7 @@ function testCreateQueueWithInvalidAttributes() returns error? {
     string|Error result = sqsClient->createQueue(queueName, config);
     test:assertTrue(result is Error);
     if result is error {
-        ErrorDetails details = result.detail();
+        aws:ErrorDetails details = result.detail();
         test:assertEquals(details.errorCode, "InvalidAttributeValue");
         test:assertEquals(details.httpStatusCode, 400);
         test:assertEquals(details.errorMessage, "Invalid value for the parameter DelaySeconds.");
@@ -242,7 +242,7 @@ function testSendMessageToNonexistentQueue() returns error? {
     SendMessageResponse|Error result = sqsClient->sendMessage(queueUrl, message, sendMessageConfig);
     test:assertTrue(result is Error);
     if result is error {
-        ErrorDetails details = result.detail();
+        aws:ErrorDetails details = result.detail();
         test:assertEquals(details.httpStatusCode, 400);
         test:assertEquals(details.errorCode, "AWS.SimpleQueueService.NonExistentQueue");
         string? errorMessage = details.errorMessage;
@@ -264,7 +264,7 @@ function testSendMessageWithEmptyMessageBody() returns error? {
     SendMessageResponse|Error result = sqsClient->sendMessage(queueUrl, message);
     test:assertTrue(result is Error);
     if result is error {
-        ErrorDetails details = result.detail();
+        aws:ErrorDetails details = result.detail();
         test:assertEquals(details.httpStatusCode, 400);
         test:assertEquals(details.errorCode, "MissingParameter");
         test:assertEquals(details.errorMessage, "The request must contain the parameter MessageBody.");
@@ -284,7 +284,7 @@ function testSendMessageWithInvalidDelay() returns error? {
     SendMessageResponse|Error result = sqsClient->sendMessage(queueUrl, message, sendMessageConfig);
     test:assertTrue(result is Error);
     if result is error {
-        ErrorDetails details = result.detail();
+        aws:ErrorDetails details = result.detail();
         test:assertEquals(details.httpStatusCode, 400);
         test:assertEquals(details.errorCode, "InvalidParameterValue");
         test:assertEquals(details.errorMessage, "Value -1 for parameter DelaySeconds is invalid. Reason: DelaySeconds must be >= 0 and <= 900.");
@@ -304,7 +304,7 @@ function testSendMessageWithExcessiveDelay() returns error? {
     SendMessageResponse|Error result = sqsClient->sendMessage(queueUrl, message, sendMessageConfig);
     test:assertTrue(result is Error);
     if result is error {
-        ErrorDetails details = result.detail();
+        aws:ErrorDetails details = result.detail();
         test:assertEquals(details.httpStatusCode, 400);
         test:assertEquals(details.errorCode, "InvalidParameterValue");
         test:assertEquals(details.errorMessage, "Value 1000 for parameter DelaySeconds is invalid. Reason: DelaySeconds must be >= 0 and <= 900.");
@@ -329,7 +329,7 @@ function testSendMessageWithInvalidAttributes() returns error? {
     SendMessageResponse|Error result = sqsClient->sendMessage(queueUrl, message, sendMessageConfig);
     test:assertTrue(result is Error);
     if result is error {
-        ErrorDetails details = result.detail();
+        aws:ErrorDetails details = result.detail();
         test:assertEquals(details.httpStatusCode, 400);
         test:assertEquals(details.errorCode, "InvalidParameterValue");
         test:assertEquals(details.errorMessage, "The type of message (user) attribute 'invalidAttribute' is invalid. " +
@@ -397,7 +397,7 @@ function testSendMessageBatchWithDuplicatemessageId() returns error? {
     if result is SendMessageBatchResponse {
         test:assertFail("Expected error for duplicate message IDs, but got a successful response: " + result.toString());
     } else {
-        ErrorDetails details = result.detail();
+        aws:ErrorDetails details = result.detail();
         test:assertEquals(details.httpStatusCode, 400);
         test:assertEquals(details.errorCode, "AWS.SimpleQueueService.BatchEntryIdsNotDistinct");
         test:assertEquals(details.errorMessage, "Id idA repeated.");
@@ -439,7 +439,7 @@ function testSendMessageBatchExceedsLimit() returns error? {
     SendMessageBatchResponse|Error result = sqsClient->sendMessageBatch(queueUrl, entries);
     test:assertTrue(result is Error);
     if result is error {
-        ErrorDetails details = result.detail();
+        aws:ErrorDetails details = result.detail();
         test:assertEquals(details.httpStatusCode, 400);
         test:assertEquals(details.errorCode, "AWS.SimpleQueueService.TooManyEntriesInBatchRequest");
         test:assertEquals(details.errorMessage, "Maximum number of entries per request are 10. You have sent 11.");
@@ -456,7 +456,7 @@ function testSendMessageBatchWithEmptyList() returns error? {
     SendMessageBatchResponse|Error result = sqsClient->sendMessageBatch(queueUrl, entries);
     test:assertTrue(result is Error);
     if result is error {
-        ErrorDetails details = result.detail();
+        aws:ErrorDetails details = result.detail();
         test:assertEquals(details.httpStatusCode, 400);
         test:assertEquals(details.errorCode, "AWS.SimpleQueueService.EmptyBatchRequest");
         test:assertEquals(details.errorMessage, "There should be at least one SendMessageBatchRequestEntry in the request.");
@@ -485,7 +485,7 @@ function testSendMessageBatchExceedsTotalSizeLimit() returns error? {
     SendMessageBatchResponse|Error result = sqsClient->sendMessageBatch(queueUrl, entries);
     test:assertTrue(result is Error);
     if result is error {
-        ErrorDetails details = result.detail();
+        aws:ErrorDetails details = result.detail();
         test:assertEquals(details.httpStatusCode, 400);
         test:assertEquals(details.errorCode, "AWS.SimpleQueueService.BatchRequestTooLong");
         test:assertEquals(details.errorMessage, "Batch requests cannot be longer than 1048576 bytes. You have sent 1048580 bytes.");
@@ -541,7 +541,7 @@ isolated function testReceiveMessageInvalidQueueUrl() returns error? {
     Message[]|Error result = sqsClient->receiveMessage(queueUrl);
     test:assertTrue(result is Error);
     if result is error {
-        ErrorDetails details = result.detail();
+        aws:ErrorDetails details = result.detail();
         test:assertEquals(details.httpStatusCode, 404);
         test:assertEquals(details.errorCode, "InvalidAddress");
     }
@@ -559,7 +559,7 @@ function testReceiveMessageInvalidMaxMessages() returns error? {
     Message[]|Error result = sqsClient->receiveMessage(queueUrl, config);
     test:assertTrue(result is Error);
     if result is error {
-        ErrorDetails details = result.detail();
+        aws:ErrorDetails details = result.detail();
         test:assertEquals(details.httpStatusCode, 400);
         test:assertEquals(details.errorCode, "InvalidParameterValue");
     }
@@ -607,7 +607,7 @@ function testDeleteMessageWithInvalidReceiptHandle() returns error? {
     Error? deleteResult = sqsClient->deleteMessage(queueUrl, fakeReceiptHandle);
     test:assertTrue(deleteResult is Error);
     if deleteResult is error {
-        ErrorDetails details = deleteResult.detail();
+        aws:ErrorDetails details = deleteResult.detail();
         test:assertEquals(details.httpStatusCode, 404);
         test:assertEquals(details.errorCode, "ReceiptHandleIsInvalid");
     }
@@ -690,7 +690,7 @@ function testDeleteMessageBatchWithDuplicateIds() returns error? {
     DeleteMessageBatchResponse|Error result = sqsClient->deleteMessageBatch(queueUrl, entries);
     test:assertTrue(result is Error);
     if result is error {
-        ErrorDetails details = result.detail();
+        aws:ErrorDetails details = result.detail();
         test:assertEquals(details.errorCode, "AWS.SimpleQueueService.BatchEntryIdsNotDistinct");
         test:assertEquals(details.httpStatusCode, 400);
         test:assertEquals(details.errorMessage, "Id dup-id repeated.");
@@ -725,7 +725,7 @@ function testSetQueueAttribuesWithInvalidDelay() returns error? {
     Error? result = sqsClient->setQueueAttributes(queueUrl, attributes);
     test:assertTrue(result is Error);
     if result is error {
-        ErrorDetails details = result.detail();
+        aws:ErrorDetails details = result.detail();
         test:assertEquals(details.errorCode, "InvalidAttributeValue");
         test:assertEquals(details.httpStatusCode, 400);
         test:assertEquals(details.errorMessage, "Invalid value for the parameter DelaySeconds.");
@@ -764,13 +764,6 @@ function testGetQueueAttributesWithSomeAttributes() returns error? {
     };
     GetQueueAttributesResponse|Error result = sqsClient->getQueueAttributes(queueUrl, config);
     test:assertTrue(result is GetQueueAttributesResponse);
-    test:assertFalse(result is Error);
-    if result is error {
-        ErrorDetails detail = result.detail();
-        test:assertEquals(detail.errorCode, "InvalidAttributeName");
-        test:assertEquals(detail.errorMessage, "Unknown Attribute FifoQueue.");
-        test:assertEquals(detail.httpStatusCode, 400);
-    }
 }
 
 @test:Config {
@@ -865,7 +858,7 @@ isolated function testGetNonExistentQueueUrl() returns error? {
     string|Error? result = sqsClient->getQueueUrl(queueName);
     test:assertTrue(result is Error);
     if result is error {
-        ErrorDetails details = result.detail();
+        aws:ErrorDetails details = result.detail();
         test:assertEquals(details.errorCode, "AWS.SimpleQueueService.NonExistentQueue");
         test:assertEquals(details.errorMessage, "The specified queue does not exist.");
         test:assertEquals(details.httpStatusCode, 400);
@@ -898,7 +891,7 @@ function testTagQueueWithEmptyTagKey() returns error? {
     Error? result = sqsClient->tagQueue(queueUrl, tags);
     test:assertTrue(result is Error);
     if result is error {
-        ErrorDetails details = result.detail();
+        aws:ErrorDetails details = result.detail();
         test:assertEquals(details.errorCode, "InvalidParameterValue");
         test:assertEquals(details.httpStatusCode, 400);
         test:assertEquals(details.errorMessage, "Tag keys must be between 1 and 128 characters in length.");
@@ -1055,7 +1048,7 @@ isolated function testDeleteNonExistentQueue() returns error? {
     Error? result = sqsClient->deleteQueue(queueUrl);
     test:assertTrue(result is Error, "Expected unsuccessful deletion.");
     if result is error {
-        ErrorDetails details = result.detail();
+        aws:ErrorDetails details = result.detail();
         test:assertEquals(details.errorCode, "AWS.SimpleQueueService.NonExistentQueue");
         test:assertEquals(details.httpStatusCode, 400);
         string? errorMessage = details.errorMessage;
