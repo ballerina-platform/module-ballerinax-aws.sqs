@@ -46,7 +46,6 @@ import io.ballerina.runtime.api.values.BMap;
 import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.api.values.BString;
 
-import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
 import software.amazon.awssdk.services.sqs.SqsClient;
 import software.amazon.awssdk.services.sqs.SqsClientBuilder;
 import software.amazon.awssdk.services.sqs.model.CancelMessageMoveTaskRequest;
@@ -86,14 +85,36 @@ import software.amazon.awssdk.services.sqs.model.UntagQueueRequest;
 
 public class NativeClientAdaptor {
     public static final String NATIVE_SQS_CLIENT = "nativeClient";
-    public static final String NATIVE_CREDENTIALS_PROVIDER = "nativeCredentialsProvider";
     public static final String NATIVE_CLIENT_CLOSED = "nativeClientClosed";
 
     private NativeClientAdaptor() {
     }
 
     public static SqsClient createSqsClient(BMap<BString, Object> bConnectionConfig) {
-        return buildSqsClient(new ConnectionConfig(bConnectionConfig));
+        ConnectionConfig connectionConfig = new ConnectionConfig(bConnectionConfig);
+        try {
+            return buildSqsClient(connectionConfig);
+        } catch (Exception e) {
+            // The credentials provider is built before the client, and it is the client
+            // that releases it. Hence, it has to be released here when there is no client.
+            releaseProvider(connectionConfig, e);
+            throw e;
+        }
+    }
+
+    /**
+     * Releases the credentials provider of a configuration whose client could not be
+     * built, recording any failure to do so on the originating exception.
+     */
+    private static void releaseProvider(ConnectionConfig connectionConfig, Exception failure) {
+        if (connectionConfig == null) {
+            return;
+        }
+        try {
+            ProviderFactory.closeProvider(connectionConfig.credentialsProvider());
+        } catch (Exception closeFailure) {
+            failure.addSuppressed(closeFailure);
+        }
     }
 
     private static SqsClient buildSqsClient(ConnectionConfig connectionConfig) {
@@ -113,20 +134,8 @@ public class NativeClientAdaptor {
             connectionConfig = new ConnectionConfig(bConnectionConfig);
             SqsClient nativeClient = buildSqsClient(connectionConfig);
             bClient.addNativeData(NATIVE_SQS_CLIENT, nativeClient);
-            // Retained for release on close(): the SDK client does not close a
-            // caller-supplied credentials provider.
-            bClient.addNativeData(NATIVE_CREDENTIALS_PROVIDER, connectionConfig.credentialsProvider());
         } catch (Exception e) {
-            // Building the credentials provider can open an STS/SSO client and start a
-            // background refresh thread. close() never runs for a client whose init failed,
-            // so release it here rather than leaving it stranded.
-            if (connectionConfig != null) {
-                try {
-                    ProviderFactory.closeProvider(connectionConfig.credentialsProvider());
-                } catch (Exception closeFailure) {
-                    e.addSuppressed(closeFailure);
-                }
-            }
+            releaseProvider(connectionConfig, e);
             String errorMsg = String.format("Error occurred while initializing the SQS client: %s",
                     Objects.requireNonNullElse(e.getMessage(), "Unknown error"));
             return CommonUtils.createError(errorMsg, e);
@@ -473,38 +482,19 @@ public class NativeClientAdaptor {
             return null;
         }
         Object client = bClient.getNativeData(NATIVE_SQS_CLIENT);
-        Exception closeException = null;
         try {
             if (client instanceof SqsClient sqsClient) {
+                // This also releases the configured credentials provider, along with any
+                // STS/SSO client and background refresh thread it holds.
                 sqsClient.close();
             }
             // Clear the stale reference
             bClient.addNativeData(NATIVE_SQS_CLIENT, null);
         } catch (Exception e) {
-            closeException = e;
-        } finally {
-            // Always release the credentials provider's resources (e.g. STS/SSO
-            // background refresh threads), even if closing the SQS client itself failed.
-            try {
-                Object provider = bClient.getNativeData(NATIVE_CREDENTIALS_PROVIDER);
-                if (provider instanceof AwsCredentialsProvider credentialsProvider) {
-                    ProviderFactory.closeProvider(credentialsProvider);
-                }
-                // Clear the stale reference
-                bClient.addNativeData(NATIVE_CREDENTIALS_PROVIDER, null);
-            } catch (Exception e) {
-                if (closeException == null) {
-                    closeException = e;
-                } else {
-                    closeException.addSuppressed(e);
-                }
-            }
+            String errorMsg = String.format("Error occurred while closing the SQS client: %s",
+                    Objects.requireNonNullElse(e.getMessage(), "Unknown error"));
+            return CommonUtils.createError(errorMsg, e);
         }
-        if (closeException == null) {
-            return null;
-        }
-        String errorMsg = String.format("Error occurred while closing the SQS client: %s",
-                Objects.requireNonNullElse(closeException.getMessage(), "Unknown error"));
-        return CommonUtils.createError(errorMsg, closeException);
+        return null;
     }
 }

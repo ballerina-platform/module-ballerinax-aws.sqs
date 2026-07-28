@@ -28,7 +28,7 @@ string testAttributesQueueUrl = "";
 }
 isolated function testInitUsingStaticAuth() returns error? {
     ConnectionConfig connectionConfig = {
-        region: aws:US_EAST_1,
+        region: awsRegion,
         auth: staticAuth
     };
     Client sqsClient = check new (connectionConfig);
@@ -41,7 +41,7 @@ isolated function testInitUsingStaticAuth() returns error? {
 }
 isolated function testInitUsingProfileAuth() returns error? {
     ConnectionConfig connectionConfig = {
-        region: aws:US_EAST_1,
+        region: awsRegion,
         auth: profileAuth
     };
     Client sqsClient = check new (connectionConfig);

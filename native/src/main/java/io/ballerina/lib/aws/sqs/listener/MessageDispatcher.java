@@ -147,7 +147,9 @@ public final class MessageDispatcher {
             } catch (BError err) {
                 String msg = "Failed to invoke onError method: "
                         + Objects.requireNonNullElse(err.getMessage(), "Unknown error");
-                CommonUtils.createError(msg, err);
+                // The service's own error handler failed, hence there is nothing left to
+                // propagate it to.
+                CommonUtils.createError(msg, err).printStackTrace();
             }
         }
     }

@@ -25,6 +25,8 @@ final string secretAccessKey = os:getEnv("BALLERINA_AWS_TEST_SECRET_ACCESS_KEY")
 final string profileName = os:getEnv("BALLERINA_AWS_TEST_PROFILE_NAME");
 final string credentialsFilePath = os:getEnv("BALLERINA_AWS_TEST_CREDENTIALS_FILE");
 
+final readonly & aws:Region awsRegion = aws:US_EAST_2;
+
 final readonly & auth:StaticAuthConfig staticAuth = {
     accessKeyId,
     secretAccessKey
@@ -40,17 +42,17 @@ final Client sqsClient = check initClient();
 isolated function initClient() returns Client|error {
     if authType == "default" {
         return new ({
-            region: aws:US_EAST_1,
+            region: awsRegion,
             auth: auth:DEFAULT_CREDENTIALS
         });
     } else if authType == "profile" {
         return new ({
-            region: aws:US_EAST_1,
+            region: awsRegion,
             auth: profileAuth
         });
     } else if accessKeyId != "" && secretAccessKey != "" {
         return new ({
-            region: aws:US_EAST_1,
+            region: awsRegion,
             auth: staticAuth
         });
     }

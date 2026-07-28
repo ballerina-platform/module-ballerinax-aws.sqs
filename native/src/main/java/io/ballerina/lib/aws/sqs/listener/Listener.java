@@ -73,13 +73,31 @@ public final class Listener {
             AtomicBoolean listenerStopped = new AtomicBoolean(true);
             bListener.addNativeData(NATIVE_STOPPED, listenerStopped);
         } catch (BError e) {
+            closeSqsClient(bListener);
             return e;
         } catch (Exception e) {
+            closeSqsClient(bListener);
             String msg = "Failed to initialize SQS listener: "
                     + Objects.requireNonNullElse(e.getMessage(), "Unknown error");
             return CommonUtils.createError(msg, e);
         }
         return null;
+    }
+
+    /**
+     * Closes the native SQS client of a listener that failed to initialize. The listener
+     * is never started, hence never stopped, so a client created before the failure would
+     * otherwise be left open along with its credentials provider.
+     */
+    private static void closeSqsClient(BObject bListener) {
+        try {
+            if (bListener.getNativeData(NativeClientAdaptor.NATIVE_SQS_CLIENT) instanceof SqsClient client) {
+                client.close();
+            }
+            bListener.addNativeData(NativeClientAdaptor.NATIVE_SQS_CLIENT, null);
+        } catch (Exception e) {
+            // Nothing can be done about a failure while cleaning up after another failure.
+        }
     }
 
     /**

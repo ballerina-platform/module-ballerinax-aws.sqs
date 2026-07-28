@@ -21,8 +21,9 @@ It contains breaking changes. See the "Migrating from 4.x" section below.
   The `string` alternative allows regions that are not yet present in the `aws:Region` enum to be supplied
   directly.
 - **[Breaking]** The detail type of `sqs:Error` changed from `sqs:ErrorDetails` to `aws:ErrorDetails`, so that
-  all AWS connectors report failures through a single, shared error detail record. The two records have
-  identical fields, so field access on the value returned by `error.detail()` continues to work unchanged —
+  all AWS connectors report failures through a single, shared error detail record. The two records have identical fields,
+  with `aws:ErrorDetails` additionally including the optional `requestId` field, so field access on the value
+  returned by `error.detail()` continues to work unchanged —
   only explicit `sqs:ErrorDetails` type references need updating.
 
 ### Removed
