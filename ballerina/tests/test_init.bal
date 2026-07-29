@@ -15,6 +15,8 @@
 // under the License.
 
 import ballerina/os;
+import ballerinax/aws;
+import ballerinax/aws.auth;
 import ballerina/test;
 
 final string authType = os:getEnv("BALLERINA_AWS_TEST_AUTH_TYPE");
@@ -23,14 +25,14 @@ final string secretAccessKey = os:getEnv("BALLERINA_AWS_TEST_SECRET_ACCESS_KEY")
 final string profileName = os:getEnv("BALLERINA_AWS_TEST_PROFILE_NAME");
 final string credentialsFilePath = os:getEnv("BALLERINA_AWS_TEST_CREDENTIALS_FILE");
 
-final readonly & Region awsRegion = US_EAST_2;
+final readonly & aws:Region awsRegion = aws:US_EAST_2;
 
-final readonly & StaticAuthConfig staticAuth = {
+final readonly & auth:StaticAuthConfig staticAuth = {
     accessKeyId,
     secretAccessKey
 };
 
-final readonly & ProfileAuthConfig profileAuth = {
+final readonly & auth:ProfileAuthConfig profileAuth = {
     profileName,
     credentialsFilePath
 };
@@ -41,7 +43,7 @@ isolated function initClient() returns Client|error {
     if authType == "default" {
         return new ({
             region: awsRegion,
-            auth: DEFAULT_CREDENTIALS
+            auth: auth:DEFAULT_CREDENTIALS
         });
     } else if authType == "profile" {
         return new ({

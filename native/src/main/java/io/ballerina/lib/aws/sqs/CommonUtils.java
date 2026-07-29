@@ -16,18 +16,12 @@
 
 package io.ballerina.lib.aws.sqs;
 
-import java.util.Objects;
-
+import io.ballerina.lib.aws.ErrorUtils;
 import io.ballerina.runtime.api.creators.ErrorCreator;
-import io.ballerina.runtime.api.creators.ValueCreator;
 import io.ballerina.runtime.api.utils.StringUtils;
 import io.ballerina.runtime.api.values.BError;
 import io.ballerina.runtime.api.values.BMap;
 import io.ballerina.runtime.api.values.BString;
-
-import software.amazon.awssdk.awscore.exception.AwsErrorDetails;
-import software.amazon.awssdk.awscore.exception.AwsServiceException;
-import software.amazon.awssdk.http.SdkHttpResponse;
 
 /**
  * {@code CommonUtils} Contains the common utility functions for the Ballerina
@@ -37,36 +31,28 @@ import software.amazon.awssdk.http.SdkHttpResponse;
 public final class CommonUtils {
 
     private static final String ERROR = "Error";
-    private static final String ERROR_DETAILS = "ErrorDetails";
-    private static final BString ERROR_DETAILS_HTTP_STATUS_CODE = StringUtils.fromString("httpStatusCode");
-    private static final BString ERROR_DETAILS_HTTP_STATUS_TEXT = StringUtils.fromString("httpStatusText");
-    private static final BString ERROR_DETAILS_ERROR_CODE = StringUtils.fromString("errorCode");
-    private static final BString ERROR_DETAILS_ERROR_MESSAGE = StringUtils.fromString("errorMessage");
 
     private CommonUtils() {
     }
 
+    /**
+     * Creates an {@code sqs:Error} carrying the shared {@code ballerinax/aws:ErrorDetails}
+     * built from the given exception.
+     */
     public static BError createError(String message, Throwable exception) {
         BError cause = ErrorCreator.createError(exception);
-        BMap<BString, Object> errorDetails = ValueCreator.createRecordValue(
-                ModuleUtils.getModule(), ERROR_DETAILS);
-        if (exception instanceof AwsServiceException awsServiceException &&
-                Objects.nonNull(awsServiceException.awsErrorDetails())) {
-            AwsErrorDetails awsErrorDetails = awsServiceException.awsErrorDetails();
-            SdkHttpResponse sdkResponse = awsErrorDetails.sdkHttpResponse();
-            if (Objects.nonNull(sdkResponse)) {
-                errorDetails.put(ERROR_DETAILS_HTTP_STATUS_CODE, sdkResponse.statusCode());
-                sdkResponse.statusText().ifPresent(httpStatusTxt -> errorDetails.put(
-                        ERROR_DETAILS_HTTP_STATUS_TEXT, StringUtils.fromString(httpStatusTxt)));
-            }
-            errorDetails.put(ERROR_DETAILS_ERROR_CODE, StringUtils.fromString(awsErrorDetails.errorCode()));
-            errorDetails.put(ERROR_DETAILS_ERROR_MESSAGE, StringUtils.fromString(awsErrorDetails.errorMessage()));
-        }
+        BMap<BString, Object> errorDetails = ErrorUtils.createErrorDetails(exception);
         return ErrorCreator.createError(
                 ModuleUtils.getModule(), ERROR, StringUtils.fromString(message), cause, errorDetails);
     }
 
+    /**
+     * Creates an {@code sqs:Error} for a failure that did not originate from an AWS
+     * service call, hence with all the {@code ballerinax/aws:ErrorDetails} fields unset.
+     */
     public static BError createError(String message) {
-        return ErrorCreator.createError(ModuleUtils.getModule(), ERROR, StringUtils.fromString(message), null, null);
+        BMap<BString, Object> errorDetails = ErrorUtils.createErrorDetails(null);
+        return ErrorCreator.createError(
+                ModuleUtils.getModule(), ERROR, StringUtils.fromString(message), null, errorDetails);
     }
 }

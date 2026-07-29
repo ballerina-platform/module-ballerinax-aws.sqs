@@ -15,6 +15,7 @@
 // under the License.
 
 import ballerina/log;
+import ballerinax/aws;
 import ballerinax/aws.sqs;
 
 configurable string queueName = ?;
@@ -28,7 +29,7 @@ sqs:PollingConfig pollingConfig = {
 };
 
 sqs:ConnectionConfig connectionConfig = {
-    region: sqs:US_EAST_2,
+    region: aws:US_EAST_1,
     auth: {
         accessKeyId,
         secretAccessKey

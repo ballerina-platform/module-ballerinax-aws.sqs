@@ -16,6 +16,8 @@
 
 package io.ballerina.lib.aws.sqs.listener;
 
+import java.util.Objects;
+
 import io.ballerina.lib.aws.sqs.CommonUtils;
 import io.ballerina.lib.aws.sqs.mappers.ReceiveMessageMapper;
 import io.ballerina.runtime.api.Environment;
@@ -119,7 +121,8 @@ public final class MessageDispatcher {
                     callback.notifySuccess(null);
                 }
             } catch (Exception e) {
-                BError err = CommonUtils.createError("Dispatch error: " + e.getMessage(), e);
+                String msg = "Dispatch error: " + Objects.requireNonNullElse(e.getMessage(), "Unknown error");
+                BError err = CommonUtils.createError(msg, e);
                 callback.notifyFailure(err);
             }
         });
@@ -142,7 +145,11 @@ public final class MessageDispatcher {
                         meta,
                         error, true);
             } catch (BError err) {
-                CommonUtils.createError("Failed to invoke onError method: " + err.getMessage(), err);
+                String msg = "Failed to invoke onError method: "
+                        + Objects.requireNonNullElse(err.getMessage(), "Unknown error");
+                // The service's own error handler failed, hence there is nothing left to
+                // propagate it to.
+                CommonUtils.createError(msg, err).printStackTrace();
             }
         }
     }

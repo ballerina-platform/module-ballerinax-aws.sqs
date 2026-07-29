@@ -14,17 +14,9 @@
 // specific language governing permissions and limitations
 // under the License.
 
-# Represents a AWS SQS  distinct error.
-public type Error distinct error<ErrorDetails>;
+import ballerinax/aws;
 
-# The error details type for the AWS SQS  module.
-public type ErrorDetails record {|
-    # The HTTP status code for the error
-    int httpStatusCode?;
-    # The HTTP status text returned from the service
-    string httpStatusText?;
-    # The error code associated with the response
-    string errorCode?;
-    # The human-readable error message provided by the service
-    string errorMessage?;
-|};
+# Represents a AWS SQS distinct error. The fields of `aws:ErrorDetails` are populated
+# when the failure originates from an AWS SQS service call, and are left unset when the
+# failure occurs before a response is received (e.g. an invalid configuration).
+public type Error distinct error<aws:ErrorDetails>;
