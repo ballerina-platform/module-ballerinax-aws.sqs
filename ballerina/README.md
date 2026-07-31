@@ -13,53 +13,11 @@ Amazon Simple Queue Service (SQS) is a fully managed message queuing service tha
 
 ## Setup guide
 
-### Login to AWS Console
+### Obtain IAM user credentials
 
-Log into the [AWS Management Console](https://console.aws.amazon.com/console). If you don’t have an AWS account yet, you can create one by visiting the AWS [sign-up](https://aws.amazon.com/free/) page. Sign up is free, and you can explore many services under the Free Tier.
+To create an IAM user and generate an access key, follow the [obtaining IAM user credentials](https://central.ballerina.io/ballerinax/aws/latest#obtaining-iam-user-credentials) guide.
 
-### Create a user
-
-1. In the AWS Management Console, search for IAM in the services search bar.
-2. Click on IAM
-
-   ![create-user-1.png](https://raw.githubusercontent.com/ballerina-platform/module-ballerinax-aws.sqs/refs/heads/master/docs/setup/resources/create-user-1.png)
-
-3. Click Users
-
-   ![create-user-2.png](https://raw.githubusercontent.com/ballerina-platform/module-ballerinax-aws.sqs/refs/heads/master/docs/setup/resources/create-user-2.png)
-
-4. Click Create User
-
-   ![create-user-3.png](https://raw.githubusercontent.com/ballerina-platform/module-ballerinax-aws.sqs/refs/heads/master/docs/setup/resources/create-user-3.png)
-
-5. Provide a suitable name for the user and continue
-
-   ![specify-user-details.png](https://raw.githubusercontent.com/ballerina-platform/module-ballerinax-aws.sqs/refs/heads/master/docs/setup/resources/specify-user-details.png)
-
-6. Add necessary permissions by adding the user to a user group, copy permissions or directly attach the policies. And click next.
-
-   ![set-user-permissions.png](https://raw.githubusercontent.com/ballerina-platform/module-ballerinax-aws.sqs/refs/heads/master/docs/setup/resources/set-user-permissions.png)
-7. Review and create the user
-
-   ![review-create-user.png](https://raw.githubusercontent.com/ballerina-platform/module-ballerinax-aws.sqs/refs/heads/master/docs/setup/resources/review-create-user.png)
-
-### Get user access keys
-
-1. Click the user that created
-
-   ![users.png](https://raw.githubusercontent.com/ballerina-platform/module-ballerinax-aws.sqs/refs/heads/master/docs/setup/resources/users.png)
-
-2. Click `Create access key`
-
-   ![create-access-key-1.png](https://raw.githubusercontent.com/ballerina-platform/module-ballerinax-aws.sqs/refs/heads/master/docs/setup/resources/create-access-key-1.png)
-
-3. Click your use case and click next.
-
-   ![select-usecase.png](https://raw.githubusercontent.com/ballerina-platform/module-ballerinax-aws.sqs/refs/heads/master/docs/setup/resources/select-usecase.png)
-
-4. Record the Access Key and Secret access key. These credentials will be used to authenticate your Ballerina application with Amazon SQS.
-
-   ![retrieve-access-key.png](https://raw.githubusercontent.com/ballerina-platform/module-ballerinax-aws.sqs/refs/heads/master/docs/setup/resources/retrieve-access-key.png)
+Attach the SQS permissions your application needs to the user — the AWS managed `AmazonSQSFullAccess` policy grants full access, or scope a custom policy to only the SQS actions you call.
 
 ## Quickstart
 
