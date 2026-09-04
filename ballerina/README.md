@@ -143,7 +143,7 @@ bal run
 You can use AWS profile-based authentication as an alternative to static credentials.
 
 ```ballerina
-simpledb:Client sqsClient = check new ({
+sqs:Client sqsClient = check new ({
     region: aws:US_EAST_1,
     auth: {
         profileName: "myAwsProfile",
@@ -159,7 +159,7 @@ Resolves credentials automatically from the AWS SDK's default chain. This is the
 ```ballerina
 import ballerinax/aws.auth;
 
-simpledb:Client sqsClient = check new ({
+sqs:Client sqsClient = check new ({
     region: aws:US_EAST_1,
     auth: auth:DEFAULT_CREDENTIALS
 });
