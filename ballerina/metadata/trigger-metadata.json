@@ -1,0 +1,75 @@
+{
+  "version": "v1.0",
+
+  "listeners": [
+    {
+      "id": "$listener",
+      "doc": "Polls the configured SQS queue and dispatches each received message to the attached service.",
+      "type": { "name": "Listener" },
+      "services": ["$service"],
+      "multipleServicesAllowed": true,
+      "multipleServicesOfSameTypeAllowed": true
+    }
+  ],
+
+  "serviceTypes": [
+    {
+      "id": "$service",
+      "doc": "Consumes messages received from the polled SQS queue.",
+      "type": { "name": "Service" },
+      "concrete": false,
+      "multipleListenersAllowed": true,
+      "annotations": ["$serviceConfig"],
+      "handlers": {
+        "backedByConcreteType": false,
+        "options": [
+          {
+            "id": "$service.onMessage",
+            "name": "onMessage",
+            "kind": "remote",
+            "doc": "Invoked once per message received from the polled queue. The listener requests one message at a time and waits for this call to return before polling again, so there is no batching to configure. Set @sqs:ServiceConfig { autoDelete: false } to take over deletion explicitly through the caller parameter instead of the listener's automatic delete-after-receive behavior.",
+            "presence": "required",
+            "params": [
+              {
+                "id": "$service.onMessage.message",
+                "name": "message",
+                "doc": "The received message: its body, message and receipt IDs, and any system or user-defined attributes requested for the poll.",
+                "type": { "name": "Message" },
+                "presence": "required"
+              },
+              {
+                "id": "$service.onMessage.caller",
+                "name": "caller",
+                "doc": "Handle for explicitly deleting the message from the queue. Needed only when @sqs:ServiceConfig { autoDelete: false } is set; otherwise the listener deletes the message automatically once this handler returns.",
+                "type": { "name": "Caller" },
+                "presence": "optional"
+              }
+            ],
+            "returns": { "id": "$service.onMessage.returns", "type": [{ "name": "error", "builtin": true }, { "name": "()", "builtin": true }] }
+          },
+          {
+            "id": "$service.onError",
+            "name": "onError",
+            "kind": "remote",
+            "doc": "Invoked when a received message cannot be dispatched to onMessage, most commonly because the declared parameter types do not match sqs:Message or sqs:Caller, or because an automatic delete after onMessage fails.",
+            "presence": "optional",
+            "params": [
+              {
+                "id": "$service.onError.err",
+                "name": "err",
+                "doc": "The failure that prevented dispatch or the post-processing delete.",
+                "type": { "name": "Error" },
+                "presence": "required"
+              }
+            ],
+            "returns": { "id": "$service.onError.returns", "type": [{ "name": "error", "builtin": true }, { "name": "()", "builtin": true }] }
+          }
+        ]
+      }
+    }
+  ],
+
+  "annotations": [
+    { "id": "$serviceConfig", "type": { "name": "ServiceConfig" }, "attachPoint": "service", "presence": "required" }
+  ]
+}
