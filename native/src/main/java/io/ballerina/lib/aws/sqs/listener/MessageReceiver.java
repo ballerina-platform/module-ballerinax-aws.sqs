@@ -39,6 +39,7 @@ public class MessageReceiver {
 
     private final ScheduledExecutorService executorService = Executors.newScheduledThreadPool(1);
     private final AtomicBoolean closed = new AtomicBoolean(false);
+    private final AtomicBoolean pollingCancelled = new AtomicBoolean(false);
 
     private final SqsClient sqsClient;
     private final ReceiveMessageRequest receiveRequest;
@@ -86,7 +87,7 @@ public class MessageReceiver {
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                     CommonUtils.createError("Message processing interrupted", e);
-                    this.pollingTaskFuture.cancel(false);
+                    cancelPolling();
                     return;
                 }
             }
@@ -94,7 +95,7 @@ public class MessageReceiver {
             String msg = "Polling Error: " + Objects.requireNonNullElse(e.getMessage(), "Unknown error");
             BError error = CommonUtils.createError(msg);
             error.printStackTrace();
-            this.pollingTaskFuture.cancel(false);
+            cancelPolling();
             if (stopListener != null) {
                 // Run on a new thread to avoid deadlocking the executor when stop() awaits termination.
                 Thread.startVirtualThread(stopListener::run);
@@ -104,14 +105,31 @@ public class MessageReceiver {
                 String msg = "Polling Error: " + Objects.requireNonNullElse(e.getMessage(), "Unknown error");
                 BError error = CommonUtils.createError(msg, e);
                 error.printStackTrace();
-                this.pollingTaskFuture.cancel(false);
+                cancelPolling();
             }
         }
     }
 
     public void consume() {
-        this.pollingTaskFuture = this.executorService.scheduleAtFixedRate(
-                this::poll, 0, this.pollingInterval, TimeUnit.MILLISECONDS);
+        if (this.pollingInterval > 0) {
+            this.pollingTaskFuture = this.executorService.scheduleAtFixedRate(
+                    this::poll, 0, this.pollingInterval, TimeUnit.MILLISECONDS);
+        } else {
+            this.pollingTaskFuture = this.executorService.schedule(this::pollContinuously, 0, TimeUnit.MILLISECONDS);
+        }
+    }
+
+    private void pollContinuously() {
+        while (!closed.get() && !pollingCancelled.get() && !Thread.currentThread().isInterrupted()) {
+            poll();
+        }
+    }
+
+    private void cancelPolling() {
+        pollingCancelled.set(true);
+        if (Objects.nonNull(this.pollingTaskFuture)) {
+            this.pollingTaskFuture.cancel(false);
+        }
     }
 
     public void setStopListener(Runnable stopListener) {

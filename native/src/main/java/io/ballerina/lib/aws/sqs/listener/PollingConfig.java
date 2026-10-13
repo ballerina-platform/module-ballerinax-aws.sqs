@@ -16,6 +16,7 @@
 
 package io.ballerina.lib.aws.sqs.listener;
 
+import io.ballerina.lib.aws.sqs.CommonUtils;
 import io.ballerina.runtime.api.utils.StringUtils;
 import io.ballerina.runtime.api.values.BDecimal;
 import io.ballerina.runtime.api.values.BMap;
@@ -33,6 +34,13 @@ public record PollingConfig(
     static final BString POLL_INTERVAL = StringUtils.fromString("pollInterval");
     static final BString WAIT_TIME = StringUtils.fromString("waitTime");
     static final BString VISIBILITY_TIMEOUT = StringUtils.fromString("visibilityTimeout");
+
+    public PollingConfig {
+        if (pollInterval < 0) {
+            throw CommonUtils.createError("Invalid polling configuration: 'pollInterval' must be greater than or " +
+                    "equal to 0, but found " + pollInterval);
+        }
+    }
 
     /**
      * Creates polling configuration from Ballerina config map.
