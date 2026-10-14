@@ -112,8 +112,6 @@ public class MessageReceiver {
 
     public void consume() {
         if (this.pollingInterval > 0) {
-    public void consume() {
-        if (this.pollingInterval > 0) {
             this.pollingTaskFuture = this.executorService.scheduleAtFixedRate(
                     this::poll, 0, this.pollingInterval, TimeUnit.MILLISECONDS);
         } else {
