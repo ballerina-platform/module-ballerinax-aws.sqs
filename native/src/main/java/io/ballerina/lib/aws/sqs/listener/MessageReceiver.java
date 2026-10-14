@@ -112,12 +112,14 @@ public class MessageReceiver {
 
     public void consume() {
         if (this.pollingInterval > 0) {
+    public void consume() {
+        if (this.pollingInterval > 0) {
             this.pollingTaskFuture = this.executorService.scheduleAtFixedRate(
                     this::poll, 0, this.pollingInterval, TimeUnit.MILLISECONDS);
         } else {
             this.pollingTaskFuture = this.executorService.schedule(this::pollContinuously, 0, TimeUnit.MILLISECONDS);
         }
-        // A poll that failed before the future was assigned could not cancel it.
+        // A poll that failed before the future was assigned could not cancel it
         if (this.pollingCancelled.get()) {
             this.pollingTaskFuture.cancel(false);
         }
