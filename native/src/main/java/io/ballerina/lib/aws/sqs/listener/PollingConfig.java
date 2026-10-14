@@ -21,6 +21,7 @@ import java.math.BigDecimal;
 import io.ballerina.lib.aws.sqs.CommonUtils;
 import io.ballerina.runtime.api.utils.StringUtils;
 import io.ballerina.runtime.api.values.BDecimal;
+import io.ballerina.runtime.api.values.BError;
 import io.ballerina.runtime.api.values.BMap;
 import io.ballerina.runtime.api.values.BString;
 
@@ -36,6 +37,12 @@ public record PollingConfig(
     static final BString POLL_INTERVAL = StringUtils.fromString("pollInterval");
     static final BString WAIT_TIME = StringUtils.fromString("waitTime");
     static final BString VISIBILITY_TIMEOUT = StringUtils.fromString("visibilityTimeout");
+
+    public PollingConfig {
+        if (pollInterval < 0) {
+            throw createInvalidPollIntervalError(pollInterval);
+        }
+    }
 
     /**
      * Creates polling configuration from Ballerina config map.
@@ -53,10 +60,14 @@ public record PollingConfig(
         // Validate the decimal value itself, as tiny negative values underflow to -0.0 when converted to double.
         BigDecimal pollInterval = ((BDecimal) config.get(POLL_INTERVAL)).value();
         if (pollInterval.signum() < 0) {
-            throw CommonUtils.createError("Invalid polling configuration: 'pollInterval' must be greater than or " +
-                    "equal to 0, but found " + pollInterval);
+            throw createInvalidPollIntervalError(pollInterval);
         }
         return pollInterval.doubleValue();
+    }
+
+    private static BError createInvalidPollIntervalError(Object pollInterval) {
+        return CommonUtils.createError("Invalid polling configuration: 'pollInterval' must be greater than or " +
+                "equal to 0, but found " + pollInterval);
     }
 
     public long pollIntervalInMillis() {
