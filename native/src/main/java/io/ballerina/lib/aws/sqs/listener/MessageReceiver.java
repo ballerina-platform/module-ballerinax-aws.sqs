@@ -49,7 +49,7 @@ public class MessageReceiver {
     private final String queueUrl;
     private final boolean autoDelete;
 
-    private ScheduledFuture<?> pollingTaskFuture;
+    private volatile ScheduledFuture<?> pollingTaskFuture;
     private Runnable stopListener;
 
     public MessageReceiver(SqsClient sqsClient, String queueUrl, PollingConfig pollingConfig,
@@ -71,7 +71,7 @@ public class MessageReceiver {
 
     private void poll() {
         try {
-            if (closed.get())
+            if (closed.get() || pollingCancelled.get())
                 return;
 
             ReceiveMessageResponse response = sqsClient.receiveMessage(receiveRequest);
@@ -116,6 +116,10 @@ public class MessageReceiver {
                     this::poll, 0, this.pollingInterval, TimeUnit.MILLISECONDS);
         } else {
             this.pollingTaskFuture = this.executorService.schedule(this::pollContinuously, 0, TimeUnit.MILLISECONDS);
+        }
+        // A poll that failed before the future was assigned could not cancel it.
+        if (this.pollingCancelled.get()) {
+            this.pollingTaskFuture.cancel(false);
         }
     }
 
