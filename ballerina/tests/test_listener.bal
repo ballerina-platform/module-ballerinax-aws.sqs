@@ -527,3 +527,16 @@ function testListenerWithNegativePollInterval() {
     test:assertTrue(result.message().includes("'pollInterval' must be greater than or equal to 0"),
             "Unexpected error message: " + result.message());
 }
+
+@test:Config {
+    groups: ["listenerValidation"]
+}
+function testListenerWithTinyNegativePollInterval() {
+    // This value underflows to -0.0 when converted to a double, so it must be validated as a decimal.
+    Listener|Error result = new (connectionConfig, {pollInterval: -1E-400d});
+    if result is Listener {
+        test:assertFail("Expected an error when initializing the listener with a tiny negative poll interval");
+    }
+    test:assertTrue(result.message().includes("'pollInterval' must be greater than or equal to 0"),
+            "Unexpected error message: " + result.message());
+}
