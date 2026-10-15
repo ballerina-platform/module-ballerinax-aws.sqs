@@ -16,7 +16,7 @@
 
 plugins {
     id "com.github.spotbugs"
-    id "com.github.johnrengelman.shadow"
+    id "com.gradleup.shadow"
     id "de.undercouch.download"
     id "net.researchgate.release"
 
@@ -29,6 +29,10 @@ allprojects {
     version = project.version
 
     apply plugin: 'maven-publish'
+    apply plugin: 'jacoco'
+    jacoco {
+        toolVersion = jacocoVersion
+    }
 
     ext {
         snapshotVersion = '-SNAPSHOT'
@@ -57,9 +61,16 @@ allprojects {
 
 }
 
-task build {
-    dependsOn(":aws.sqs-native:build")
-    dependsOn(":aws.sqs-ballerina:build")
+if (tasks.names.contains('build')) {
+    tasks.named('build') {
+        dependsOn(":aws.sqs-native:build")
+        dependsOn(":aws.sqs-ballerina:build")
+    }
+} else {
+    tasks.register('build') {
+        dependsOn(":aws.sqs-native:build")
+        dependsOn(":aws.sqs-ballerina:build")
+    }
 }
 
 def moduleVersion = project.version.replace("-SNAPSHOT", "")
