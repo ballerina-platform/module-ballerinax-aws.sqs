@@ -498,3 +498,45 @@ isolated function testListenerCallerAndAutoDeleteMutualExclusivity() returns err
                 result.message(),
             "Failed to attach service : `sqs:Caller` cannot be used together with the `autoDelete` configuration.");
 }
+
+@test:Config {
+    groups: ["listenerValidation"]
+}
+function testListenerWithZeroPollInterval() returns error? {
+    Listener zeroPollIntervalListener = check new (connectionConfig, {pollInterval: 0, waitTime: 20});
+    Service svc = @ServiceConfig {
+        queueUrl: "https://sqs.us-east-2.amazonaws.com/284495578152/ZeroPollIntervalQueue",
+        autoDelete: true
+    } service object {
+        isolated remote function onMessage(Message message) returns error? {
+        }
+    };
+    check zeroPollIntervalListener.attach(svc);
+    check zeroPollIntervalListener.'start();
+    check zeroPollIntervalListener.gracefulStop();
+}
+
+@test:Config {
+    groups: ["listenerValidation"]
+}
+function testListenerWithNegativePollInterval() {
+    Listener|Error result = new (connectionConfig, {pollInterval: -1});
+    if result is Listener {
+        test:assertFail("Expected an error when initializing the listener with a negative poll interval");
+    }
+    test:assertTrue(result.message().includes("'pollInterval' must be greater than or equal to 0"),
+            "Unexpected error message: " + result.message());
+}
+
+@test:Config {
+    groups: ["listenerValidation"]
+}
+function testListenerWithTinyNegativePollInterval() {
+    // This value underflows to -0.0 when converted to a double, so it must be validated as a decimal.
+    Listener|Error result = new (connectionConfig, {pollInterval: -1E-400d});
+    if result is Listener {
+        test:assertFail("Expected an error when initializing the listener with a tiny negative poll interval");
+    }
+    test:assertTrue(result.message().includes("'pollInterval' must be greater than or equal to 0"),
+            "Unexpected error message: " + result.message());
+}

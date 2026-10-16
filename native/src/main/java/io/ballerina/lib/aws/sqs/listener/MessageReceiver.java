@@ -39,6 +39,7 @@ public class MessageReceiver {
 
     private final ScheduledExecutorService executorService = Executors.newScheduledThreadPool(1);
     private final AtomicBoolean closed = new AtomicBoolean(false);
+    private final AtomicBoolean pollingCancelled = new AtomicBoolean(false);
 
     private final SqsClient sqsClient;
     private final ReceiveMessageRequest receiveRequest;
@@ -48,7 +49,7 @@ public class MessageReceiver {
     private final String queueUrl;
     private final boolean autoDelete;
 
-    private ScheduledFuture<?> pollingTaskFuture;
+    private volatile ScheduledFuture<?> pollingTaskFuture;
     private Runnable stopListener;
 
     public MessageReceiver(SqsClient sqsClient, String queueUrl, PollingConfig pollingConfig,
@@ -70,7 +71,7 @@ public class MessageReceiver {
 
     private void poll() {
         try {
-            if (closed.get())
+            if (closed.get() || pollingCancelled.get())
                 return;
 
             ReceiveMessageResponse response = sqsClient.receiveMessage(receiveRequest);
@@ -86,7 +87,7 @@ public class MessageReceiver {
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                     CommonUtils.createError("Message processing interrupted", e);
-                    this.pollingTaskFuture.cancel(false);
+                    cancelPolling();
                     return;
                 }
             }
@@ -94,7 +95,7 @@ public class MessageReceiver {
             String msg = "Polling Error: " + Objects.requireNonNullElse(e.getMessage(), "Unknown error");
             BError error = CommonUtils.createError(msg);
             error.printStackTrace();
-            this.pollingTaskFuture.cancel(false);
+            cancelPolling();
             if (stopListener != null) {
                 // Run on a new thread to avoid deadlocking the executor when stop() awaits termination.
                 Thread.startVirtualThread(stopListener::run);
@@ -104,14 +105,35 @@ public class MessageReceiver {
                 String msg = "Polling Error: " + Objects.requireNonNullElse(e.getMessage(), "Unknown error");
                 BError error = CommonUtils.createError(msg, e);
                 error.printStackTrace();
-                this.pollingTaskFuture.cancel(false);
+                cancelPolling();
             }
         }
     }
 
     public void consume() {
-        this.pollingTaskFuture = this.executorService.scheduleAtFixedRate(
-                this::poll, 0, this.pollingInterval, TimeUnit.MILLISECONDS);
+        if (this.pollingInterval > 0) {
+            this.pollingTaskFuture = this.executorService.scheduleAtFixedRate(
+                    this::poll, 0, this.pollingInterval, TimeUnit.MILLISECONDS);
+        } else {
+            this.pollingTaskFuture = this.executorService.schedule(this::pollContinuously, 0, TimeUnit.MILLISECONDS);
+        }
+        // A poll that failed before the future was assigned could not cancel it
+        if (this.pollingCancelled.get()) {
+            this.pollingTaskFuture.cancel(false);
+        }
+    }
+
+    private void pollContinuously() {
+        while (!closed.get() && !pollingCancelled.get() && !Thread.currentThread().isInterrupted()) {
+            poll();
+        }
+    }
+
+    private void cancelPolling() {
+        pollingCancelled.set(true);
+        if (Objects.nonNull(this.pollingTaskFuture)) {
+            this.pollingTaskFuture.cancel(false);
+        }
     }
 
     public void setStopListener(Runnable stopListener) {

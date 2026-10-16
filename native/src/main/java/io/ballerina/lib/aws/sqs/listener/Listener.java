@@ -56,13 +56,15 @@ public final class Listener {
             BMap<BString, Object> connectionConfig,
             BMap<BString, Object> pollingConfig) {
         try {
+            // parse and validate polling configuration before creating the client
+            PollingConfig pollingCfg = new PollingConfig(pollingConfig);
+
             // create the native SQS client
             SqsClient nativeSqsClient = NativeClientAdaptor.createSqsClient(connectionConfig);
             // set the native client as native data in the listener object
             bListener.addNativeData(NativeClientAdaptor.NATIVE_SQS_CLIENT, nativeSqsClient);
 
-            // parse and store polling configuration
-            PollingConfig pollingCfg = new PollingConfig(pollingConfig);
+            // store polling configuration
             bListener.addNativeData(NATIVE_POLLING_CONFIG, pollingCfg);
 
             // initialize empty service registry
